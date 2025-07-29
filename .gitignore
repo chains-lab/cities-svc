@@ -1,0 +1,10 @@
+.idea
+vendor
+node_modules
+
+main
+cmd/cities-dir-svc/m ain
+
+config_local.yaml
+config_docker.yaml
+
