@@ -10,16 +10,18 @@ import (
 	"github.com/google/uuid"
 )
 
-const countriesTable = "countries"
+const citiesTable = "cities"
 
-type CountryModel struct {
+type CityModels struct {
 	ID        uuid.UUID `db:"id"`
+	CountryID uuid.UUID `db:"country_id"`
 	Name      string    `db:"name"`
 	Status    string    `db:"status"`
 	CreatedAt time.Time `db:"created_at"`
 	UpdatedAt time.Time `db:"updated_at"`
 }
-type CountriesQ struct {
+
+type CitiesQ struct {
 	db       *sql.DB
 	selector sq.SelectBuilder
 	inserter sq.InsertBuilder
@@ -28,25 +30,26 @@ type CountriesQ struct {
 	counter  sq.SelectBuilder
 }
 
-func NewCountries(db *sql.DB) CountriesQ {
+func NewCities(db *sql.DB) CitiesQ {
 	builder := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
-	return CountriesQ{
+	return CitiesQ{
 		db:       db,
-		selector: builder.Select("*").From(countriesTable),
-		inserter: builder.Insert(countriesTable),
-		updater:  builder.Update(countriesTable),
-		deleter:  builder.Delete(countriesTable),
-		counter:  builder.Select("COUNT(*) AS count").From(countriesTable),
+		selector: builder.Select("*").From(citiesTable),
+		inserter: builder.Insert(citiesTable),
+		updater:  builder.Update(citiesTable),
+		deleter:  builder.Delete(citiesTable),
+		counter:  builder.Select("COUNT(*) AS count").From(citiesTable),
 	}
 }
 
-func (q CountriesQ) New() CountriesQ {
-	return NewCountries(q.db)
+func (q CitiesQ) New() CitiesQ {
+	return NewCities(q.db)
 }
 
-func (q CountriesQ) Insert(ctx context.Context, input CountryModel) error {
+func (q CitiesQ) Insert(ctx context.Context, input CityModels) error {
 	values := map[string]interface{}{
 		"id":         input.ID,
+		"country_id": input.CountryID,
 		"name":       input.Name,
 		"status":     input.Status,
 		"created_at": input.CreatedAt,
@@ -55,7 +58,7 @@ func (q CountriesQ) Insert(ctx context.Context, input CountryModel) error {
 
 	query, args, err := q.inserter.SetMap(values).ToSql()
 	if err != nil {
-		return err
+		return fmt.Errorf("building inserter query for table: %s: %w", citiesTable, err)
 	}
 
 	if tx, ok := ctx.Value(TxKey).(*sql.Tx); ok {
@@ -63,40 +66,42 @@ func (q CountriesQ) Insert(ctx context.Context, input CountryModel) error {
 	} else {
 		_, err = q.db.ExecContext(ctx, query, args...)
 	}
-
 	return err
 }
 
-func (q CountriesQ) Get(ctx context.Context) (CountryModel, error) {
+func (q CitiesQ) Get(ctx context.Context) (CityModels, error) {
 	query, args, err := q.selector.Limit(1).ToSql()
 	if err != nil {
-		return CountryModel{}, fmt.Errorf("building selector query for table: %s: %w", countriesTable, err)
+		return CityModels{}, fmt.Errorf("building selector query for table: %s: %w", citiesTable, err)
 	}
 
-	var model CountryModel
+	var city CityModels
 	var row *sql.Row
 	if tx, ok := ctx.Value(TxKey).(*sql.Tx); ok {
 		row = tx.QueryRowContext(ctx, query, args...)
 	} else {
 		row = q.db.QueryRowContext(ctx, query, args...)
 	}
+
 	err = row.Scan(
-		&model.ID,
-		&model.Name,
-		&model.Status,
-		&model.UpdatedAt,
-		&model.CreatedAt,
+		&city.ID,
+		&city.CountryID,
+		&city.Name,
+		&city.Status,
+		&city.CreatedAt,
+		&city.UpdatedAt,
 	)
 
-	return model, err
+	return city, err
 }
 
-func (q CountriesQ) Select(ctx context.Context) ([]CountryModel, error) {
+func (q CitiesQ) Select(ctx context.Context) ([]CityModels, error) {
 	query, args, err := q.selector.ToSql()
 	if err != nil {
-		return nil, fmt.Errorf("building selector query for table: %s: %w", countriesTable, err)
+		return nil, fmt.Errorf("building selector query for table: %s: %w", citiesTable, err)
 	}
 
+	var cities []CityModels
 	var rows *sql.Rows
 	if tx, ok := ctx.Value(TxKey).(*sql.Tx); ok {
 		rows, err = tx.QueryContext(ctx, query, args...)
@@ -108,31 +113,32 @@ func (q CountriesQ) Select(ctx context.Context) ([]CountryModel, error) {
 	}
 	defer rows.Close()
 
-	var models []CountryModel
 	for rows.Next() {
-		var model CountryModel
+		var city CityModels
 		if err := rows.Scan(
-			&model.ID,
-			&model.Name,
-			&model.Status,
-			&model.UpdatedAt,
-			&model.CreatedAt,
+			&city.ID,
+			&city.CountryID,
+			&city.Name,
+			&city.Status,
+			&city.CreatedAt,
+			&city.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}
-		models = append(models, model)
+		cities = append(cities, city)
 	}
 
-	return models, rows.Err()
+	return cities, nil
 }
 
-type UpdateCountryInput struct {
-	Name      *string   `db:"name"`
-	Status    *string   `db:"status"`
-	UpdatedAt time.Time `db:"updated_at"`
+type CityUpdate struct {
+	CountryID *uuid.UUID
+	Name      *string
+	Status    *string
+	UpdatedAt time.Time
 }
 
-func (q CountriesQ) Update(ctx context.Context, input UpdateCountryInput) error {
+func (q CitiesQ) Update(ctx context.Context, input CityUpdate) error {
 	updates := map[string]interface{}{
 		"updated_at": input.UpdatedAt,
 	}
@@ -142,10 +148,13 @@ func (q CountriesQ) Update(ctx context.Context, input UpdateCountryInput) error 
 	if input.Status != nil {
 		updates["status"] = *input.Status
 	}
+	if input.CountryID != nil {
+		updates["country_id"] = *input.CountryID
+	}
 
 	query, args, err := q.updater.SetMap(updates).ToSql()
 	if err != nil {
-		return fmt.Errorf("building updater query for table: %s: %w", countriesTable, err)
+		return fmt.Errorf("building updater query for table: %s: %w", citiesTable, err)
 	}
 
 	if tx, ok := ctx.Value(TxKey).(*sql.Tx); ok {
@@ -157,10 +166,10 @@ func (q CountriesQ) Update(ctx context.Context, input UpdateCountryInput) error 
 	return err
 }
 
-func (q CountriesQ) Delete(ctx context.Context) error {
+func (q CitiesQ) Delete(ctx context.Context) error {
 	query, args, err := q.deleter.ToSql()
 	if err != nil {
-		return fmt.Errorf("building deleter query for table: %s: %w", countriesTable, err)
+		return fmt.Errorf("building deleter query for table: %s: %w", citiesTable, err)
 	}
 
 	if tx, ok := ctx.Value(TxKey).(*sql.Tx); ok {
@@ -172,37 +181,34 @@ func (q CountriesQ) Delete(ctx context.Context) error {
 	return err
 }
 
-func (q CountriesQ) FilterID(ID uuid.UUID) CountriesQ {
+func (q CitiesQ) FilterID(ID uuid.UUID) CitiesQ {
 	q.selector = q.selector.Where(sq.Eq{"id": ID})
 	q.counter = q.counter.Where(sq.Eq{"id": ID})
 	q.deleter = q.deleter.Where(sq.Eq{"id": ID})
 	q.updater = q.updater.Where(sq.Eq{"id": ID})
-
 	return q
 }
 
-func (q CountriesQ) FilterName(name string) CountriesQ {
-	q.selector = q.selector.Where(sq.Eq{"name": name})
-	q.counter = q.counter.Where(sq.Eq{"name": name})
-	q.deleter = q.deleter.Where(sq.Eq{"name": name})
-	q.updater = q.updater.Where(sq.Eq{"name": name})
-
+func (q CitiesQ) FilterCountryID(countryID uuid.UUID) CitiesQ {
+	q.selector = q.selector.Where(sq.Eq{"country_id": countryID})
+	q.counter = q.counter.Where(sq.Eq{"country_id": countryID})
+	q.deleter = q.deleter.Where(sq.Eq{"country_id": countryID})
+	q.updater = q.updater.Where(sq.Eq{"country_id": countryID})
 	return q
 }
 
-func (q CountriesQ) FilterStatus(status string) CountriesQ {
+func (q CitiesQ) FilterStatus(status string) CitiesQ {
 	q.selector = q.selector.Where(sq.Eq{"status": status})
 	q.counter = q.counter.Where(sq.Eq{"status": status})
 	q.deleter = q.deleter.Where(sq.Eq{"status": status})
 	q.updater = q.updater.Where(sq.Eq{"status": status})
-
 	return q
 }
 
-func (q CountriesQ) Count(ctx context.Context) (uint64, error) {
+func (q CitiesQ) Count(ctx context.Context) (uint64, error) {
 	query, args, err := q.counter.ToSql()
 	if err != nil {
-		return 0, fmt.Errorf("building count query for table: %s: %w", countriesTable, err)
+		return 0, fmt.Errorf("building count query for table: %s: %w", citiesTable, err)
 	}
 
 	var count uint64
@@ -219,7 +225,7 @@ func (q CountriesQ) Count(ctx context.Context) (uint64, error) {
 	return count, nil
 }
 
-func (q CountriesQ) Page(limit, offset uint64) CountriesQ {
+func (q CitiesQ) Page(limit, offset uint64) CitiesQ {
 	q.counter = q.counter.Limit(limit).Offset(offset)
 	q.selector = q.selector.Limit(limit).Offset(offset)
 	return q
