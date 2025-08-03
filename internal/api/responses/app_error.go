@@ -5,6 +5,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/chains-lab/apperr"
 	"github.com/chains-lab/cities-dir-svc/internal/ape"
 	"github.com/google/uuid"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
@@ -12,14 +13,14 @@ import (
 )
 
 func AppError(ctx context.Context, requestID uuid.UUID, err error) error {
-	var appErr *ape.Error
+	var appErr *apperr.ErrorObject
 	if errors.As(err, &appErr) {
 
-		st := status.New(appErr.Code(), appErr.Error())
+		st := status.New(appErr.Code, appErr.Error())
 
-		details := appErr.Details()
+		details := appErr.Details
 		details = append(details, &errdetails.ErrorInfo{
-			Reason: appErr.Reason(),
+			Reason: appErr.Reason,
 			Domain: ape.ServiceName,
 			Metadata: map[string]string{
 				"timestamp": time.Now().UTC().Format(time.RFC3339Nano),

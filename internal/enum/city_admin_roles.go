@@ -8,19 +8,28 @@ const (
 	Moderator
 )
 
-var roleNames = [...]string{
+var citiesAdminsRoles = []string{
 	"owner",
 	"admin",
 	"moderator",
 }
 
 func (r CityAdminRole) String() string {
-	if int(r) < len(roleNames) {
-		return roleNames[r]
+	if int(r) < len(citiesAdminsRoles) {
+		return citiesAdminsRoles[r]
 	}
-	return "unknown"
+	return ""
 }
 
-func Compare(r1, r2 CityAdminRole) int {
-	return int(r1) - int(r2)
+func CheckRole(role string) bool {
+	for _, name := range citiesAdminsRoles {
+		if name == role {
+			return true
+		}
+	}
+	return false
+}
+
+func GetAllCitiesAdminsRoles() []string {
+	return citiesAdminsRoles
 }

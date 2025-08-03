@@ -132,10 +132,11 @@ func (q CitiesQ) Select(ctx context.Context) ([]CityModels, error) {
 }
 
 type CityUpdate struct {
-	CountryID *uuid.UUID
-	Name      *string
-	Status    *string
-	UpdatedAt time.Time
+	CountryID   *uuid.UUID
+	Name        *string
+	Status      *string
+	Coordinates *string
+	UpdatedAt   time.Time
 }
 
 func (q CitiesQ) Update(ctx context.Context, input CityUpdate) error {
@@ -147,6 +148,9 @@ func (q CitiesQ) Update(ctx context.Context, input CityUpdate) error {
 	}
 	if input.Status != nil {
 		updates["status"] = *input.Status
+	}
+	if input.Coordinates != nil {
+		updates["coordinates"] = *input.Coordinates
 	}
 	if input.CountryID != nil {
 		updates["country_id"] = *input.CountryID
@@ -202,6 +206,21 @@ func (q CitiesQ) FilterStatus(status string) CitiesQ {
 	q.counter = q.counter.Where(sq.Eq{"status": status})
 	q.deleter = q.deleter.Where(sq.Eq{"status": status})
 	q.updater = q.updater.Where(sq.Eq{"status": status})
+	return q
+}
+
+func (q CitiesQ) FilterName(name string) CitiesQ {
+	q.selector = q.selector.Where(sq.Eq{"name": name})
+	q.counter = q.counter.Where(sq.Eq{"name": name})
+	q.deleter = q.deleter.Where(sq.Eq{"name": name})
+	q.updater = q.updater.Where(sq.Eq{"name": name})
+	return q
+}
+
+func (q CitiesQ) SearchName(name string) CitiesQ {
+	pattern := fmt.Sprintf("%%%s%%", name)
+	q.selector = q.selector.Where("name ILIKE ?", pattern)
+	q.counter = q.counter.Where("name ILIKE ?", pattern)
 	return q
 }
 

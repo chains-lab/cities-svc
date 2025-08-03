@@ -10,12 +10,12 @@ CREATE TABLE "countries" (
 );
 
 CREATE TABLE "city" (
-    "id"         UUID         PRIMARY KEY NOT NULL,
-    "country_id" UUID         NOT NULL REFERENCES "countries" ("id") ON DELETE CASCADE,
-    "name"       VARCHAR(255) NOT NULL,
-    "status"     VARCHAR(32)  NOT NULL,
-    "created_at" TIMESTAMP    NOT NULL,
-    "updated_at" TIMESTAMP    NOT NULL
+    "id"          UUID         PRIMARY KEY NOT NULL,
+    "country_id"  UUID         NOT NULL REFERENCES "countries" ("id") ON DELETE CASCADE,
+    "name"        VARCHAR(255) NOT NULL UNIQUE,
+    "status"      VARCHAR(32)  NOT NULL,
+    "created_at"  TIMESTAMP    NOT NULL,
+    "updated_at"  TIMESTAMP    NOT NULL
 );
 
 CREATE TYPE city_admin_roles AS ENUM (

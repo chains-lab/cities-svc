@@ -16,6 +16,7 @@ type CityAdminModel struct {
 	UserID    uuid.UUID `db:"user_id"`
 	CityID    uuid.UUID `db:"city_id"`
 	Role      string    `db:"role"`
+	UpdatedAt time.Time `db:"updated_at"`
 	CreatedAt time.Time `db:"created_at"`
 }
 
@@ -28,7 +29,7 @@ type CitiesAdminsQ struct {
 	counter  sq.SelectBuilder
 }
 
-func NewProfiles(db *sql.DB) CitiesAdminsQ {
+func NewCitiesAdmins(db *sql.DB) CitiesAdminsQ {
 	builder := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
 	return CitiesAdminsQ{
 		db:       db,
@@ -41,7 +42,7 @@ func NewProfiles(db *sql.DB) CitiesAdminsQ {
 }
 
 func (q CitiesAdminsQ) New() CitiesAdminsQ {
-	return NewProfiles(q.db)
+	return NewCitiesAdmins(q.db)
 }
 
 func (q CitiesAdminsQ) Insert(ctx context.Context, input CityAdminModel) error {
@@ -83,6 +84,7 @@ func (q CitiesAdminsQ) Get(ctx context.Context) (CityAdminModel, error) {
 		&model.UserID,
 		&model.CityID,
 		&model.Role,
+		&model.UpdatedAt,
 		&model.CreatedAt,
 	)
 
@@ -113,6 +115,7 @@ func (q CitiesAdminsQ) Select(ctx context.Context) ([]CityAdminModel, error) {
 			&model.UserID,
 			&model.CityID,
 			&model.Role,
+			&model.UpdatedAt,
 			&model.CreatedAt,
 		); err != nil {
 			return nil, err

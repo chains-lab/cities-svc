@@ -5,7 +5,7 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/chains-lab/cities-dir-svc/internal/ape"
+	"github.com/chains-lab/apperr"
 	"github.com/chains-lab/cities-dir-svc/internal/api/interceptors"
 	"github.com/chains-lab/cities-dir-svc/internal/config"
 	"github.com/google/uuid"
@@ -77,7 +77,7 @@ type logger struct {
 
 // WithError — ваш особый метод.
 func (l *logger) WithError(err error) *logrus.Entry {
-	var ae *ape.Error
+	var ae *apperr.ErrorObject
 	if errors.As(err, &ae) {
 		return l.Entry.WithError(ae.Unwrap())
 	}

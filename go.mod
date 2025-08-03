@@ -5,6 +5,7 @@ go 1.24.4
 require (
 	github.com/Masterminds/squirrel v1.5.4
 	github.com/alecthomas/kingpin v2.2.6+incompatible
+	github.com/chains-lab/apperr v0.0.5
 	github.com/chains-lab/gatekit v0.1.1
 	github.com/google/uuid v1.6.0
 	github.com/lib/pq v1.10.9
