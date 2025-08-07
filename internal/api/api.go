@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/chains-lab/cities-dir-svc/internal/api/interceptors"
+	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/interceptors"
 	"github.com/chains-lab/cities-dir-svc/internal/app"
 	"github.com/chains-lab/cities-dir-svc/internal/config"
 	"github.com/chains-lab/cities-dir-svc/internal/logger"
@@ -13,7 +13,7 @@ import (
 )
 
 func Run(ctx context.Context, cfg config.Config, log logger.Logger, app *app.App) error {
-	//server := service.NewService(cfg, app)
+	// server := service.NewService(cfg, app)
 	authInterceptor := interceptors.NewAuth(cfg.JWT.Service.SecretKey, cfg.JWT.User.AccessToken.SecretKey)
 	logInterceptor := logger.UnaryLogInterceptor(log)
 

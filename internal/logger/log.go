@@ -2,12 +2,11 @@ package logger
 
 import (
 	"context"
-	"errors"
 	"strings"
 
-	"github.com/chains-lab/apperr"
-	"github.com/chains-lab/cities-dir-svc/internal/api/interceptors"
+	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/interceptors"
 	"github.com/chains-lab/cities-dir-svc/internal/config"
+	"github.com/chains-lab/svc-errors/ape"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
@@ -77,11 +76,11 @@ type logger struct {
 
 // WithError — ваш особый метод.
 func (l *logger) WithError(err error) *logrus.Entry {
-	var ae *apperr.ErrorObject
-	if errors.As(err, &ae) {
+	ae := ape.Unwrap(err)
+	if ae != nil {
 		return l.Entry.WithError(ae.Unwrap())
 	}
-	// для “обычных” ошибок просто стандартный путь
+
 	return l.Entry.WithError(err)
 }
 

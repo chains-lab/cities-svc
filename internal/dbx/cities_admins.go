@@ -7,17 +7,19 @@ import (
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
+	"github.com/chains-lab/cities-dir-svc/internal/enum"
 	"github.com/google/uuid"
 )
 
 const citiesAdminsTable = "cities_admins"
 
 type CityAdminModel struct {
-	UserID    uuid.UUID `db:"user_id"`
-	CityID    uuid.UUID `db:"city_id"`
-	Role      string    `db:"role"`
-	UpdatedAt time.Time `db:"updated_at"`
-	CreatedAt time.Time `db:"created_at"`
+	ID        uuid.UUID          `db:"id"`
+	UserID    uuid.UUID          `db:"user_id"`
+	CityID    uuid.UUID          `db:"city_id"`
+	Role      enum.CityAdminRole `db:"role"`
+	UpdatedAt time.Time          `db:"updated_at"`
+	CreatedAt time.Time          `db:"created_at"`
 }
 
 type CitiesAdminsQ struct {
@@ -47,9 +49,11 @@ func (q CitiesAdminsQ) New() CitiesAdminsQ {
 
 func (q CitiesAdminsQ) Insert(ctx context.Context, input CityAdminModel) error {
 	values := map[string]interface{}{
+		"id":         input.ID,
 		"user_id":    input.UserID,
 		"city_id":    input.CityID,
 		"role":       input.Role,
+		"updated_at": input.UpdatedAt,
 		"created_at": input.CreatedAt,
 	}
 
@@ -81,6 +85,7 @@ func (q CitiesAdminsQ) Get(ctx context.Context) (CityAdminModel, error) {
 		row = q.db.QueryRowContext(ctx, query, args...)
 	}
 	err = row.Scan(
+		&model.ID,
 		&model.UserID,
 		&model.CityID,
 		&model.Role,
@@ -112,6 +117,7 @@ func (q CitiesAdminsQ) Select(ctx context.Context) ([]CityAdminModel, error) {
 	for rows.Next() {
 		var model CityAdminModel
 		if err := rows.Scan(
+			&model.ID,
 			&model.UserID,
 			&model.CityID,
 			&model.Role,
@@ -127,8 +133,8 @@ func (q CitiesAdminsQ) Select(ctx context.Context) ([]CityAdminModel, error) {
 }
 
 type UpdateCityAdmin struct {
-	Role      *string   `db:"role"`
-	UpdatedAt time.Time `db:"updated_at"`
+	Role      *enum.CityAdminRole `db:"role"`
+	UpdatedAt time.Time           `db:"updated_at"`
 }
 
 func (q CitiesAdminsQ) Update(ctx context.Context, input UpdateCityAdmin) error {
@@ -186,7 +192,7 @@ func (q CitiesAdminsQ) FilterCityID(cityID uuid.UUID) CitiesAdminsQ {
 	return q
 }
 
-func (q CitiesAdminsQ) FilterRole(role string) CitiesAdminsQ {
+func (q CitiesAdminsQ) FilterRole(role enum.CityAdminRole) CitiesAdminsQ {
 	q.selector = q.selector.Where(sq.Eq{"role": role})
 	q.counter = q.counter.Where(sq.Eq{"role": role})
 	q.deleter = q.deleter.Where(sq.Eq{"role": role})

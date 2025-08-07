@@ -7,18 +7,19 @@ import (
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
+	"github.com/chains-lab/cities-dir-svc/internal/enum"
 	"github.com/google/uuid"
 )
 
 const citiesTable = "cities"
 
 type CityModels struct {
-	ID        uuid.UUID `db:"id"`
-	CountryID uuid.UUID `db:"country_id"`
-	Name      string    `db:"name"`
-	Status    string    `db:"status"`
-	CreatedAt time.Time `db:"created_at"`
-	UpdatedAt time.Time `db:"updated_at"`
+	ID        uuid.UUID       `db:"id"`
+	CountryID uuid.UUID       `db:"country_id"`
+	Name      string          `db:"name"`
+	Status    enum.CityStatus `db:"status"`
+	CreatedAt time.Time       `db:"created_at"`
+	UpdatedAt time.Time       `db:"updated_at"`
 }
 
 type CitiesQ struct {
@@ -48,7 +49,6 @@ func (q CitiesQ) New() CitiesQ {
 
 func (q CitiesQ) Insert(ctx context.Context, input CityModels) error {
 	values := map[string]interface{}{
-		"id":         input.ID,
 		"country_id": input.CountryID,
 		"name":       input.Name,
 		"status":     input.Status,
@@ -84,7 +84,6 @@ func (q CitiesQ) Get(ctx context.Context) (CityModels, error) {
 	}
 
 	err = row.Scan(
-		&city.ID,
 		&city.CountryID,
 		&city.Name,
 		&city.Status,
@@ -116,7 +115,6 @@ func (q CitiesQ) Select(ctx context.Context) ([]CityModels, error) {
 	for rows.Next() {
 		var city CityModels
 		if err := rows.Scan(
-			&city.ID,
 			&city.CountryID,
 			&city.Name,
 			&city.Status,
@@ -131,15 +129,15 @@ func (q CitiesQ) Select(ctx context.Context) ([]CityModels, error) {
 	return cities, nil
 }
 
-type CityUpdate struct {
+type UpdateCityInput struct {
 	CountryID   *uuid.UUID
 	Name        *string
-	Status      *string
+	Status      *enum.CityStatus
 	Coordinates *string
 	UpdatedAt   time.Time
 }
 
-func (q CitiesQ) Update(ctx context.Context, input CityUpdate) error {
+func (q CitiesQ) Update(ctx context.Context, input UpdateCityInput) error {
 	updates := map[string]interface{}{
 		"updated_at": input.UpdatedAt,
 	}
@@ -201,7 +199,7 @@ func (q CitiesQ) FilterCountryID(countryID uuid.UUID) CitiesQ {
 	return q
 }
 
-func (q CitiesQ) FilterStatus(status string) CitiesQ {
+func (q CitiesQ) FilterStatus(status enum.CityStatus) CitiesQ {
 	q.selector = q.selector.Where(sq.Eq{"status": status})
 	q.counter = q.counter.Where(sq.Eq{"status": status})
 	q.deleter = q.deleter.Where(sq.Eq{"status": status})
@@ -214,6 +212,11 @@ func (q CitiesQ) FilterName(name string) CitiesQ {
 	q.counter = q.counter.Where(sq.Eq{"name": name})
 	q.deleter = q.deleter.Where(sq.Eq{"name": name})
 	q.updater = q.updater.Where(sq.Eq{"name": name})
+	return q
+}
+
+func (q CitiesQ) SortedNameAlphabet() CitiesQ {
+	q.selector = q.selector.OrderBy("name ASC")
 	return q
 }
 

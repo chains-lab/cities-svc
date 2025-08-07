@@ -1,33 +1,29 @@
 package enum
 
-type CountryStatus int
+type CountryStatus string
 
 const (
-	CountryNotSupport CountryStatus = iota
-	CountrySupport
+	CountryStatusSupported   CountryStatus = "supported"
+	CountryStatusSuspended   CountryStatus = "suspended"
+	CountryStatusUnsupported CountryStatus = "unsupported"
 )
 
-var countriesStatus = []string{
-	"not_support",
-	"support",
+var countryStatuses = []CountryStatus{
+	CountryStatusSupported,
+	CountryStatusSuspended,
+	CountryStatusUnsupported,
 }
 
-func (s CountryStatus) String() string {
-	if int(s) < len(countriesStatus) {
-		return countriesStatus[s]
-	}
-	return ""
-}
-
-func CheckCountryStatus(s string) bool {
-	for _, name := range countriesStatus {
-		if name == s {
-			return true
+func ParseCountryStatus(status string) (CountryStatus, bool) {
+	for _, s := range countryStatuses {
+		if s == CountryStatus(status) {
+			return s, true
 		}
 	}
-	return false
+
+	return "", false
 }
 
-func GetAllCountriesStatuses() []string {
-	return countriesStatus
+func GetAllCountriesStatuses() []CountryStatus {
+	return countryStatuses
 }

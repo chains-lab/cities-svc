@@ -7,17 +7,18 @@ import (
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
+	"github.com/chains-lab/cities-dir-svc/internal/enum"
 	"github.com/google/uuid"
 )
 
 const countriesTable = "countries"
 
 type CountryModel struct {
-	ID        uuid.UUID `db:"id"`
-	Name      string    `db:"name"`
-	Status    string    `db:"status"`
-	CreatedAt time.Time `db:"created_at"`
-	UpdatedAt time.Time `db:"updated_at"`
+	ID        uuid.UUID          `db:"id"`
+	Name      string             `db:"name"`
+	Status    enum.CountryStatus `db:"status"`
+	CreatedAt time.Time          `db:"created_at"`
+	UpdatedAt time.Time          `db:"updated_at"`
 }
 type CountriesQ struct {
 	db       *sql.DB
@@ -127,9 +128,9 @@ func (q CountriesQ) Select(ctx context.Context) ([]CountryModel, error) {
 }
 
 type UpdateCountryInput struct {
-	Name      *string   `db:"name"`
-	Status    *string   `db:"status"`
-	UpdatedAt time.Time `db:"updated_at"`
+	Name      *string             `db:"name"`
+	Status    *enum.CountryStatus `db:"status"`
+	UpdatedAt time.Time           `db:"updated_at"`
 }
 
 func (q CountriesQ) Update(ctx context.Context, input UpdateCountryInput) error {
@@ -190,7 +191,7 @@ func (q CountriesQ) FilterName(name string) CountriesQ {
 	return q
 }
 
-func (q CountriesQ) FilterStatus(status string) CountriesQ {
+func (q CountriesQ) FilterStatus(status enum.CountryStatus) CountriesQ {
 	q.selector = q.selector.Where(sq.Eq{"status": status})
 	q.counter = q.counter.Where(sq.Eq{"status": status})
 	q.deleter = q.deleter.Where(sq.Eq{"status": status})

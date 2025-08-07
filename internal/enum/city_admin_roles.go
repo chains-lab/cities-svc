@@ -1,35 +1,46 @@
 package enum
 
-type CityAdminRole int
+import "math"
+
+type CityAdminRole string
 
 const (
-	Owner CityAdminRole = iota
-	Admin
-	Moderator
+	CityOwner     CityAdminRole = "owner"
+	CityAdmin     CityAdminRole = "admin"
+	CityModerator CityAdminRole = "moderator"
 )
 
-var citiesAdminsRoles = []string{
-	"owner",
-	"admin",
-	"moderator",
+var citiesAdminsRoles = []CityAdminRole{
+	CityOwner,
+	CityAdmin,
+	CityModerator,
 }
 
-func (r CityAdminRole) String() string {
-	if int(r) < len(citiesAdminsRoles) {
-		return citiesAdminsRoles[r]
-	}
-	return ""
-}
-
-func CheckRole(role string) bool {
-	for _, name := range citiesAdminsRoles {
-		if name == role {
-			return true
+func ParseCityAdminRole(role string) (CityAdminRole, bool) {
+	for _, r := range citiesAdminsRoles {
+		if r == CityAdminRole(role) {
+			return r, true
 		}
 	}
-	return false
+	return "", false
 }
 
-func GetAllCitiesAdminsRoles() []string {
+func CompareCityAdminRole(role1, role2 CityAdminRole) int {
+	power := map[CityAdminRole]uint8{
+		CityOwner:     math.MaxUint8,
+		CityAdmin:     2,
+		CityModerator: 1,
+	}
+
+	if power[role1] > power[role2] {
+		return 1
+	} else if power[role1] < power[role2] {
+		return -1
+	}
+
+	return 0
+}
+
+func GetAllCitiesAdminsRoles() []CityAdminRole {
 	return citiesAdminsRoles
 }

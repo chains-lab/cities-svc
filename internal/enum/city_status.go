@@ -1,33 +1,29 @@
 package enum
 
-type CityStatus int
+type CityStatus string
 
 const (
-	CityNotSupport CityStatus = iota
-	CitySupport
+	CityStatusSupported   CityStatus = "supported"
+	CityStatusSuspended   CityStatus = "suspended"
+	CityStatusUnsupported CityStatus = "unsupported"
 )
 
-var citiesStatus = []string{
-	"not_support",
-	"support",
+var cityStatuses = []CityStatus{
+	CityStatusSupported,
+	CityStatusSuspended,
+	CityStatusUnsupported,
 }
 
-func (s CityStatus) String() string {
-	if int(s) < len(citiesStatus) {
-		return citiesStatus[s]
-	}
-	return ""
-}
-
-func CheckCityStatus(s string) bool {
-	for _, name := range citiesStatus {
-		if name == s {
-			return true
+func ParseCityStatus(status string) (CityStatus, bool) {
+	for _, s := range cityStatuses {
+		if s == CityStatus(status) {
+			return s, true
 		}
 	}
-	return false
+
+	return "", false
 }
 
-func GetAllCitiesStatuses() []string {
-	return citiesStatus
+func GetAllCitiesStatuses() []CityStatus {
+	return cityStatuses
 }

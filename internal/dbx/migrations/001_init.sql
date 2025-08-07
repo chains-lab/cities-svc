@@ -3,7 +3,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TABLE "countries" (
     "id"         UUID         PRIMARY KEY NOT NULL,
-    "name"       VARCHAR(255) NOT NULL,
+    "name"       VARCHAR(255) NOT NULL UNIQUE,
     "status"     VARCHAR(32)  NOT NULL,
     "created_at" TIMESTAMP    NOT NULL,
     "updated_at" TIMESTAMP    NOT NULL
@@ -12,7 +12,7 @@ CREATE TABLE "countries" (
 CREATE TABLE "city" (
     "id"          UUID         PRIMARY KEY NOT NULL,
     "country_id"  UUID         NOT NULL REFERENCES "countries" ("id") ON DELETE CASCADE,
-    "name"        VARCHAR(255) NOT NULL UNIQUE,
+    "name"        VARCHAR(255) NOT NULL,
     "status"      VARCHAR(32)  NOT NULL,
     "created_at"  TIMESTAMP    NOT NULL,
     "updated_at"  TIMESTAMP    NOT NULL
@@ -29,6 +29,7 @@ CREATE TABLE "cities_admins" (
     "city_id"    UUID             NOT NULL REFERENCES "city" ("id") ON DELETE CASCADE,
     "role"       city_admin_roles NOT NULL,
     "created_at" TIMESTAMP        NOT NULL,
+    "updated_at" TIMESTAMP        NOT NULL,
 
     PRIMARY KEY ("user_id", "city_id"),
 );
