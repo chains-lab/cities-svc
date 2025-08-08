@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/chains-lab/gatekit/auth"
-	"github.com/chains-lab/gatekit/roles"
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -13,19 +12,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-type MetaData struct {
-	Issuer         string     `json:"iss,omitempty"`
-	Subject        string     `json:"sub,omitempty"`
-	Audience       []string   `json:"aud,omitempty"`
-	InitiatorID    uuid.UUID  `json:"initiator_id,omitempty"`
-	SessionID      uuid.UUID  `json:"session_id,omitempty"`
-	SubscriptionID uuid.UUID  `json:"subscription_id,omitempty"`
-	Verified       bool       `json:"verified,omitempty"`
-	Role           roles.Role `json:"role,omitempty"`
-	RequestID      uuid.UUID  `json:"request_id,omitempty"`
-}
-
-func NewAuth(skService, skUser string) grpc.UnaryServerInterceptor {
+func Auth(skService string) grpc.UnaryServerInterceptor {
 	return func(
 		ctx context.Context,
 		req interface{},
@@ -36,19 +23,14 @@ func NewAuth(skService, skUser string) grpc.UnaryServerInterceptor {
 		if !ok {
 			return nil, status.New(codes.Unauthenticated, fmt.Sprintf("no metadata found in incoming context")).Err()
 		}
-		toksServ := md["authorization"]
-		if len(toksServ) == 0 {
+		tokenSvc := md["authorization"]
+		if len(tokenSvc) == 0 {
 			return nil, status.New(codes.Unauthenticated, fmt.Sprintf("authorization token not supplied")).Err()
 		}
 
-		data, err := auth.VerifyServiceJWT(ctx, toksServ[0], skService)
+		data, err := auth.VerifyServiceJWT(ctx, tokenSvc[0], skService)
 		if err != nil {
 			return nil, status.New(codes.Unauthenticated, fmt.Sprintf("failed to verify token: %s", err)).Err()
-		}
-
-		toksUser := md["x-user-token"]
-		if len(toksUser) == 0 {
-			return nil, status.New(codes.Unauthenticated, fmt.Sprintf("user token not supplied")).Err()
 		}
 
 		requestIDArr := md["x-request-id"]
@@ -56,31 +38,24 @@ func NewAuth(skService, skUser string) grpc.UnaryServerInterceptor {
 			return nil, status.New(codes.Unauthenticated, fmt.Sprintf("request ID not supplied")).Err()
 		}
 
-		userData, err := auth.VerifyUserJWT(ctx, toksUser[0], skUser)
-		if err != nil {
-			return nil, status.New(codes.Unauthenticated, fmt.Sprintf("invalid user token: %v", err)).Err()
-		}
-
-		userID, err := uuid.Parse(userData.Subject)
-		if err != nil {
-			return nil, status.New(codes.Unauthenticated, fmt.Sprintf("invalid user ID: %v", err)).Err()
-		}
-
 		requestID, err := uuid.Parse(requestIDArr[0])
 		if err != nil {
 			return nil, status.New(codes.Unauthenticated, fmt.Sprintf("invalid request ID: %v", err)).Err()
 		}
 
-		ctx = context.WithValue(ctx, MetaCtxKey, MetaData{
-			Issuer:      data.Issuer,
-			Subject:     data.Subject,
-			Audience:    data.Audience,
-			InitiatorID: userID,
-			SessionID:   userData.Session,
-			Verified:    userData.Verified,
-			Role:        userData.Role,
-			RequestID:   requestID,
-		})
+		ThisSvcInAudience := false
+		for _, aud := range data.Audience {
+			if aud == data.Issuer {
+				ThisSvcInAudience = true
+				break
+			}
+		}
+
+		if !ThisSvcInAudience {
+			return nil, status.New(codes.Unauthenticated, fmt.Sprintf("service issuer %s not in audience %v", data.Issuer, data.Audience)).Err()
+		}
+
+		ctx = context.WithValue(ctx, RequestIDCtxKey, requestID)
 
 		return handler(ctx, req)
 	}

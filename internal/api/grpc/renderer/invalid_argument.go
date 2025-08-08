@@ -1,6 +1,7 @@
 package renderer
 
 import (
+	"context"
 	"time"
 
 	"github.com/google/uuid"
@@ -17,6 +18,7 @@ type Violation struct {
 }
 
 func InvalidArgumentError(
+	ctx context.Context,
 	requestID uuid.UUID,
 	violations ...Violation,
 ) error {
@@ -45,7 +47,6 @@ func InvalidArgumentError(
 
 	st, err := st.WithDetails(info, br, ri)
 	if err != nil {
-		// если не удалось упаковать — возвращаем без деталей
 		return st.Err()
 	}
 

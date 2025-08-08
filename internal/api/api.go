@@ -14,13 +14,13 @@ import (
 
 func Run(ctx context.Context, cfg config.Config, log logger.Logger, app *app.App) error {
 	// server := service.NewService(cfg, app)
-	authInterceptor := interceptors.NewAuth(cfg.JWT.Service.SecretKey, cfg.JWT.User.AccessToken.SecretKey)
+
 	logInterceptor := logger.UnaryLogInterceptor(log)
+	authInterceptor := interceptors.Auth(cfg.JWT.Service.SecretKey)
 
 	grpcServer := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
-			logInterceptor,
-			authInterceptor,
+			logInterceptor, authInterceptor,
 		),
 	)
 

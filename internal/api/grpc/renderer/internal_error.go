@@ -1,6 +1,7 @@
 package renderer
 
 import (
+	"context"
 	"time"
 
 	"github.com/google/uuid"
@@ -9,8 +10,9 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func InternalError(
-	requestID *uuid.UUID,
+func internalError(
+	ctx context.Context,
+	requestID uuid.UUID,
 ) error {
 	st := status.New(codes.Internal, "internal server error")
 
@@ -22,17 +24,12 @@ func InternalError(
 		},
 	}
 
-	var ri *errdetails.RequestInfo
-	if requestID != nil {
-		ri = &errdetails.RequestInfo{
-			RequestId: requestID.String(),
-		}
+	ri := &errdetails.RequestInfo{
+		RequestId: requestID.String(),
 	}
 
 	st, err := st.WithDetails(info, ri)
-
 	if err != nil {
-		// если не удалось упаковать — возвращаем без деталей
 		return st.Err()
 	}
 

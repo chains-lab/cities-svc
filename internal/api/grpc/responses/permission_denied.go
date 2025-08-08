@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/chains-lab/cities-dir-svc/internal/enum"
+	"github.com/chains-lab/gatekit/roles"
 	"github.com/google/uuid"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
@@ -51,6 +52,23 @@ func InitiatorIsNotCityAdmin(cityID, userID uuid.UUID, description string) *stat
 			Owner:        fmt.Sprintf("cities_admins?user_id=%s&city_id=%s", userID.String(), cityID.String()),
 			Description:  fmt.Sprintf("initiator with ID '%s' is not a city admin for city with ID '%s': %s", userID.String(), cityID.String(), description),
 		},
+		&errdetails.ErrorInfo{
+			Reason: PermissionDeniedReason,
+			Domain: serviceName,
+			Metadata: map[string]string{
+				"timestamp": time.Now().UTC().Format(time.RFC3339Nano),
+			},
+		},
+	)
+
+	return response
+}
+
+func PermissionDeniedByRole(userID uuid.UUID, role roles.Role) *status.Status {
+	response, _ := status.New(
+		PermissionDeniedCode,
+		PermissionDeniedMessage,
+	).WithDetails(
 		&errdetails.ErrorInfo{
 			Reason: PermissionDeniedReason,
 			Domain: serviceName,

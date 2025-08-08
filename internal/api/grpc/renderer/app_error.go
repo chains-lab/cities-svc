@@ -12,7 +12,7 @@ import (
 func AppError(ctx context.Context, requestID uuid.UUID, err error) error {
 	st, ok := status.FromError(err)
 	if !ok {
-		return InternalError(&requestID)
+		return internalError(ctx, requestID)
 	}
 
 	withReq, derr := st.WithDetails(

@@ -1,9 +1,12 @@
 package service
 
 import (
+	svccities "github.com/chains-lab/cities-dir-proto/gen/go/cities"
+	svccitiesadmins "github.com/chains-lab/cities-dir-proto/gen/go/citiesadmins"
+	svccountries "github.com/chains-lab/cities-dir-proto/gen/go/countries"
 	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/service/cities"
 	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/service/citiesadmins"
-	countries2 "github.com/chains-lab/cities-dir-svc/internal/api/grpc/service/countries"
+	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/service/countries"
 	"github.com/chains-lab/cities-dir-svc/internal/app"
 	"github.com/chains-lab/cities-dir-svc/internal/config"
 )
@@ -18,19 +21,19 @@ type Countries interface {
 }
 
 type Service struct {
-	Cities
-	CitiesAdmins
-	Countries
+	svccities.CityServiceServer
+	svccitiesadmins.CityAdminServiceServer
+	svccountries.CountryServiceServer
 }
 
 func NewService(cfg config.Config, app *app.App) Service {
 	citiesService := cities.NewService(cfg, app)
 	citiesAdminsService := citiesadmins.NewService(cfg, app)
-	countriesService := countries2.NewService(cfg, app)
+	countriesService := countries.NewService(cfg, app)
 
 	return Service{
-		Cities:       citiesService,
-		CitiesAdmins: citiesAdminsService,
-		Countries:    countriesService,
+		CityServiceServer:      citiesService,
+		CityAdminServiceServer: citiesAdminsService,
+		CountryServiceServer:   countriesService,
 	}
 }

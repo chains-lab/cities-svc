@@ -194,6 +194,19 @@ func (a App) DeleteCountry(ctx context.Context, ID uuid.UUID) error {
 	return nil
 }
 
+func (a App) SearchCountries(ctx context.Context, name string, status enum.CountryStatus, limit, offset uint64) ([]models.Country, error) {
+	countries, err := a.countriesQ.New().
+		FilterName(name).
+		FilterStatus(status).
+		Page(limit, offset).
+		Select(ctx)
+	if err != nil {
+		return nil, errs2.RaiseInternal(err)
+	}
+
+	return arrCountryDbxToModel(countries), nil
+}
+
 func countryDbxToModel(country dbx.CountryModel) models.Country {
 	return models.Country{
 		ID:        country.ID,
@@ -202,4 +215,12 @@ func countryDbxToModel(country dbx.CountryModel) models.Country {
 		CreatedAt: country.CreatedAt,
 		UpdatedAt: country.UpdatedAt,
 	}
+}
+
+func arrCountryDbxToModel(countries []dbx.CountryModel) []models.Country {
+	result := make([]models.Country, 0, len(countries))
+	for _, country := range countries {
+		result = append(result, countryDbxToModel(country))
+	}
+	return result
 }
