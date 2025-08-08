@@ -7,6 +7,7 @@ import (
 	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/responses"
 	"github.com/chains-lab/cities-dir-svc/internal/constant/enum"
 	"github.com/chains-lab/cities-dir-svc/internal/logger"
+	"github.com/chains-lab/cities-dir-svc/internal/pagination"
 )
 
 func (s Service) SearchCountries(ctx context.Context, req *svc.SearchCountriesRequest) (*svc.CountriesList, error) {
@@ -20,12 +21,15 @@ func (s Service) SearchCountries(ctx context.Context, req *svc.SearchCountriesRe
 		})
 	}
 
-	countries, err := s.app.SearchCountries(ctx, req.NameLike, status, req.Pagination.Limit, req.Pagination.Page)
+	countries, pag, err := s.app.SearchCountries(ctx, req.NameLike, status, pagination.Request{
+		Page: req.Pagination.Page,
+		Size: req.Pagination.Size,
+	})
 	if err != nil {
 		logger.Log(ctx, RequestID(ctx)).WithError(err).Error("failed to search countries")
 
 		return nil, responses.AppError(ctx, RequestID(ctx), err)
 	}
 
-	return responses.CountriesList(countries), nil
+	return responses.CountriesList(countries, pag), nil
 }

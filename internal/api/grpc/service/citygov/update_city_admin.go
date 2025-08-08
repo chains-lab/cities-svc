@@ -50,7 +50,7 @@ func (s Service) UpdateCityAdmin(ctx context.Context, req *svc.UpdateCityAdminRe
 		return nil, responses.AppError(ctx, RequestID(ctx), err)
 	}
 
-	cityAdmin, err := s.app.GetCityAdminForCity(ctx, cityID, userID)
+	cityAdmin, err := s.app.GetCityAdmin(ctx, cityID, userID)
 	if err != nil {
 		return nil, responses.AppError(ctx, RequestID(ctx), err)
 	}

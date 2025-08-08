@@ -7,9 +7,10 @@ import (
 	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/responses"
 	"github.com/chains-lab/cities-dir-svc/internal/logger"
 	"github.com/google/uuid"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-func (s Service) RefuseCityAdminRights(ctx context.Context, req *svc.RefuseCityAdminRightRequest) (*svc.CityAdmin, error) {
+func (s Service) RefuseCityAdminRight(ctx context.Context, req *svc.RefuseCityAdminRightRequest) (*emptypb.Empty, error) {
 	cityID, err := uuid.Parse(req.CityId)
 	if err != nil {
 		logger.Log(ctx, RequestID(ctx)).WithError(err).Error("invalid city ID format")
@@ -37,12 +38,5 @@ func (s Service) RefuseCityAdminRights(ctx context.Context, req *svc.RefuseCityA
 		return nil, responses.AppError(ctx, RequestID(ctx), err)
 	}
 
-	cityAdmin, err := s.app.GetCityAdminForCity(ctx, cityID, userID)
-	if err != nil {
-		logger.Log(ctx, RequestID(ctx)).WithError(err).Error("failed to get city admin after refusal")
-
-		return nil, responses.AppError(ctx, RequestID(ctx), err)
-	}
-
-	return responses.CityAdmin(cityAdmin), nil
+	return &emptypb.Empty{}, nil
 }

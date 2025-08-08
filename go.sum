@@ -18,6 +18,12 @@ github.com/chains-lab/cities-dir-proto v0.2.10 h1:r1hYFgGMoX1+mivjQWGm5fDoUi8hso
 github.com/chains-lab/cities-dir-proto v0.2.10/go.mod h1:1j+jDebihIaPNKIuE8YyDz6czHeAQjoyGDpb4CyTBVY=
 github.com/chains-lab/cities-dir-proto v0.2.11 h1:dsrxHO5U9noFvX8rcJYOSnTCMRqKJu642X1atWGo+aM=
 github.com/chains-lab/cities-dir-proto v0.2.11/go.mod h1:1j+jDebihIaPNKIuE8YyDz6czHeAQjoyGDpb4CyTBVY=
+github.com/chains-lab/cities-dir-proto v0.2.12 h1:PK+QEbzr2WrqSARIfUdfwd/kh9IF0qjBzNWYxUkWvzw=
+github.com/chains-lab/cities-dir-proto v0.2.12/go.mod h1:1j+jDebihIaPNKIuE8YyDz6czHeAQjoyGDpb4CyTBVY=
+github.com/chains-lab/cities-dir-proto v0.2.13 h1:XoBWKsDWPj2/78fP12p3h2VXTPtH3qj3shY6ro6MPyI=
+github.com/chains-lab/cities-dir-proto v0.2.13/go.mod h1:1j+jDebihIaPNKIuE8YyDz6czHeAQjoyGDpb4CyTBVY=
+github.com/chains-lab/cities-dir-proto v0.2.14 h1:C55GhpQQG/OfPaZcdeoT6EZdhCkwr2I5EkEEFp32xcE=
+github.com/chains-lab/cities-dir-proto v0.2.14/go.mod h1:1j+jDebihIaPNKIuE8YyDz6czHeAQjoyGDpb4CyTBVY=
 github.com/chains-lab/gatekit v0.1.1 h1:ItVe+BYqI4baDOGIYbYRrCKK9NzTDV0Em87pUSNSY60=
 github.com/chains-lab/gatekit v0.1.1/go.mod h1:4Bm8BXPMR+HTnMg7uEPGA4nCLMA8xD+fYifuKkn766Q=
 github.com/chains-lab/svc-errors v0.2.2 h1:70aJpuCHhptxOXQTIntfSwG8xi0WmthSPUpj3o2F0ds=

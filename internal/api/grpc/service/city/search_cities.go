@@ -6,6 +6,7 @@ import (
 	svc "github.com/chains-lab/cities-dir-proto/gen/go/city"
 	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/responses"
 	"github.com/chains-lab/cities-dir-svc/internal/logger"
+	"github.com/chains-lab/cities-dir-svc/internal/pagination"
 	"github.com/google/uuid"
 )
 
@@ -20,11 +21,14 @@ func (s Service) SearchCities(ctx context.Context, req *svc.SearchCitiesRequest)
 		})
 	}
 
-	cities, err := s.app.SearchCityInCountry(ctx, req.NameLike, CountryID, req.Pagination.Page, req.Pagination.Limit)
+	cities, pag, err := s.app.SearchCityInCountry(ctx, req.NameLike, CountryID, pagination.Request{
+		Page: req.Pagination.Page,
+		Size: req.Pagination.Size,
+	})
 	if err != nil {
 		logger.Log(ctx, RequestID(ctx)).WithError(err).Error("failed to search cities")
 		return nil, responses.AppError(ctx, RequestID(ctx), err)
 	}
 
-	return responses.CitiesList(cities), nil
+	return responses.CitiesList(cities, pag), nil
 }

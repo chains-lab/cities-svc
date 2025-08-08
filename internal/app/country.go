@@ -11,6 +11,7 @@ import (
 	"github.com/chains-lab/cities-dir-svc/internal/constant/enum"
 	"github.com/chains-lab/cities-dir-svc/internal/dbx"
 	"github.com/chains-lab/cities-dir-svc/internal/errx"
+	"github.com/chains-lab/cities-dir-svc/internal/pagination"
 	"github.com/google/uuid"
 )
 
@@ -30,6 +31,8 @@ type countryQ interface {
 	Count(ctx context.Context) (uint64, error)
 	Page(limit, offset uint64) dbx.CountryQ
 }
+
+// Create methods for countries
 
 func (a App) CreateCountry(ctx context.Context, name string) (models.Country, error) {
 	country := dbx.CountryModel{
@@ -53,8 +56,10 @@ func (a App) CreateCountry(ctx context.Context, name string) (models.Country, er
 		}
 	}
 
-	return countryDbxToModel(country), nil
+	return countryModel(country), nil
 }
+
+// Read methods for countries
 
 func (a App) GetCountryByID(ctx context.Context, ID uuid.UUID) (models.Country, error) {
 	country, err := a.countriesQ.New().FilterID(ID).Get(ctx)
@@ -68,8 +73,32 @@ func (a App) GetCountryByID(ctx context.Context, ID uuid.UUID) (models.Country, 
 		return models.Country{}, errx.RaiseInternal(err)
 	}
 
-	return countryDbxToModel(country), nil
+	return countryModel(country), nil
 }
+
+func (a App) SearchCountries(ctx context.Context, name string, status string, pag pagination.Request) ([]models.Country, pagination.Response, error) {
+	limit, offset := pagination.CalculateLimitOffset(pag)
+
+	countries, err := a.countriesQ.New().
+		FilterName(name).
+		FilterStatus(status).
+		Page(limit, offset).
+		Select(ctx)
+	if err != nil {
+		return nil, pagination.Response{}, errx.RaiseInternal(err)
+	}
+
+	total, err := a.countriesQ.New().Count(ctx)
+	if err != nil {
+		return nil, pagination.Response{}, errx.RaiseInternal(err)
+	}
+
+	res, pagRes := countriesArray(countries, limit, offset, total)
+
+	return res, pagRes, nil
+}
+
+// Update methods for countries
 
 func (a App) UpdateCountryStatus(ctx context.Context, ID uuid.UUID, status string) (models.Country, error) {
 	//TODO in future create event to kafka about country status change
@@ -99,12 +128,12 @@ func (a App) UpdateCountryStatus(ctx context.Context, ID uuid.UUID, status strin
 		}
 
 		if status == enum.CountryStatusUnsupported {
-			err = a.UpdateStatusForCitiesByCountryID(ctx, ID, enum.CountryStatusUnsupported)
+			err = a.updateStatusForCitiesByCountryID(ctx, ID, enum.CountryStatusUnsupported)
 			if err != nil {
 				return err
 			}
 		} else if status == enum.CountryStatusSuspended {
-			err = a.UpdateStatusForCitiesByCountryID(ctx, ID, enum.CountryStatusSuspended)
+			err = a.updateStatusForCitiesByCountryID(ctx, ID, enum.CountryStatusSuspended)
 			if err != nil {
 				return err
 			}
@@ -156,58 +185,9 @@ func (a App) UpdateCountryName(ctx context.Context, ID uuid.UUID, name string) (
 	return a.GetCountryByID(ctx, ID)
 }
 
-func (a App) DeleteCountry(ctx context.Context, ID uuid.UUID) error {
-	//TODO this method is not safe, because it can delete country with cities and admins, need to add check for cities and admins
-	// dose not allow to delete country with cities and admins, or delete all cities and admins before deleting country
+// Helper functions for countries
 
-	_, err := a.GetCountryByID(ctx, ID)
-	if err != nil {
-		return err
-	}
-
-	cities, err := a.citiesQ.New().FilterCountryID(ID).Select(ctx)
-	if err != nil {
-		switch {
-		case errors.Is(err, sql.ErrNoRows):
-			break
-		default:
-			return errx.RaiseInternal(err)
-		}
-	}
-
-	if err == nil || len(cities) > 0 {
-		return errx.RaiseInternal(err)
-	}
-
-	if err = a.countriesQ.New().FilterID(ID).Delete(ctx); err != nil {
-		switch {
-		case errors.Is(err, sql.ErrNoRows):
-			return errx.RaiseCountryNotFoundByID(
-				fmt.Errorf("country with id '%s' does not exist, cause: %s", ID, err),
-				ID,
-			)
-		default:
-			return errx.RaiseInternal(err)
-		}
-	}
-
-	return nil
-}
-
-func (a App) SearchCountries(ctx context.Context, name string, status string, limit, offset uint64) ([]models.Country, error) {
-	countries, err := a.countriesQ.New().
-		FilterName(name).
-		FilterStatus(status).
-		Page(limit, offset).
-		Select(ctx)
-	if err != nil {
-		return nil, errx.RaiseInternal(err)
-	}
-
-	return arrCountryDbxToModel(countries), nil
-}
-
-func countryDbxToModel(country dbx.CountryModel) models.Country {
+func countryModel(country dbx.CountryModel) models.Country {
 	return models.Country{
 		ID:        country.ID,
 		Name:      country.Name,
@@ -217,10 +197,17 @@ func countryDbxToModel(country dbx.CountryModel) models.Country {
 	}
 }
 
-func arrCountryDbxToModel(countries []dbx.CountryModel) []models.Country {
+func countriesArray(countries []dbx.CountryModel, limit, offset, total uint64) ([]models.Country, pagination.Response) {
 	result := make([]models.Country, 0, len(countries))
 	for _, country := range countries {
-		result = append(result, countryDbxToModel(country))
+		result = append(result, countryModel(country))
 	}
-	return result
+
+	pag := pagination.Response{
+		Page:  offset/limit + 1,
+		Size:  limit,
+		Total: total,
+	}
+
+	return result, pag
 }

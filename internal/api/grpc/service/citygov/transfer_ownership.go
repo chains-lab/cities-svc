@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (s Service) TransferCityOwnership(ctx context.Context, req *svc.TransferOwnershipRequest) (*svc.CityAdmin, error) {
+func (s Service) TransferOwnership(ctx context.Context, req *svc.TransferOwnershipRequest) (*svc.CityAdmin, error) {
 	cityID, err := uuid.Parse(req.CityId)
 	if err != nil {
 		logger.Log(ctx, RequestID(ctx)).WithError(err).Error("invalid city ID format")
@@ -37,7 +37,7 @@ func (s Service) TransferCityOwnership(ctx context.Context, req *svc.TransferOwn
 		return nil, responses.AppError(ctx, RequestID(ctx), err)
 	}
 
-	cityAdmin, err := s.app.GetCityAdminForCity(ctx, cityID, newOwnerID)
+	cityAdmin, err := s.app.GetCityAdmin(ctx, cityID, newOwnerID)
 	if err != nil {
 		logger.Log(ctx, RequestID(ctx)).WithError(err).Error("failed to get city admin after transfer")
 

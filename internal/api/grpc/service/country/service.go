@@ -8,14 +8,14 @@ import (
 	"github.com/chains-lab/cities-dir-svc/internal/app"
 	"github.com/chains-lab/cities-dir-svc/internal/app/models"
 	"github.com/chains-lab/cities-dir-svc/internal/config"
+	"github.com/chains-lab/cities-dir-svc/internal/pagination"
 	"github.com/google/uuid"
 )
 
 type application interface {
 	CreateCountry(ctx context.Context, name string) (models.Country, error)
 	GetCountryByID(ctx context.Context, ID uuid.UUID) (models.Country, error)
-	SearchCountries(ctx context.Context, name string, status string, limit, offset uint64) ([]models.Country, error)
-	DeleteCountry(ctx context.Context, ID uuid.UUID) error
+	SearchCountries(ctx context.Context, name string, status string, pag pagination.Request) ([]models.Country, pagination.Response, error)
 
 	UpdateCountryStatus(ctx context.Context, ID uuid.UUID, status string) (models.Country, error)
 	UpdateCountryName(ctx context.Context, ID uuid.UUID, name string) (models.Country, error)
@@ -25,7 +25,7 @@ type Service struct {
 	app application
 	cfg config.Config
 
-	svc.CountryServiceServer
+	svc.UnimplementedCountryServiceServer
 }
 
 func NewService(cfg config.Config, app *app.App) Service {
