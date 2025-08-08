@@ -20,7 +20,7 @@ func (s Service) SearchCountries(ctx context.Context, req *svc.SearchCountriesRe
 		})
 	}
 
-	countries, err := s.methods.SearchCountries(ctx, req.NameLike, status, req.Pagination.Limit, req.Pagination.Page)
+	countries, err := s.app.SearchCountries(ctx, req.NameLike, status, req.Pagination.Limit, req.Pagination.Page)
 	if err != nil {
 		logger.Log(ctx, RequestID(ctx)).WithError(err).Error("failed to search countries")
 

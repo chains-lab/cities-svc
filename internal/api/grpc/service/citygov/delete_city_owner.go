@@ -54,7 +54,7 @@ func (s Service) DeleteCityOwner(ctx context.Context, req *svc.DeleteCityOwnerRe
 		})
 	}
 
-	err = s.methods.DeleteCityOwner(ctx, cityID, userID)
+	err = s.app.DeleteCityOwner(ctx, cityID, userID)
 	if err != nil {
 		logger.Log(ctx, RequestID(ctx)).WithError(err).Error("failed to delete city owner")
 

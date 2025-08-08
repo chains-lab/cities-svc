@@ -30,7 +30,7 @@ func (s Service) CreateCountry(ctx context.Context, req *svc.CreateCountryReques
 		)
 	}
 
-	country, err := s.methods.CreateCountry(ctx, req.Name)
+	country, err := s.app.CreateCountry(ctx, req.Name)
 	if err != nil {
 		logger.Log(ctx, RequestID(ctx)).WithError(err).Error("failed to create country")
 

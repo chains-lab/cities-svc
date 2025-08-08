@@ -11,10 +11,10 @@ import (
 	"github.com/google/uuid"
 )
 
-type methods interface {
+type application interface {
 	CreateCityOwner(ctx context.Context, cityID, userID uuid.UUID) (models.CityAdmin, error)
 	DeleteCityOwner(ctx context.Context, cityID, userID uuid.UUID) error
-	
+
 	TransferCityOwnership(ctx context.Context, initiatorID, newOwnerID, cityID uuid.UUID) error
 
 	CreateCityAdmin(ctx context.Context, initiatorID, cityID, userID uuid.UUID, input app.CreateCityAdminInput) (models.CityAdmin, error)
@@ -29,16 +29,16 @@ type methods interface {
 }
 
 type Service struct {
-	methods methods
-	cfg     config.Config
+	app application
+	cfg config.Config
 
 	svc.UnimplementedCityGovServiceServer
 }
 
 func NewService(cfg config.Config, app *app.App) Service {
 	return Service{
-		methods: app,
-		cfg:     cfg,
+		app: app,
+		cfg: cfg,
 	}
 }
 

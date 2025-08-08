@@ -45,12 +45,12 @@ func (s Service) UpdateCityAdmin(ctx context.Context, req *svc.UpdateCityAdminRe
 		})
 	}
 
-	err = s.methods.UpdateCityAdminRole(ctx, initiatorID, cityID, userID, role)
+	err = s.app.UpdateCityAdminRole(ctx, initiatorID, cityID, userID, role)
 	if err != nil {
 		return nil, responses.AppError(ctx, RequestID(ctx), err)
 	}
 
-	cityAdmin, err := s.methods.GetCityAdminForCity(ctx, cityID, userID)
+	cityAdmin, err := s.app.GetCityAdminForCity(ctx, cityID, userID)
 	if err != nil {
 		return nil, responses.AppError(ctx, RequestID(ctx), err)
 	}

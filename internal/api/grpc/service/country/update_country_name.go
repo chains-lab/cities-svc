@@ -41,7 +41,7 @@ func (s Service) UpdateCountryName(ctx context.Context, req *svc.UpdateCountryNa
 		})
 	}
 
-	country, err := s.methods.UpdateCountryName(ctx, countryID, req.Name)
+	country, err := s.app.UpdateCountryName(ctx, countryID, req.Name)
 	if err != nil {
 		logger.Log(ctx, RequestID(ctx)).WithError(err).Error("failed to create country")
 

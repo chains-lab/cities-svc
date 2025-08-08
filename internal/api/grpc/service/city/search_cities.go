@@ -20,7 +20,7 @@ func (s Service) SearchCities(ctx context.Context, req *svc.SearchCitiesRequest)
 		})
 	}
 
-	cities, err := s.methods.SearchCityInCountry(ctx, req.NameLike, CountryID, req.Pagination.Page, req.Pagination.Limit)
+	cities, err := s.app.SearchCityInCountry(ctx, req.NameLike, CountryID, req.Pagination.Page, req.Pagination.Limit)
 	if err != nil {
 		logger.Log(ctx, RequestID(ctx)).WithError(err).Error("failed to search cities")
 		return nil, responses.AppError(ctx, RequestID(ctx), err)

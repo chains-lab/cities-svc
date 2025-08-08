@@ -191,7 +191,7 @@ func (a App) UpdateCitiesStatusByOwner(ctx context.Context, initiatorID, cityID 
 		)
 	}
 
-	_, err = enum.ParseCityStatus(string(status))
+	_, err = enum.ParseCityStatus(status)
 	if err != nil {
 		return models.City{}, errx.RaiseInvalidCityStatus(err, status)
 	}

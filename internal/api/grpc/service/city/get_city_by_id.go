@@ -20,7 +20,7 @@ func (s Service) GetCityById(ctx context.Context, req *svc.GetCityByIdRequest) (
 		})
 	}
 
-	city, err := s.methods.GetCityByID(ctx, cityID)
+	city, err := s.app.GetCityByID(ctx, cityID)
 	if err != nil {
 		logger.Log(ctx, RequestID(ctx)).WithError(err).Error("failed to get city by ID")
 

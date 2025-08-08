@@ -30,7 +30,7 @@ func (s Service) UpdateCityName(ctx context.Context, req *svc.UpdateCityNameRequ
 		})
 	}
 
-	city, err := s.methods.UpdateCityName(ctx, cityID, initiatorID, req.Name)
+	city, err := s.app.UpdateCityName(ctx, cityID, initiatorID, req.Name)
 	if err != nil {
 		logger.Log(ctx, RequestID(ctx)).WithError(err).Error("failed to update city name")
 		return nil, responses.AppError(ctx, RequestID(ctx), err)

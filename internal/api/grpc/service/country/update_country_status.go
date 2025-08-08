@@ -26,7 +26,7 @@ func (s Service) UpdateCountryStatus(ctx context.Context, req *svc.UpdateCountry
 		})
 	}
 
-	country, err := s.methods.UpdateCountryStatus(ctx, countryID, status)
+	country, err := s.app.UpdateCountryStatus(ctx, countryID, status)
 	if err != nil {
 		return nil, responses.AppError(ctx, RequestID(ctx), err)
 	}

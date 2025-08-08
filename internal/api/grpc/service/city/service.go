@@ -11,7 +11,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type methods interface {
+type application interface {
 	CreateCity(ctx context.Context, input app.CreateCityInput) (models.City, error)
 	GetCityByID(ctx context.Context, ID uuid.UUID) (models.City, error)
 	DeleteCity(ctx context.Context, ID uuid.UUID) error
@@ -26,16 +26,16 @@ type methods interface {
 }
 
 type Service struct {
-	methods methods
-	cfg     config.Config
+	app application
+	cfg config.Config
 
 	svccities.CityServiceServer
 }
 
 func NewService(cfg config.Config, app *app.App) Service {
 	return Service{
-		methods: app,
-		cfg:     cfg,
+		app: app,
+		cfg: cfg,
 	}
 }
 

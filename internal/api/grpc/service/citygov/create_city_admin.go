@@ -52,7 +52,7 @@ func (s Service) CreateCityAdmin(ctx context.Context, req *svc.CreateCityAdminRe
 		})
 	}
 
-	cityAdmin, err := s.methods.CreateCityAdmin(ctx, initiatorID, cityID, userID, app.CreateCityAdminInput{
+	cityAdmin, err := s.app.CreateCityAdmin(ctx, initiatorID, cityID, userID, app.CreateCityAdminInput{
 		Role: role,
 	})
 

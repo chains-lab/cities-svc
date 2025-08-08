@@ -42,7 +42,7 @@ func (s Service) CreateCity(ctx context.Context, req *svc.CreateCityRequest) (*s
 		})
 	}
 
-	city, err := s.methods.CreateCity(ctx, app.CreateCityInput{
+	city, err := s.app.CreateCity(ctx, app.CreateCityInput{
 		Name:      req.Name,
 		CountryID: CountryID,
 	})

@@ -11,7 +11,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type methods interface {
+type application interface {
 	CreateCountry(ctx context.Context, name string) (models.Country, error)
 	GetCountryByID(ctx context.Context, ID uuid.UUID) (models.Country, error)
 	SearchCountries(ctx context.Context, name string, status string, limit, offset uint64) ([]models.Country, error)
@@ -22,16 +22,16 @@ type methods interface {
 }
 
 type Service struct {
-	methods methods
-	cfg     config.Config
+	app application
+	cfg config.Config
 
 	svc.CountryServiceServer
 }
 
 func NewService(cfg config.Config, app *app.App) Service {
 	return Service{
-		methods: app,
-		cfg:     cfg,
+		app: app,
+		cfg: cfg,
 	}
 }
 

@@ -20,7 +20,7 @@ func (s Service) ListCityAdminsForCity(ctx context.Context, req *svc.ListCityAdm
 		})
 	}
 
-	cityAdmins, err := s.methods.GetCityAdmins(ctx, cityID, req.Pagination.Limit, req.Pagination.Page)
+	cityAdmins, err := s.app.GetCityAdmins(ctx, cityID, req.Pagination.Limit, req.Pagination.Page)
 	if err != nil {
 		logger.Log(ctx, RequestID(ctx)).WithError(err).Error("failed to list city admins")
 

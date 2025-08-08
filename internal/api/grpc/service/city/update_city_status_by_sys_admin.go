@@ -62,7 +62,7 @@ func (s Service) UpdateCityStatusBySysAdmin(ctx context.Context, req *svc.Update
 		})
 	}
 
-	city, err := s.methods.UpdateCitiesStatusByOwner(ctx, initiatorID, cityID, cityStatus)
+	city, err := s.app.UpdateCitiesStatusByOwner(ctx, initiatorID, cityID, cityStatus)
 	if err != nil {
 		logger.Log(ctx, RequestID(ctx)).WithError(err).Error("failed to update city status")
 

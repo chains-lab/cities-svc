@@ -41,7 +41,7 @@ func (s Service) UpdateCityStatus(ctx context.Context, req *svc.UpdateCityStatus
 		})
 	}
 
-	city, err := s.methods.UpdateCitiesStatusByOwner(ctx, initiatorID, cityID, status)
+	city, err := s.app.UpdateCitiesStatusByOwner(ctx, initiatorID, cityID, status)
 	if err != nil {
 		logger.Log(ctx, RequestID(ctx)).WithError(err).Error("failed to update city status")
 

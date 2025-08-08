@@ -30,14 +30,14 @@ func (s Service) TransferCityOwnership(ctx context.Context, req *svc.TransferOwn
 		})
 	}
 
-	err = s.methods.TransferCityOwnership(ctx, RequestID(ctx), newOwnerID, cityID)
+	err = s.app.TransferCityOwnership(ctx, RequestID(ctx), newOwnerID, cityID)
 	if err != nil {
 		logger.Log(ctx, RequestID(ctx)).WithError(err).Error("failed to transfer city ownership")
 
 		return nil, responses.AppError(ctx, RequestID(ctx), err)
 	}
 
-	cityAdmin, err := s.methods.GetCityAdminForCity(ctx, cityID, newOwnerID)
+	cityAdmin, err := s.app.GetCityAdminForCity(ctx, cityID, newOwnerID)
 	if err != nil {
 		logger.Log(ctx, RequestID(ctx)).WithError(err).Error("failed to get city admin after transfer")
 

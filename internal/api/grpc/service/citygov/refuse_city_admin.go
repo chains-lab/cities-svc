@@ -30,14 +30,14 @@ func (s Service) RefuseCityAdminRights(ctx context.Context, req *svc.RefuseCityA
 		})
 	}
 
-	err = s.methods.RefuseOwnAdminRights(ctx, cityID, userID)
+	err = s.app.RefuseOwnAdminRights(ctx, cityID, userID)
 	if err != nil {
 		logger.Log(ctx, RequestID(ctx)).WithError(err).Error("failed to refuse own admin rights")
 
 		return nil, responses.AppError(ctx, RequestID(ctx), err)
 	}
 
-	cityAdmin, err := s.methods.GetCityAdminForCity(ctx, cityID, userID)
+	cityAdmin, err := s.app.GetCityAdminForCity(ctx, cityID, userID)
 	if err != nil {
 		logger.Log(ctx, RequestID(ctx)).WithError(err).Error("failed to get city admin after refusal")
 

@@ -20,7 +20,7 @@ func (s Service) GetCountryById(ctx context.Context, req *svc.GetCountryByIdRequ
 		})
 	}
 
-	country, err := s.methods.GetCountryByID(ctx, countryID)
+	country, err := s.app.GetCountryByID(ctx, countryID)
 	if err != nil {
 		logger.Log(ctx, RequestID(ctx)).WithError(err).Error("failed to get country by ID")
 

@@ -30,7 +30,7 @@ func (s Service) GetCityAdmin(ctx context.Context, req *svc.GetCityAdminRequest)
 		})
 	}
 
-	cityAdmin, err := s.methods.GetCityAdmin(ctx, cityID, userID)
+	cityAdmin, err := s.app.GetCityAdmin(ctx, cityID, userID)
 	if err != nil {
 		logger.Log(ctx, RequestID(ctx)).WithError(err).Error("failed to get city admin")
 

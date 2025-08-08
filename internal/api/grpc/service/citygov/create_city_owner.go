@@ -53,7 +53,7 @@ func (s Service) CreateCityOwner(ctx context.Context, req *svc.CreateCityOwnerRe
 		})
 	}
 
-	cityAdmin, err := s.methods.CreateCityOwner(ctx, cityID, userID)
+	cityAdmin, err := s.app.CreateCityOwner(ctx, cityID, userID)
 	if err != nil {
 		logger.Log(ctx, RequestID(ctx)).WithError(err).Error("failed to create city owner")
 		return nil, responses.AppError(ctx, RequestID(ctx), err)

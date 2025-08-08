@@ -41,7 +41,7 @@ func (s Service) DeleteCityAdmin(ctx context.Context, req *svc.DeleteCityAdminRe
 		})
 	}
 
-	err = s.methods.DeleteCityAdmin(ctx, initiatorID, cityID, userID)
+	err = s.app.DeleteCityAdmin(ctx, initiatorID, cityID, userID)
 	if err != nil {
 		logger.Log(ctx, RequestID(ctx)).WithError(err).Error("failed to delete city admin")
 
