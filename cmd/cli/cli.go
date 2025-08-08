@@ -16,10 +16,7 @@ import (
 )
 
 func Run(args []string) bool {
-	cfg, err := config.LoadConfig()
-	if err != nil {
-		log.Fatalf("failed to load config: %v", err)
-	}
+	cfg := config.LoadConfig()
 
 	logger := logger.NewLogger(cfg)
 	logger.Info("Starting server...")

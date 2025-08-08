@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/interceptors"
+	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/interceptor"
 	"github.com/chains-lab/cities-dir-svc/internal/config"
 	"github.com/chains-lab/svc-errors/ape"
 	"github.com/google/uuid"
@@ -43,7 +43,7 @@ func UnaryLogInterceptor(log Logger) grpc.UnaryServerInterceptor {
 		// чтобы не потерять таймауты и другую информацию.
 		ctxWithLog := context.WithValue(
 			ctx,
-			interceptors.LogCtxKey,
+			interceptor.LogCtxKey,
 			log, // ваш интерфейс Logger
 		)
 
@@ -53,7 +53,7 @@ func UnaryLogInterceptor(log Logger) grpc.UnaryServerInterceptor {
 }
 
 func Log(ctx context.Context, requestID uuid.UUID) Logger {
-	entry, ok := ctx.Value(interceptors.LogCtxKey).(Logger)
+	entry, ok := ctx.Value(interceptor.LogCtxKey).(Logger)
 	if !ok {
 		logrus.Info("no logger in context")
 

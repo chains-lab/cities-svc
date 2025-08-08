@@ -10,9 +10,9 @@ import (
 )
 
 type App struct {
-	citiesQ    citiesQ
-	adminsQ    citiesAdminsQ
-	countriesQ countriesQ
+	citiesQ    cityQ
+	adminsQ    cityAdminQ
+	countriesQ countryQ
 
 	db *sql.DB
 }
@@ -24,9 +24,9 @@ func NewApp(cfg config.Config) (App, error) {
 	}
 
 	return App{
-		citiesQ:    dbx.NewCities(pg),
-		countriesQ: dbx.NewCountries(pg),
-		adminsQ:    dbx.NewCitiesAdmins(pg),
+		citiesQ:    dbx.NewCityQ(pg),
+		countriesQ: dbx.NewCountryQ(pg),
+		adminsQ:    dbx.NewCityAdminQ(pg),
 
 		db: pg,
 	}, nil

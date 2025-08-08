@@ -5,7 +5,13 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/interceptors"
+	cityProto "github.com/chains-lab/cities-dir-proto/gen/go/city"
+	cityGovProto "github.com/chains-lab/cities-dir-proto/gen/go/citygov"
+	countryProto "github.com/chains-lab/cities-dir-proto/gen/go/country"
+	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/interceptor"
+	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/service/city"
+	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/service/citygov"
+	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/service/country"
 	"github.com/chains-lab/cities-dir-svc/internal/app"
 	"github.com/chains-lab/cities-dir-svc/internal/config"
 	"github.com/chains-lab/cities-dir-svc/internal/logger"
@@ -13,10 +19,8 @@ import (
 )
 
 func Run(ctx context.Context, cfg config.Config, log logger.Logger, app *app.App) error {
-	// server := service.NewService(cfg, app)
-
 	logInterceptor := logger.UnaryLogInterceptor(log)
-	authInterceptor := interceptors.Auth(cfg.JWT.Service.SecretKey)
+	authInterceptor := interceptor.Auth(cfg.JWT.Service.SecretKey)
 
 	grpcServer := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
@@ -24,7 +28,9 @@ func Run(ctx context.Context, cfg config.Config, log logger.Logger, app *app.App
 		),
 	)
 
-	//TODO: Register your grpc-service server here
+	cityProto.RegisterCityServiceServer(grpcServer, city.NewService(cfg, app))
+	cityGovProto.RegisterCityGovServiceServer(grpcServer, citygov.NewService(cfg, app))
+	countryProto.RegisterCountryServiceServer(grpcServer, country.NewService(cfg, app))
 
 	lis, err := net.Listen("tcp", cfg.Server.Port)
 	if err != nil {

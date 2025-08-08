@@ -1,11 +1,11 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"time"
 
 	_ "github.com/lib/pq" // postgres driver don`t delete
-	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 )
 
@@ -91,21 +91,21 @@ type Config struct {
 	Properties PropertiesConfig `mapstructure:"properties"`
 }
 
-func LoadConfig() (Config, error) {
+func LoadConfig() Config {
 	configPath := os.Getenv("KV_VIPER_FILE")
 	if configPath == "" {
-		return Config{}, errors.New("KV_VIPER_FILE env var is not set")
+		panic(fmt.Errorf("KV_VIPER_FILE env var is not set"))
 	}
 	viper.SetConfigFile(configPath)
 
 	if err := viper.ReadInConfig(); err != nil {
-		return Config{}, errors.Errorf("error reading config file: %s", err)
+		panic(fmt.Errorf("error reading config file: %s", err))
 	}
 
 	var config Config
 	if err := viper.Unmarshal(&config); err != nil {
-		return Config{}, errors.Errorf("error unmarshalling config: %s", err)
+		panic(fmt.Errorf("error unmarshalling config: %s", err))
 	}
 
-	return config, nil
+	return config
 }
