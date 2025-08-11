@@ -4,8 +4,8 @@ import (
 	"context"
 
 	svc "github.com/chains-lab/cities-dir-proto/gen/go/citygov"
-	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/problems"
-	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/responses"
+	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/problem"
+	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/response"
 	"github.com/chains-lab/cities-dir-svc/internal/logger"
 	"github.com/google/uuid"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
@@ -14,9 +14,9 @@ import (
 func (s Service) GetCityAdmin(ctx context.Context, req *svc.GetCityAdminRequest) (*svc.CityAdmin, error) {
 	cityID, err := uuid.Parse(req.CityId)
 	if err != nil {
-		logger.Log(ctx, RequestID(ctx)).WithError(err).Error("invalid city ID format")
+		logger.Log(ctx).WithError(err).Error("invalid city ID format")
 
-		return nil, problems.InvalidArgumentError(ctx, "city id is invalid", &errdetails.BadRequest_FieldViolation{
+		return nil, problem.InvalidArgumentError(ctx, "city id is invalid", &errdetails.BadRequest_FieldViolation{
 			Field:       "city_id",
 			Description: "invalid UUID format for city ID",
 		})
@@ -24,9 +24,9 @@ func (s Service) GetCityAdmin(ctx context.Context, req *svc.GetCityAdminRequest)
 
 	userID, err := uuid.Parse(req.UserId)
 	if err != nil {
-		logger.Log(ctx, RequestID(ctx)).WithError(err).Error("invalid user ID format")
+		logger.Log(ctx).WithError(err).Error("invalid user ID format")
 
-		return nil, problems.InvalidArgumentError(ctx, "user id is invalid format", &errdetails.BadRequest_FieldViolation{
+		return nil, problem.InvalidArgumentError(ctx, "user id is invalid format", &errdetails.BadRequest_FieldViolation{
 			Field:       "user_id",
 			Description: "invalid UUID format for user ID",
 		})
@@ -34,10 +34,10 @@ func (s Service) GetCityAdmin(ctx context.Context, req *svc.GetCityAdminRequest)
 
 	cityAdmin, err := s.app.GetCityAdmin(ctx, cityID, userID)
 	if err != nil {
-		logger.Log(ctx, RequestID(ctx)).WithError(err).Error("failed to get city admin")
+		logger.Log(ctx).WithError(err).Error("failed to get city admin")
 
 		return nil, err
 	}
 
-	return responses.CityAdmin(cityAdmin), nil
+	return response.CityAdmin(cityAdmin), nil
 }

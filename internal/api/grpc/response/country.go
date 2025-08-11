@@ -1,4 +1,4 @@
-package responses
+package response
 
 import (
 	countryProto "github.com/chains-lab/cities-dir-proto/gen/go/country"

@@ -5,9 +5,9 @@ import (
 	"strings"
 
 	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/interceptor"
+	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/meta"
 	"github.com/chains-lab/cities-dir-svc/internal/config"
 	"github.com/chains-lab/svc-errors/ape"
-	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 )
@@ -52,13 +52,16 @@ func UnaryLogInterceptor(log Logger) grpc.UnaryServerInterceptor {
 	}
 }
 
-func Log(ctx context.Context, requestID uuid.UUID) Logger {
+func Log(ctx context.Context) Logger {
 	entry, ok := ctx.Value(interceptor.LogCtxKey).(Logger)
 	if !ok {
 		logrus.Info("no logger in context")
 
 		entry = NewWithBase(logrus.New())
 	}
+
+	requestID := meta.RequestID(ctx)
+
 	return &logger{Entry: entry.WithField("request_id", requestID)}
 }
 

@@ -4,8 +4,8 @@ import (
 	"context"
 
 	svc "github.com/chains-lab/cities-dir-proto/gen/go/country"
-	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/problems"
-	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/responses"
+	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/problem"
+	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/response"
 	"github.com/chains-lab/cities-dir-svc/internal/constant/enum"
 	"github.com/chains-lab/cities-dir-svc/internal/logger"
 	"github.com/chains-lab/cities-dir-svc/internal/pagination"
@@ -15,9 +15,9 @@ import (
 func (s Service) SearchCountries(ctx context.Context, req *svc.SearchCountriesRequest) (*svc.CountriesList, error) {
 	status, err := enum.ParseCountryStatus(req.Status)
 	if err != nil {
-		logger.Log(ctx, RequestID(ctx)).Error(err)
+		logger.Log(ctx).Error(err)
 
-		return nil, problems.InvalidArgumentError(ctx, "invalid country status", &errdetails.BadRequest_FieldViolation{
+		return nil, problem.InvalidArgumentError(ctx, "invalid country status", &errdetails.BadRequest_FieldViolation{
 			Field:       "status",
 			Description: err.Error(),
 		})
@@ -28,10 +28,10 @@ func (s Service) SearchCountries(ctx context.Context, req *svc.SearchCountriesRe
 		Size: req.Pagination.Size,
 	})
 	if err != nil {
-		logger.Log(ctx, RequestID(ctx)).WithError(err).Error("failed to search countries")
+		logger.Log(ctx).WithError(err).Error("failed to search countries")
 
 		return nil, err
 	}
 
-	return responses.CountriesList(countries, pag), nil
+	return response.CountriesList(countries, pag), nil
 }

@@ -1,4 +1,4 @@
-package responses
+package response
 
 import (
 	cityAdminProto "github.com/chains-lab/cities-dir-proto/gen/go/citygov"

@@ -4,8 +4,8 @@ import (
 	"context"
 
 	svc "github.com/chains-lab/cities-dir-proto/gen/go/citygov"
-	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/problems"
-	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/responses"
+	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/problem"
+	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/response"
 	"github.com/chains-lab/cities-dir-svc/internal/constant/enum"
 	"github.com/chains-lab/cities-dir-svc/internal/logger"
 	"github.com/google/uuid"
@@ -15,7 +15,7 @@ import (
 func (s Service) UpdateCityAdmin(ctx context.Context, req *svc.UpdateCityAdminRequest) (*svc.CityAdmin, error) {
 	cityID, err := uuid.Parse(req.CityId)
 	if err != nil {
-		return nil, problems.InvalidArgumentError(ctx, "invalid city id format", &errdetails.BadRequest_FieldViolation{
+		return nil, problem.InvalidArgumentError(ctx, "invalid city id format", &errdetails.BadRequest_FieldViolation{
 			Field:       "city_id",
 			Description: "invalid UUID format for city ID",
 		})
@@ -23,22 +23,22 @@ func (s Service) UpdateCityAdmin(ctx context.Context, req *svc.UpdateCityAdminRe
 
 	userID, err := uuid.Parse(req.UserId)
 	if err != nil {
-		return nil, problems.InvalidArgumentError(ctx, "invalid user id format", &errdetails.BadRequest_FieldViolation{
+		return nil, problem.InvalidArgumentError(ctx, "invalid user id format", &errdetails.BadRequest_FieldViolation{
 			Field:       "user_id",
 			Description: "invalid UUID format for user ID",
 		})
 	}
 
-	initiatorID, err := uuid.Parse(req.Initiator.Id)
+	initiatorID, err := uuid.Parse(req.Initiator.UserId)
 	if err != nil {
-		return nil, problems.UnauthenticatedError(ctx, "initiator id is invalid format")
+		return nil, problem.UnauthenticatedError(ctx, "initiator id is invalid format")
 	}
 
 	role, err := enum.ParseCityAdminRole(req.Role)
 	if err != nil {
-		logger.Log(ctx, RequestID(ctx)).Error(err)
+		logger.Log(ctx).Error(err)
 
-		return nil, problems.InvalidArgumentError(ctx, "invalid city admin role", &errdetails.BadRequest_FieldViolation{
+		return nil, problem.InvalidArgumentError(ctx, "invalid city admin role", &errdetails.BadRequest_FieldViolation{
 			Field:       "role",
 			Description: err.Error(),
 		})
@@ -54,5 +54,5 @@ func (s Service) UpdateCityAdmin(ctx context.Context, req *svc.UpdateCityAdminRe
 		return nil, err
 	}
 
-	return responses.CityAdmin(cityAdmin), nil
+	return response.CityAdmin(cityAdmin), nil
 }
