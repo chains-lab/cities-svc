@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/chains-lab/cities-dir-svc/internal/constant"
 	"github.com/chains-lab/gatekit/auth"
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
@@ -45,7 +46,7 @@ func Auth(skService string) grpc.UnaryServerInterceptor {
 
 		ThisSvcInAudience := false
 		for _, aud := range data.Audience {
-			if aud == data.Issuer {
+			if aud == constant.ServiceName {
 				ThisSvcInAudience = true
 				break
 			}

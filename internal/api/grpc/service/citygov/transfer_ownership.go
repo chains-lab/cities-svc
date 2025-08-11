@@ -4,9 +4,11 @@ import (
 	"context"
 
 	svc "github.com/chains-lab/cities-dir-proto/gen/go/citygov"
+	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/problems"
 	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/responses"
 	"github.com/chains-lab/cities-dir-svc/internal/logger"
 	"github.com/google/uuid"
+	"google.golang.org/genproto/googleapis/rpc/errdetails"
 )
 
 func (s Service) TransferOwnership(ctx context.Context, req *svc.TransferOwnershipRequest) (*svc.CityAdmin, error) {
@@ -14,7 +16,7 @@ func (s Service) TransferOwnership(ctx context.Context, req *svc.TransferOwnersh
 	if err != nil {
 		logger.Log(ctx, RequestID(ctx)).WithError(err).Error("invalid city ID format")
 
-		return nil, responses.InvalidArgumentError(ctx, RequestID(ctx), responses.Violation{
+		return nil, problems.InvalidArgumentError(ctx, "invalid city id format", &errdetails.BadRequest_FieldViolation{
 			Field:       "city_id",
 			Description: "invalid UUID format for city ID",
 		})
@@ -24,7 +26,7 @@ func (s Service) TransferOwnership(ctx context.Context, req *svc.TransferOwnersh
 	if err != nil {
 		logger.Log(ctx, RequestID(ctx)).WithError(err).Error("invalid new owner ID format")
 
-		return nil, responses.InvalidArgumentError(ctx, RequestID(ctx), responses.Violation{
+		return nil, problems.InvalidArgumentError(ctx, "invalid city owner id", &errdetails.BadRequest_FieldViolation{
 			Field:       "new_owner_id",
 			Description: "invalid UUID format for new owner ID",
 		})
@@ -34,14 +36,14 @@ func (s Service) TransferOwnership(ctx context.Context, req *svc.TransferOwnersh
 	if err != nil {
 		logger.Log(ctx, RequestID(ctx)).WithError(err).Error("failed to transfer city ownership")
 
-		return nil, responses.AppError(ctx, RequestID(ctx), err)
+		return nil, err
 	}
 
 	cityAdmin, err := s.app.GetCityAdmin(ctx, cityID, newOwnerID)
 	if err != nil {
 		logger.Log(ctx, RequestID(ctx)).WithError(err).Error("failed to get city admin after transfer")
 
-		return nil, responses.AppError(ctx, RequestID(ctx), err)
+		return nil, err
 	}
 
 	return responses.CityAdmin(cityAdmin), nil

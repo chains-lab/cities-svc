@@ -9,7 +9,7 @@ func City(city models.City) *cityProto.City {
 	return &cityProto.City{
 		Id:        city.ID.String(),
 		Name:      city.Name,
-		Status:    string(city.Status),
+		Status:    city.Status,
 		CountryId: city.CountryID.String(),
 	}
 }

@@ -9,6 +9,6 @@ func Country(country models.Country) *countryProto.Country {
 	return &countryProto.Country{
 		Id:     country.ID.String(),
 		Name:   country.Name,
-		Status: string(country.Status),
+		Status: country.Status,
 	}
 }

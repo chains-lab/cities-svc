@@ -1,41 +1,96 @@
 package errx
 
 import (
-	"github.com/chains-lab/cities-dir-svc/internal/errx/statusx"
+	"context"
+	"fmt"
+	"time"
+
+	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/meta"
+	"github.com/chains-lab/cities-dir-svc/internal/constant"
 	"github.com/chains-lab/svc-errors/ape"
 	"github.com/google/uuid"
+	"google.golang.org/genproto/googleapis/rpc/errdetails"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
+
+func nowRFC3339Nano() string {
+	return time.Now().UTC().Format(time.RFC3339Nano)
+}
 
 var ErrorCityNotFound = ape.Declare("CITY_NOT_FOUND")
 
-func RaiseCityNotFoundByID(cause error, cityID uuid.UUID) error {
-	return ErrorCityNotFound.Raise(
-		cause,
-		statusx.CityNotFoundByID(cityID),
+func RaiseCityNotFoundByID(ctx context.Context, cause error, cityID uuid.UUID) error {
+	st := status.New(codes.NotFound, fmt.Sprintf("city %s not found", cityID))
+	st, _ = st.WithDetails(
+		&errdetails.ErrorInfo{
+			Reason: ErrorCityNotFound.Error(),
+			Domain: constant.ServiceName,
+			Metadata: map[string]string{
+				"timestamp": nowRFC3339Nano(),
+			},
+		},
+		&errdetails.RequestInfo{
+			RequestId: meta.RequestID(ctx),
+		},
 	)
+	return ErrorCityNotFound.Raise(cause, st)
 }
 
-func RaiseCityNotFoundByName(cause error, cityName string) error {
-	return ErrorCityNotFound.Raise(
-		cause,
-		statusx.CityNotFoundByName(cityName),
+func RaiseCityNotFoundByName(ctx context.Context, cause error, cityName string) error {
+	st := status.New(codes.NotFound, fmt.Sprintf("city with name %q not found", cityName))
+	st, _ = st.WithDetails(
+		&errdetails.ErrorInfo{
+			Reason: ErrorCityNotFound.Error(),
+			Domain: constant.ServiceName,
+			Metadata: map[string]string{
+				"timestamp": nowRFC3339Nano(),
+			},
+		},
+		&errdetails.RequestInfo{
+			RequestId: meta.RequestID(ctx),
+		},
 	)
+	return ErrorCityNotFound.Raise(cause, st)
 }
 
 var ErrorInvalidCityStatus = ape.Declare("INVALID_CITY_STATUS")
 
-func RaiseInvalidCityStatus(cause error, status string) error {
-	return ErrorInvalidCityStatus.Raise(
-		cause,
-		statusx.InvalidCityStatus(status),
+func RaiseInvalidCityStatus(ctx context.Context, cause error, cityStatus string) error {
+	st := status.New(codes.InvalidArgument, fmt.Sprintf("invalid city status: %s", cityStatus))
+	st, _ = st.WithDetails(
+		&errdetails.ErrorInfo{
+			Reason: ErrorInvalidCityStatus.Error(),
+			Domain: constant.ServiceName,
+			Metadata: map[string]string{
+				"timestamp": nowRFC3339Nano(),
+			},
+		},
+		&errdetails.RequestInfo{
+			RequestId: meta.RequestID(ctx),
+		},
 	)
+	return ErrorInvalidCityStatus.Raise(cause, st)
 }
 
 var ErrorCityStatusIsNotApplicable = ape.Declare("CITY_STATUS_IS_NOT_APPLICABLE")
 
-func RaiseCityStatusIsNotApplicable(cause error, cityID uuid.UUID, expectedStatus, curStatus string) error {
-	return ErrorCityStatusIsNotApplicable.Raise(
-		cause,
-		statusx.CityStatusNotApplicable(cityID, expectedStatus, curStatus),
+func RaiseCityStatusIsNotApplicable(ctx context.Context, cause error, cityID uuid.UUID, expectedStatus, curStatus string) error {
+	st := status.New(
+		codes.FailedPrecondition,
+		fmt.Sprintf("status change is not applicable: city=%s expected=%s current=%s", cityID, expectedStatus, curStatus),
 	)
+	st, _ = st.WithDetails(
+		&errdetails.ErrorInfo{
+			Reason: ErrorCityStatusIsNotApplicable.Error(),
+			Domain: constant.ServiceName,
+			Metadata: map[string]string{
+				"timestamp": nowRFC3339Nano(),
+			},
+		},
+		&errdetails.RequestInfo{
+			RequestId: meta.RequestID(ctx),
+		},
+	)
+	return ErrorCityStatusIsNotApplicable.Raise(cause, st)
 }

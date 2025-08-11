@@ -53,6 +53,7 @@ func (a App) CreateCity(ctx context.Context, input CreateCityInput) (models.City
 
 	if country.Status != enum.CountryStatusSuspended {
 		return models.City{}, errx.RaiseCountryStatusIsNotApplicable(
+			ctx,
 			fmt.Errorf("country with ID '%s' is not '%s', current status: '%s'", input.CountryID, enum.CountryStatusSuspended, country.Status),
 			input.CountryID,
 			enum.CountryStatusSuspended,
@@ -75,7 +76,7 @@ func (a App) CreateCity(ctx context.Context, input CreateCityInput) (models.City
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
-			return models.City{}, errx.RaiseInternal(err)
+			return models.City{}, errx.RaiseInternal(ctx, err)
 		}
 	}
 
@@ -90,11 +91,12 @@ func (a App) GetCityByID(ctx context.Context, ID uuid.UUID) (models.City, error)
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
 			return models.City{}, errx.RaiseCityNotFoundByID(
+				ctx,
 				fmt.Errorf("city with ID '%s' not found cause: %s", ID, err),
 				ID,
 			)
 		default:
-			return models.City{}, errx.RaiseInternal(err)
+			return models.City{}, errx.RaiseInternal(ctx, err)
 		}
 	}
 
@@ -119,11 +121,12 @@ func (a App) SearchCityInCountry(ctx context.Context, like string, countryID uui
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
 			return nil, pagination.Response{}, errx.RaiseCityNotFoundByName(
+				ctx,
 				fmt.Errorf("city with name '%s' not found in country with ID '%s' cause: %s", like, countryID, err),
 				like,
 			)
 		default:
-			return nil, pagination.Response{}, errx.RaiseInternal(err)
+			return nil, pagination.Response{}, errx.RaiseInternal(ctx, err)
 		}
 	}
 
@@ -133,7 +136,7 @@ func (a App) SearchCityInCountry(ctx context.Context, like string, countryID uui
 		case errors.Is(err, sql.ErrNoRows):
 			total = 0
 		default:
-			return nil, pagination.Response{}, errx.RaiseInternal(err)
+			return nil, pagination.Response{}, errx.RaiseInternal(ctx, err)
 		}
 	}
 
@@ -157,6 +160,7 @@ func (a App) UpdateCityName(ctx context.Context, initiatorID, cityID uuid.UUID, 
 
 	if initiator.Role != enum.CityAdminRoleOwner {
 		return models.City{}, errx.RaiseCityAdminHaveNotEnoughRights(
+			ctx,
 			fmt.Errorf("initiator: '%s', is not owner of city: '%s'",
 				initiatorID,
 				cityID,
@@ -175,7 +179,7 @@ func (a App) UpdateCityName(ctx context.Context, initiatorID, cityID uuid.UUID, 
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
-			return models.City{}, errx.RaiseInternal(err)
+			return models.City{}, errx.RaiseInternal(ctx, err)
 		}
 	}
 
@@ -195,6 +199,7 @@ func (a App) UpdateCitiesStatus(ctx context.Context, cityID uuid.UUID, status st
 
 	if country.Status != enum.CountryStatusSupported {
 		return models.City{}, errx.RaiseCountryStatusIsNotApplicable(
+			ctx,
 			fmt.Errorf("country with ID '%s' is not %s, current status: %s", country.ID, enum.CountryStatusSupported, country.Status),
 			country.ID,
 			country.Status,
@@ -204,14 +209,14 @@ func (a App) UpdateCitiesStatus(ctx context.Context, cityID uuid.UUID, status st
 
 	_, err = enum.ParseCityStatus(status)
 	if err != nil {
-		return models.City{}, errx.RaiseInvalidCityStatus(err, status)
+		return models.City{}, errx.RaiseInvalidCityStatus(ctx, err, status)
 	}
 
 	err = a.citiesQ.New().FilterID(city.ID).Update(ctx, dbx.UpdateCityInput{
 		Status: &status,
 	})
 	if err != nil {
-		return models.City{}, errx.RaiseInternal(err)
+		return models.City{}, errx.RaiseInternal(ctx, err)
 	}
 
 	return a.GetCityByID(ctx, cityID)
@@ -230,6 +235,7 @@ func (a App) UpdateCitiesStatusByOwner(ctx context.Context, initiatorID, cityID 
 
 	if country.Status != enum.CountryStatusSupported {
 		return models.City{}, errx.RaiseCountryStatusIsNotApplicable(
+			ctx,
 			fmt.Errorf("country with ID '%s' is not %s, current status: %s", country.ID, enum.CountryStatusSupported, country.Status),
 			country.ID,
 			country.Status,
@@ -239,11 +245,12 @@ func (a App) UpdateCitiesStatusByOwner(ctx context.Context, initiatorID, cityID 
 
 	initiator, err := a.getInitiatorCityAdmin(ctx, cityID, initiatorID)
 	if err != nil {
-		return models.City{}, errx.RaiseInternal(err)
+		return models.City{}, errx.RaiseInternal(ctx, err)
 	}
 
 	if initiator.Role != enum.CityAdminRoleOwner {
 		return models.City{}, errx.RaiseCityAdminHaveNotEnoughRights(
+			ctx,
 			fmt.Errorf("initiator: '%s', is not owner of city: '%s'",
 				initiatorID,
 				cityID,
@@ -255,7 +262,7 @@ func (a App) UpdateCitiesStatusByOwner(ctx context.Context, initiatorID, cityID 
 
 	_, err = enum.ParseCityStatus(status)
 	if err != nil {
-		return models.City{}, errx.RaiseInvalidCityStatus(err, status)
+		return models.City{}, errx.RaiseInvalidCityStatus(ctx, err, status)
 	}
 
 	return a.UpdateCitiesStatus(ctx, cityID, status)
@@ -269,11 +276,12 @@ func (a App) updateStatusForCitiesByCountryID(ctx context.Context, countryID uui
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
 			return errx.RaiseCountryNotFoundByID(
+				ctx,
 				fmt.Errorf("country with ID '%s' not found cause: %s", countryID, err),
 				countryID,
 			)
 		default:
-			return errx.RaiseInternal(err)
+			return errx.RaiseInternal(ctx, err)
 		}
 	}
 
@@ -283,7 +291,7 @@ func (a App) updateStatusForCitiesByCountryID(ctx context.Context, countryID uui
 		case errors.Is(err, sql.ErrNoRows):
 			err = nil
 		default:
-			return errx.RaiseInternal(err)
+			return errx.RaiseInternal(ctx, err)
 		}
 	}
 
@@ -292,7 +300,7 @@ func (a App) updateStatusForCitiesByCountryID(ctx context.Context, countryID uui
 			Status: &status,
 		})
 		if err != nil {
-			return errx.RaiseInternal(err)
+			return errx.RaiseInternal(ctx, err)
 		}
 	}
 

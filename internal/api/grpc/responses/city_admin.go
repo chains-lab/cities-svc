@@ -9,6 +9,6 @@ func CityAdmin(cityAdmin models.CityAdmin) *cityAdminProto.CityAdmin {
 	return &cityAdminProto.CityAdmin{
 		CityId: cityAdmin.CityID.String(),
 		UserId: cityAdmin.UserID.String(),
-		Role:   string(cityAdmin.Role),
+		Role:   cityAdmin.Role,
 	}
 }

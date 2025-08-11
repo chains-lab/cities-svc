@@ -48,11 +48,12 @@ func (a App) CreateCountry(ctx context.Context, name string) (models.Country, er
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
 			return models.Country{}, errx.RaiseCountryAlreadyExists(
+				ctx,
 				fmt.Errorf("country with name '%s' already existt, cause: %s", name, err),
 				name,
 			)
 		default:
-			return models.Country{}, errx.RaiseInternal(err)
+			return models.Country{}, errx.RaiseInternal(ctx, err)
 		}
 	}
 
@@ -66,11 +67,12 @@ func (a App) GetCountryByID(ctx context.Context, ID uuid.UUID) (models.Country, 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return models.Country{}, errx.RaiseCountryNotFoundByID(
+				ctx,
 				fmt.Errorf("country with id '%s' does not exist, cause: %s", ID, err),
 				ID,
 			)
 		}
-		return models.Country{}, errx.RaiseInternal(err)
+		return models.Country{}, errx.RaiseInternal(ctx, err)
 	}
 
 	return countryModel(country), nil
@@ -85,12 +87,12 @@ func (a App) SearchCountries(ctx context.Context, name string, status string, pa
 		Page(limit, offset).
 		Select(ctx)
 	if err != nil {
-		return nil, pagination.Response{}, errx.RaiseInternal(err)
+		return nil, pagination.Response{}, errx.RaiseInternal(ctx, err)
 	}
 
 	total, err := a.countriesQ.New().Count(ctx)
 	if err != nil {
-		return nil, pagination.Response{}, errx.RaiseInternal(err)
+		return nil, pagination.Response{}, errx.RaiseInternal(ctx, err)
 	}
 
 	res, pagRes := countriesArray(countries, limit, offset, total)
@@ -106,6 +108,7 @@ func (a App) UpdateCountryStatus(ctx context.Context, ID uuid.UUID, status strin
 	_, err := enum.ParseCountryStatus(status)
 	if err != nil {
 		return models.Country{}, errx.RaiseInvalidCountryStatus(
+			ctx,
 			fmt.Errorf("invalid country status '%s', cause: %s", status, err),
 			status,
 		)
@@ -119,11 +122,12 @@ func (a App) UpdateCountryStatus(ctx context.Context, ID uuid.UUID, status strin
 			switch {
 			case errors.Is(err, sql.ErrNoRows):
 				return errx.RaiseCountryNotFoundByID(
+					ctx,
 					fmt.Errorf("country with id '%s' does not exist, cause: %s", ID, err),
 					ID,
 				)
 			default:
-				return errx.RaiseInternal(err)
+				return errx.RaiseInternal(ctx, err)
 			}
 		}
 
@@ -157,11 +161,12 @@ func (a App) UpdateCountryName(ctx context.Context, ID uuid.UUID, name string) (
 		case errors.Is(err, sql.ErrNoRows):
 			// country with this name does not exist, so we can update it
 		default:
-			return models.Country{}, errx.RaiseInternal(err)
+			return models.Country{}, errx.RaiseInternal(ctx, err)
 		}
 	}
 	if err == nil && country.ID != ID {
 		return models.Country{}, errx.RaiseCountryAlreadyExists(
+			ctx,
 			fmt.Errorf("country with id '%s' already exists, cause: %s", ID, country),
 			name,
 		)
@@ -174,11 +179,12 @@ func (a App) UpdateCountryName(ctx context.Context, ID uuid.UUID, name string) (
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
 			return models.Country{}, errx.RaiseCountryNotFoundByID(
+				ctx,
 				fmt.Errorf("country with id '%s' does not exist, cause: %s", ID, err),
 				ID,
 			)
 		default:
-			return models.Country{}, errx.RaiseInternal(err)
+			return models.Country{}, errx.RaiseInternal(ctx, err)
 		}
 	}
 

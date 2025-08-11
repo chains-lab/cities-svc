@@ -6,7 +6,6 @@ import (
 
 	svc "github.com/chains-lab/cities-dir-proto/gen/go/country"
 	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/responses"
-	"github.com/chains-lab/cities-dir-svc/internal/errx"
 	"github.com/chains-lab/cities-dir-svc/internal/logger"
 	"github.com/chains-lab/gatekit/roles"
 	"google.golang.org/grpc/codes"
@@ -18,7 +17,7 @@ func (s Service) CreateCountry(ctx context.Context, req *svc.CreateCountryReques
 	if err != nil {
 		logger.Log(ctx, RequestID(ctx)).WithError(err).Error("invalid role in request")
 
-		return nil, responses.AppError(ctx, RequestID(ctx), errx.RaiseInternal(err))
+		return nil, err
 	}
 
 	if role != roles.Admin && role != roles.SuperUser {
@@ -34,7 +33,7 @@ func (s Service) CreateCountry(ctx context.Context, req *svc.CreateCountryReques
 	if err != nil {
 		logger.Log(ctx, RequestID(ctx)).WithError(err).Error("failed to create country")
 
-		return nil, responses.AppError(ctx, RequestID(ctx), err)
+		return nil, err
 	}
 
 	logger.Log(ctx, RequestID(ctx)).Infof("created country with ID %s by user %s", country.ID, req.Initiator.Id)

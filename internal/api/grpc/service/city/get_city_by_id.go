@@ -2,11 +2,14 @@ package city
 
 import (
 	"context"
+	"fmt"
 
 	svc "github.com/chains-lab/cities-dir-proto/gen/go/city"
+	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/problems"
 	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/responses"
 	"github.com/chains-lab/cities-dir-svc/internal/logger"
 	"github.com/google/uuid"
+	"google.golang.org/genproto/googleapis/rpc/errdetails"
 )
 
 func (s Service) GetCityById(ctx context.Context, req *svc.GetCityByIdRequest) (*svc.City, error) {
@@ -14,7 +17,7 @@ func (s Service) GetCityById(ctx context.Context, req *svc.GetCityByIdRequest) (
 	if err != nil {
 		logger.Log(ctx, RequestID(ctx)).WithError(err).Error("invalid city ID format")
 
-		return nil, responses.InvalidArgumentError(ctx, RequestID(ctx), responses.Violation{
+		return nil, problems.InvalidArgumentError(ctx, fmt.Sprint("city_id is invalid"), &errdetails.BadRequest_FieldViolation{
 			Field:       "id",
 			Description: "invalid UUID format for city ID",
 		})
@@ -24,7 +27,7 @@ func (s Service) GetCityById(ctx context.Context, req *svc.GetCityByIdRequest) (
 	if err != nil {
 		logger.Log(ctx, RequestID(ctx)).WithError(err).Error("failed to get city by ID")
 
-		return nil, responses.AppError(ctx, RequestID(ctx), err)
+		return nil, err
 	}
 
 	return responses.City(city), nil

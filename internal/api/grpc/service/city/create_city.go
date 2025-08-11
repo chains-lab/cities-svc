@@ -5,12 +5,13 @@ import (
 	"fmt"
 
 	svc "github.com/chains-lab/cities-dir-proto/gen/go/city"
+	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/problems"
 	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/responses"
 	"github.com/chains-lab/cities-dir-svc/internal/app"
-	"github.com/chains-lab/cities-dir-svc/internal/errx"
 	"github.com/chains-lab/cities-dir-svc/internal/logger"
 	"github.com/chains-lab/gatekit/roles"
 	"github.com/google/uuid"
+	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -20,7 +21,7 @@ func (s Service) CreateCity(ctx context.Context, req *svc.CreateCityRequest) (*s
 	if err != nil {
 		logger.Log(ctx, RequestID(ctx)).WithError(err).Error("invalid role in request")
 
-		return nil, responses.AppError(ctx, RequestID(ctx), errx.RaiseInternal(err))
+		return nil, problems.UnauthenticatedError(ctx, "initiator role is invalid format")
 	}
 
 	if role != roles.Admin && role != roles.SuperUser {
@@ -36,7 +37,7 @@ func (s Service) CreateCity(ctx context.Context, req *svc.CreateCityRequest) (*s
 	if err != nil {
 		logger.Log(ctx, RequestID(ctx)).WithError(err).Error("invalid country ID format")
 
-		return nil, responses.InvalidArgumentError(ctx, RequestID(ctx), responses.Violation{
+		return nil, problems.InvalidArgumentError(ctx, fmt.Sprintf("country id is invalid"), &errdetails.BadRequest_FieldViolation{
 			Field:       "country_id",
 			Description: "invalid UUID format for country ID",
 		})
@@ -49,7 +50,7 @@ func (s Service) CreateCity(ctx context.Context, req *svc.CreateCityRequest) (*s
 	if err != nil {
 		logger.Log(ctx, RequestID(ctx)).WithError(err).Error("failed to create city")
 
-		return nil, responses.AppError(ctx, RequestID(ctx), err)
+		return nil, err
 	}
 
 	logger.Log(ctx, RequestID(ctx)).Infof("created city with ID %s by user %s", city.ID, req.Initiator.Id)

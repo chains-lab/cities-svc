@@ -4,10 +4,12 @@ import (
 	"context"
 
 	svc "github.com/chains-lab/cities-dir-proto/gen/go/country"
+	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/problems"
 	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/responses"
 	"github.com/chains-lab/cities-dir-svc/internal/constant/enum"
 	"github.com/chains-lab/cities-dir-svc/internal/logger"
 	"github.com/chains-lab/cities-dir-svc/internal/pagination"
+	"google.golang.org/genproto/googleapis/rpc/errdetails"
 )
 
 func (s Service) SearchCountries(ctx context.Context, req *svc.SearchCountriesRequest) (*svc.CountriesList, error) {
@@ -15,7 +17,7 @@ func (s Service) SearchCountries(ctx context.Context, req *svc.SearchCountriesRe
 	if err != nil {
 		logger.Log(ctx, RequestID(ctx)).Error(err)
 
-		return nil, responses.InvalidArgumentError(ctx, RequestID(ctx), responses.Violation{
+		return nil, problems.InvalidArgumentError(ctx, "invalid country status", &errdetails.BadRequest_FieldViolation{
 			Field:       "status",
 			Description: err.Error(),
 		})
@@ -28,7 +30,7 @@ func (s Service) SearchCountries(ctx context.Context, req *svc.SearchCountriesRe
 	if err != nil {
 		logger.Log(ctx, RequestID(ctx)).WithError(err).Error("failed to search countries")
 
-		return nil, responses.AppError(ctx, RequestID(ctx), err)
+		return nil, err
 	}
 
 	return responses.CountriesList(countries, pag), nil
