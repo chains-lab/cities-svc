@@ -1,9 +1,9 @@
-package citygov
+package gov
 
 import (
 	"context"
 
-	svc "github.com/chains-lab/cities-dir-proto/gen/go/citygov"
+	svc "github.com/chains-lab/cities-dir-proto/gen/go/svc/gov"
 	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/problem"
 	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/response"
 	"github.com/chains-lab/cities-dir-svc/internal/app"
@@ -14,17 +14,7 @@ import (
 )
 
 func (s Service) CreateCityGov(ctx context.Context, req *svc.CreateCityGovRequest) (*svc.CityGov, error) {
-	cityID, err := uuid.Parse(req.CityId)
-	if err != nil {
-		logger.Log(ctx).WithError(err).Error("invalid city ID format")
-
-		return nil, problem.InvalidArgumentError(ctx, "city id is invalid", &errdetails.BadRequest_FieldViolation{
-			Field:       "city_id",
-			Description: "invalid UUID format for city ID",
-		})
-	}
-
-	_, err = s.OnlyCityAdmin(ctx, req.Initiator, cityID, "create city government")
+	initiator, err := s.OnlyCityAdmin(ctx, req.Initiator.UserId, req.CityId, "create city government")
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +39,7 @@ func (s Service) CreateCityGov(ctx context.Context, req *svc.CreateCityGovReques
 		})
 	}
 
-	cityAdmin, err := s.app.CreateCityGov(ctx, cityID, userID, app.CreateCityGovInput{
+	cityAdmin, err := s.app.CreateCityGov(ctx, initiator.CityID, userID, app.CreateCityGovInput{
 		Role: role,
 	})
 

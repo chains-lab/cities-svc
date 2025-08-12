@@ -3,7 +3,7 @@ package country
 import (
 	"context"
 
-	svc "github.com/chains-lab/cities-dir-proto/gen/go/country"
+	svc "github.com/chains-lab/cities-dir-proto/gen/go/svc/country"
 	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/problem"
 	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/response"
 	"github.com/chains-lab/cities-dir-svc/internal/logger"
@@ -28,8 +28,6 @@ func (s Service) GetCountryById(ctx context.Context, req *svc.GetCountryByIdRequ
 
 		return nil, err
 	}
-
-	logger.Log(ctx).Infof("retrieved country with ID %s", country.ID)
 
 	return response.Country(country), nil
 }

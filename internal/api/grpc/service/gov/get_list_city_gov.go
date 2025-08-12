@@ -1,9 +1,9 @@
-package citygov
+package gov
 
 import (
 	"context"
 
-	svc "github.com/chains-lab/cities-dir-proto/gen/go/citygov"
+	svc "github.com/chains-lab/cities-dir-proto/gen/go/svc/gov"
 	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/problem"
 	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/response"
 	"github.com/chains-lab/cities-dir-svc/internal/logger"

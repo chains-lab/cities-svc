@@ -1,13 +1,13 @@
-package admin
+package cityadmin
 
 import (
 	"context"
 
-	svc "github.com/chains-lab/cities-dir-proto/gen/go/city"
+	cityProto "github.com/chains-lab/cities-dir-proto/gen/go/svc/city"
+	svc "github.com/chains-lab/cities-dir-proto/gen/go/svc/cityadmin"
 	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/guard"
 	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/problem"
 	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/response"
-	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/service/city"
 	"github.com/chains-lab/cities-dir-svc/internal/constant/enum"
 	"github.com/chains-lab/cities-dir-svc/internal/logger"
 	"github.com/chains-lab/gatekit/roles"
@@ -15,8 +15,8 @@ import (
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 )
 
-func (s city.Service) UpdateCityStatusBySysAdmin(ctx context.Context, req *svc.UpdateCityStatusSysAdminRequest) (*svc.City, error) {
-	_, err := guard.AllowedRoles(ctx, req.Initiator, "update city status by system admin",
+func (s Service) UpdateCityStatus(ctx context.Context, req *svc.UpdateCityStatusRequest) (*cityProto.City, error) {
+	initiatorID, err := guard.AllowedRoles(ctx, req.Initiator, "update city status by system admin",
 		roles.SuperUser, roles.Admin)
 	if err != nil {
 		return nil, err
@@ -32,13 +32,6 @@ func (s city.Service) UpdateCityStatusBySysAdmin(ctx context.Context, req *svc.U
 		})
 	}
 
-	initiatorID, err := uuid.Parse(req.Initiator.UserId)
-	if err != nil {
-		logger.Log(ctx).WithError(err).Error("invalid initiator ID format")
-
-		return nil, problem.UnauthenticatedError(ctx, "initiator id is invalid format")
-	}
-
 	cityStatus, err := enum.ParseCityStatus(req.Status)
 	if err != nil {
 		logger.Log(ctx).Error(err)
@@ -49,12 +42,14 @@ func (s city.Service) UpdateCityStatusBySysAdmin(ctx context.Context, req *svc.U
 		})
 	}
 
-	city, err := s.app.UpdateCitiesStatusByOwner(ctx, initiatorID, cityID, cityStatus)
+	city, err := s.app.UpdateCitiesStatus(ctx, cityID, cityStatus)
 	if err != nil {
 		logger.Log(ctx).WithError(err).Error("failed to update city status")
 
 		return nil, err
 	}
+
+	logger.Log(ctx).Infof("city status updated by user %s for city ID %s", initiatorID, city.ID)
 
 	return response.City(city), nil
 }

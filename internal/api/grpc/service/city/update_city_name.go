@@ -2,33 +2,19 @@ package city
 
 import (
 	"context"
-	"fmt"
 
-	svc "github.com/chains-lab/cities-dir-proto/gen/go/city"
-	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/problem"
+	svc "github.com/chains-lab/cities-dir-proto/gen/go/svc/city"
 	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/response"
 	"github.com/chains-lab/cities-dir-svc/internal/logger"
-	"github.com/google/uuid"
-	"google.golang.org/genproto/googleapis/rpc/errdetails"
 )
 
 func (s Service) UpdateCityName(ctx context.Context, req *svc.UpdateCityNameRequest) (*svc.City, error) {
-	cityID, err := uuid.Parse(req.CityId)
-	if err != nil {
-		logger.Log(ctx).WithError(err).Error("invalid city ID format")
-
-		return nil, problem.InvalidArgumentError(ctx, fmt.Sprint("city_id is invalid"), &errdetails.BadRequest_FieldViolation{
-			Field:       "city_id",
-			Description: "invalid UUID format for city ID",
-		})
-	}
-
-	initiator, err := s.OnlyCityAdmin(ctx, req.Initiator, cityID, "update city name")
+	initiator, err := s.OnlyCityAdmin(ctx, req.Initiator.UserId, req.CityId, "update city name")
 	if err != nil {
 		return nil, err
 	}
 
-	city, err := s.app.UpdateCityName(ctx, cityID, req.Name)
+	city, err := s.app.UpdateCityName(ctx, initiator.CityID, req.Name)
 	if err != nil {
 		logger.Log(ctx).WithError(err).Error("failed to update city name")
 

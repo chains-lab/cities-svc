@@ -1,9 +1,9 @@
-package city
+package form
 
 import (
 	"context"
 
-	svc "github.com/chains-lab/cities-dir-proto/gen/go/city"
+	svc "github.com/chains-lab/cities-dir-proto/gen/go/svc/form"
 	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/guard"
 	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/problem"
 	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/response"

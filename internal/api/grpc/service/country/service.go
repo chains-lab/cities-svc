@@ -3,8 +3,7 @@ package country
 import (
 	"context"
 
-	svc "github.com/chains-lab/cities-dir-proto/gen/go/country"
-	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/interceptor"
+	svc "github.com/chains-lab/cities-dir-proto/gen/go/svc/country"
 	"github.com/chains-lab/cities-dir-svc/internal/app"
 	"github.com/chains-lab/cities-dir-svc/internal/app/models"
 	"github.com/chains-lab/cities-dir-svc/internal/config"
@@ -33,17 +32,4 @@ func NewService(cfg config.Config, app *app.App) Service {
 		app: app,
 		cfg: cfg,
 	}
-}
-
-func RequestID(ctx context.Context) uuid.UUID {
-	if ctx == nil {
-		return uuid.Nil
-	}
-
-	requestID, ok := ctx.Value(interceptor.RequestIDCtxKey).(uuid.UUID)
-	if !ok {
-		return uuid.Nil
-	}
-
-	return requestID
 }

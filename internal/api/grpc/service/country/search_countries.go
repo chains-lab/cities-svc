@@ -3,7 +3,7 @@ package country
 import (
 	"context"
 
-	svc "github.com/chains-lab/cities-dir-proto/gen/go/country"
+	svc "github.com/chains-lab/cities-dir-proto/gen/go/svc/country"
 	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/problem"
 	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/response"
 	"github.com/chains-lab/cities-dir-svc/internal/constant/enum"

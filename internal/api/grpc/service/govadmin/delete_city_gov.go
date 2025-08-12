@@ -1,17 +1,25 @@
-package citygov
+package govadmin
 
 import (
 	"context"
 
-	svc "github.com/chains-lab/cities-dir-proto/gen/go/citygov"
+	svc "github.com/chains-lab/cities-dir-proto/gen/go/svc/govadmin"
+	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/guard"
 	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/problem"
 	"github.com/chains-lab/cities-dir-svc/internal/logger"
+	"github.com/chains-lab/gatekit/roles"
 	"github.com/google/uuid"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 func (s Service) DeleteCityGov(ctx context.Context, req *svc.DeleteCityGovRequest) (*emptypb.Empty, error) {
+	_, err := guard.AllowedRoles(ctx, req.Initiator, "delete city government",
+		roles.Admin, roles.SuperUser)
+	if err != nil {
+		return nil, err
+	}
+
 	cityID, err := uuid.Parse(req.CityId)
 	if err != nil {
 		logger.Log(ctx).WithError(err).Error("invalid city ID format")
@@ -20,11 +28,6 @@ func (s Service) DeleteCityGov(ctx context.Context, req *svc.DeleteCityGovReques
 			Field:       "city_id",
 			Description: "invalid UUID format for city ID",
 		})
-	}
-
-	_, err = s.OnlyCityAdmin(ctx, req.Initiator, cityID, "delete city government")
-	if err != nil {
-		return nil, err
 	}
 
 	userID, err := uuid.Parse(req.UserId)

@@ -1,8 +1,8 @@
 package response
 
 import (
-	cityAdminProto "github.com/chains-lab/cities-dir-proto/gen/go/citygov"
 	pagProto "github.com/chains-lab/cities-dir-proto/gen/go/common/pagination"
+	cityAdminProto "github.com/chains-lab/cities-dir-proto/gen/go/svc/gov"
 	"github.com/chains-lab/cities-dir-svc/internal/app/models"
 	"github.com/chains-lab/cities-dir-svc/internal/pagination"
 )

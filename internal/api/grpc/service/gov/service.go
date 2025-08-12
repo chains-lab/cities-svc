@@ -1,10 +1,10 @@
-package city
+package gov
 
 import (
 	"context"
 	"errors"
 
-	svc "github.com/chains-lab/cities-dir-proto/gen/go/svc/city"
+	svc "github.com/chains-lab/cities-dir-proto/gen/go/svc/gov"
 	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/problem"
 	"github.com/chains-lab/cities-dir-svc/internal/app"
 	"github.com/chains-lab/cities-dir-svc/internal/app/models"
@@ -18,26 +18,22 @@ import (
 )
 
 type application interface {
-	GetCityByID(ctx context.Context, ID uuid.UUID) (models.City, error)
-	SearchCityInCountry(ctx context.Context, like string, countryID uuid.UUID, request pagination.Request) ([]models.City, pagination.Response, error)
-
-	UpdateCitiesStatus(ctx context.Context, cityID uuid.UUID, status string) (models.City, error)
-	UpdateCityName(ctx context.Context, cityID uuid.UUID, name string) (models.City, error)
+	CreateCityGov(ctx context.Context, cityID, userID uuid.UUID, input app.CreateCityGovInput) (models.CityGov, error)
 
 	GetCityGov(ctx context.Context, cityID, userID uuid.UUID) (models.CityGov, error)
+	GetCityGovs(ctx context.Context, cityID uuid.UUID, pag pagination.Request) ([]models.CityGov, pagination.Response, error)
 
-	CreateForm(ctx context.Context, input app.CreateFormInput) (models.Form, error)
-	AcceptForm(ctx context.Context, initiatorID, formID, adminID uuid.UUID) (models.Form, error)
-	RejectForm(ctx context.Context, formID uuid.UUID, reason string) (models.Form, error)
-	GetForm(ctx context.Context, formID uuid.UUID) (models.Form, error)
-	SearchForms(ctx context.Context, input app.SearchFormsInput, pagPar pagination.Request, newFirst bool) ([]models.Form, pagination.Response, error)
+	RefuseOwnCityGovRights(ctx context.Context, cityID, userID uuid.UUID) error
+	TransferCityAdminRight(ctx context.Context, cityID, initiatorID, newOwnerID uuid.UUID) error
+
+	DeleteCityGov(ctx context.Context, cityID, userID uuid.UUID) error
 }
 
 type Service struct {
 	app application
 	cfg config.Config
 
-	svc.UnimplementedCityServiceServer
+	svc.UnimplementedGovServiceServer
 }
 
 func NewService(cfg config.Config, app *app.App) Service {

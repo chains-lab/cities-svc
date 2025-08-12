@@ -1,29 +1,17 @@
-package citygov
+package gov
 
 import (
 	"context"
 
-	svc "github.com/chains-lab/cities-dir-proto/gen/go/citygov"
+	svc "github.com/chains-lab/cities-dir-proto/gen/go/svc/gov"
 	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/problem"
 	"github.com/chains-lab/cities-dir-svc/internal/constant/enum"
 	"github.com/chains-lab/cities-dir-svc/internal/logger"
-	"github.com/google/uuid"
-	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 func (s Service) RefuseCityGovRight(ctx context.Context, req *svc.RefuseCityGovRightRequest) (*emptypb.Empty, error) {
-	cityID, err := uuid.Parse(req.CityId)
-	if err != nil {
-		logger.Log(ctx).WithError(err).Error("invalid city ID format")
-
-		return nil, problem.InvalidArgumentError(ctx, "invalid city id format", &errdetails.BadRequest_FieldViolation{
-			Field:       "city_id",
-			Description: "invalid UUID format for city ID",
-		})
-	}
-
-	initiator, err := s.OnlyGov(ctx, req.Initiator, cityID, "refuse city government rights")
+	initiator, err := s.OnlyGov(ctx, req.Initiator.UserId, req.CityId, "refuse city government rights")
 	if err != nil {
 		return nil, err
 	}
@@ -34,7 +22,7 @@ func (s Service) RefuseCityGovRight(ctx context.Context, req *svc.RefuseCityGovR
 		return nil, problem.PermissionDeniedError(ctx, "city admin cannot transfer own admin rights, but u can transfer to another user")
 	}
 
-	err = s.app.RefuseOwnCityGovRights(ctx, cityID, initiator.ID)
+	err = s.app.RefuseOwnCityGovRights(ctx, initiator.CityID, initiator.ID)
 	if err != nil {
 		logger.Log(ctx).WithError(err).Error("failed to transfer city ownership")
 

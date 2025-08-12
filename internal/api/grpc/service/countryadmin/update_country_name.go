@@ -1,21 +1,21 @@
-package admin
+package countryadmin
 
 import (
 	"context"
 
-	svc "github.com/chains-lab/cities-dir-proto/gen/go/country"
+	countryProto "github.com/chains-lab/cities-dir-proto/gen/go/svc/country"
+	svc "github.com/chains-lab/cities-dir-proto/gen/go/svc/countryadmin"
 	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/guard"
 	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/problem"
 	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/response"
-	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/service/country"
 	"github.com/chains-lab/cities-dir-svc/internal/logger"
 	"github.com/chains-lab/gatekit/roles"
 	"github.com/google/uuid"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 )
 
-func (s country.Service) UpdateCountryName(ctx context.Context, req *svc.UpdateCountryNameRequest) (*svc.Country, error) {
-	_, err := guard.AllowedRoles(ctx, req.Initiator, "create profile",
+func (s Service) UpdateCountryName(ctx context.Context, req *svc.UpdateCountryNameRequest) (*countryProto.Country, error) {
+	initiatorID, err := guard.AllowedRoles(ctx, req.Initiator, "create profile",
 		roles.SuperUser, roles.Admin)
 	if err != nil {
 		return nil, err
@@ -37,6 +37,8 @@ func (s country.Service) UpdateCountryName(ctx context.Context, req *svc.UpdateC
 
 		return nil, err
 	}
+
+	logger.Log(ctx).Infof("country name updated by user %s for country ID %s", initiatorID, country.ID)
 
 	return response.Country(country), nil
 }

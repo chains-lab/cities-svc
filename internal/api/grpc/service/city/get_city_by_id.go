@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	svc "github.com/chains-lab/cities-dir-proto/gen/go/city"
+	svc "github.com/chains-lab/cities-dir-proto/gen/go/svc/city"
 	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/problem"
 	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/response"
 	"github.com/chains-lab/cities-dir-svc/internal/logger"

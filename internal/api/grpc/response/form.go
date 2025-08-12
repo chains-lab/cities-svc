@@ -1,7 +1,7 @@
 package response
 
 import (
-	svc "github.com/chains-lab/cities-dir-proto/gen/go/city"
+	svc "github.com/chains-lab/cities-dir-proto/gen/go/svc/form"
 	"github.com/chains-lab/cities-dir-svc/internal/app/models"
 )
 

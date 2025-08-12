@@ -1,17 +1,17 @@
-package admin
+package countryadmin
 
 import (
 	"context"
 
-	svc "github.com/chains-lab/cities-dir-proto/gen/go/country"
+	countryProto "github.com/chains-lab/cities-dir-proto/gen/go/svc/country"
+	svc "github.com/chains-lab/cities-dir-proto/gen/go/svc/countryadmin"
 	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/guard"
 	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/response"
-	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/service/country"
 	"github.com/chains-lab/cities-dir-svc/internal/logger"
 	"github.com/chains-lab/gatekit/roles"
 )
 
-func (s country.Service) CreateCountry(ctx context.Context, req *svc.CreateCountryRequest) (*svc.Country, error) {
+func (s Service) CreateCountry(ctx context.Context, req *svc.CreateCountryRequest) (*countryProto.Country, error) {
 	_, err := guard.AllowedRoles(ctx, req.Initiator, "create profile",
 		roles.SuperUser, roles.Admin)
 	if err != nil {

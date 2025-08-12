@@ -1,9 +1,9 @@
-package citygov
+package gov
 
 import (
 	"context"
 
-	svc "github.com/chains-lab/cities-dir-proto/gen/go/citygov"
+	svc "github.com/chains-lab/cities-dir-proto/gen/go/svc/gov"
 	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/problem"
 	"github.com/chains-lab/cities-dir-svc/internal/logger"
 	"github.com/google/uuid"
@@ -12,17 +12,7 @@ import (
 )
 
 func (s Service) TransferAdminRight(ctx context.Context, req *svc.TransferAdminRightRequest) (*emptypb.Empty, error) {
-	cityID, err := uuid.Parse(req.CityId)
-	if err != nil {
-		logger.Log(ctx).WithError(err).Error("invalid city ID format")
-
-		return nil, problem.InvalidArgumentError(ctx, "city id is invalid format", &errdetails.BadRequest_FieldViolation{
-			Field:       "city_id",
-			Description: "invalid UUID format for city ID",
-		})
-	}
-
-	initiator, err := s.OnlyCityAdmin(ctx, req.Initiator, cityID, "transfer city admin right")
+	initiator, err := s.OnlyCityAdmin(ctx, req.Initiator.UserId, req.CityId, "transfer city admin right")
 	if err != nil {
 		return nil, err
 	}
@@ -37,7 +27,7 @@ func (s Service) TransferAdminRight(ctx context.Context, req *svc.TransferAdminR
 		})
 	}
 
-	err = s.app.TransferCityAdminRight(ctx, cityID, initiator.ID, userID)
+	err = s.app.TransferCityAdminRight(ctx, initiator.CityID, initiator.ID, userID)
 	if err != nil {
 		logger.Log(ctx).WithError(err).Error("failed to refuse own admin rights")
 

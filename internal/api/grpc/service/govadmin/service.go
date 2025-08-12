@@ -1,10 +1,10 @@
-package city
+package govadmin
 
 import (
 	"context"
 	"errors"
 
-	svc "github.com/chains-lab/cities-dir-proto/gen/go/svc/city"
+	svc "github.com/chains-lab/cities-dir-proto/gen/go/svc/govadmin"
 	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/problem"
 	"github.com/chains-lab/cities-dir-svc/internal/app"
 	"github.com/chains-lab/cities-dir-svc/internal/app/models"
@@ -12,32 +12,15 @@ import (
 	"github.com/chains-lab/cities-dir-svc/internal/constant/enum"
 	"github.com/chains-lab/cities-dir-svc/internal/errx"
 	"github.com/chains-lab/cities-dir-svc/internal/logger"
-	"github.com/chains-lab/cities-dir-svc/internal/pagination"
 	"github.com/google/uuid"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 )
 
-type application interface {
-	GetCityByID(ctx context.Context, ID uuid.UUID) (models.City, error)
-	SearchCityInCountry(ctx context.Context, like string, countryID uuid.UUID, request pagination.Request) ([]models.City, pagination.Response, error)
-
-	UpdateCitiesStatus(ctx context.Context, cityID uuid.UUID, status string) (models.City, error)
-	UpdateCityName(ctx context.Context, cityID uuid.UUID, name string) (models.City, error)
-
-	GetCityGov(ctx context.Context, cityID, userID uuid.UUID) (models.CityGov, error)
-
-	CreateForm(ctx context.Context, input app.CreateFormInput) (models.Form, error)
-	AcceptForm(ctx context.Context, initiatorID, formID, adminID uuid.UUID) (models.Form, error)
-	RejectForm(ctx context.Context, formID uuid.UUID, reason string) (models.Form, error)
-	GetForm(ctx context.Context, formID uuid.UUID) (models.Form, error)
-	SearchForms(ctx context.Context, input app.SearchFormsInput, pagPar pagination.Request, newFirst bool) ([]models.Form, pagination.Response, error)
-}
-
 type Service struct {
-	app application
+	app *app.App
 	cfg config.Config
 
-	svc.UnimplementedCityServiceServer
+	svc.UnimplementedGovAdminServiceServer
 }
 
 func NewService(cfg config.Config, app *app.App) Service {
