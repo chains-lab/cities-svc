@@ -23,11 +23,9 @@ func (s Service) UpdateCityStatus(ctx context.Context, req *svc.UpdateCityStatus
 		})
 	}
 
-	initiatorID, err := uuid.Parse(req.Initiator.UserId)
+	initiator, err := s.OnlyCityAdmin(ctx, req.Initiator, cityID, "update city name")
 	if err != nil {
-		logger.Log(ctx).WithError(err).Error("invalid initiator ID format")
-
-		return nil, problem.UnauthenticatedError(ctx, "initiator id is invalid format")
+		return nil, err
 	}
 
 	status, err := enum.ParseCityStatus(req.Status)
@@ -40,12 +38,14 @@ func (s Service) UpdateCityStatus(ctx context.Context, req *svc.UpdateCityStatus
 		})
 	}
 
-	city, err := s.app.UpdateCitiesStatusByOwner(ctx, initiatorID, cityID, status)
+	city, err := s.app.UpdateCitiesStatus(ctx, cityID, status)
 	if err != nil {
 		logger.Log(ctx).WithError(err).Error("failed to update city status")
 
 		return nil, err
 	}
+
+	logger.Log(ctx).Infof("city status updated by user %s for city ID %s", initiator.UserID, city.ID)
 
 	return response.City(city), nil
 }

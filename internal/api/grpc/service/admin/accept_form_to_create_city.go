@@ -1,11 +1,11 @@
-package city
+package admin
 
 import (
 	"context"
 	"fmt"
 
 	svc "github.com/chains-lab/cities-dir-proto/gen/go/city"
-	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/middleware"
+	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/guard"
 	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/problem"
 	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/response"
 	"github.com/chains-lab/cities-dir-svc/internal/app"
@@ -15,9 +15,8 @@ import (
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 )
 
-func (s Service) CreateCity(ctx context.Context, req *svc.CreateCityRequest) (*svc.City, error) {
-	_, err := middleware.AllowedRoles(ctx, req.Initiator, "create city",
-		roles.SuperUser, roles.Admin)
+func (s Service) CreateCity(ctx context.Context, req *svc.SendFormToCreateCityRequest) (*svc.City, error) {
+	_, err := guard.AllowedRoles(ctx, req.Initiator, "send form to create city", roles.User)
 	if err != nil {
 		return nil, err
 	}

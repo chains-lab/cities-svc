@@ -7,14 +7,14 @@ import (
 	"github.com/chains-lab/cities-dir-svc/internal/pagination"
 )
 
-func CitiesAdminsList(cityAdmins []models.CityAdmin, response pagination.Response) *cityAdminProto.ListCitiesAdmins {
-	cityAdminsList := make([]*cityAdminProto.CityAdmin, len(cityAdmins))
+func CitiesAdminsList(cityAdmins []models.CityGov, response pagination.Response) *cityAdminProto.ListCityGovs {
+	cityAdminsList := make([]*cityAdminProto.CityGov, len(cityAdmins))
 	for i, cityAdmin := range cityAdmins {
 		cityAdminsList[i] = CityAdmin(cityAdmin)
 	}
 
-	return &cityAdminProto.ListCitiesAdmins{
-		Admins: cityAdminsList,
+	return &cityAdminProto.ListCityGovs{
+		Government: cityAdminsList,
 		Pagination: &pagProto.Response{
 			Page:  response.Page,
 			Size:  response.Size,

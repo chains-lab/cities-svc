@@ -18,10 +18,10 @@ import (
 type cityQ interface {
 	New() dbx.CityQ
 
-	Insert(ctx context.Context, input dbx.CityModels) error
+	Insert(ctx context.Context, input dbx.CityModel) error
 	Update(ctx context.Context, input dbx.UpdateCityInput) error
-	Get(ctx context.Context) (dbx.CityModels, error)
-	Select(ctx context.Context) ([]dbx.CityModels, error)
+	Get(ctx context.Context) (dbx.CityModel, error)
+	Select(ctx context.Context) ([]dbx.CityModel, error)
 	Delete(ctx context.Context) error
 
 	FilterID(ID uuid.UUID) dbx.CityQ
@@ -63,7 +63,7 @@ func (a App) CreateCity(ctx context.Context, input CreateCityInput) (models.City
 
 	ID := uuid.New()
 
-	city := dbx.CityModels{
+	city := dbx.CityModel{
 		ID:        ID,
 		CountryID: input.CountryID,
 		Name:      input.Name,
@@ -147,27 +147,10 @@ func (a App) SearchCityInCountry(ctx context.Context, like string, countryID uui
 
 // Update methods for city
 
-func (a App) UpdateCityName(ctx context.Context, initiatorID, cityID uuid.UUID, name string) (models.City, error) {
+func (a App) UpdateCityName(ctx context.Context, cityID uuid.UUID, name string) (models.City, error) {
 	_, err := a.GetCityByID(ctx, cityID)
 	if err != nil {
 		return models.City{}, err
-	}
-
-	initiator, err := a.GetCityAdmin(ctx, initiatorID, cityID)
-	if err != nil {
-		return models.City{}, err
-	}
-
-	if initiator.Role != enum.CityAdminRoleOwner {
-		return models.City{}, errx.RaiseCityAdminHaveNotEnoughRights(
-			ctx,
-			fmt.Errorf("initiator: '%s', is not owner of city: '%s'",
-				initiatorID,
-				cityID,
-			),
-			cityID,
-			initiatorID,
-		)
 	}
 
 	cityUpdate := dbx.UpdateCityInput{
@@ -222,52 +205,6 @@ func (a App) UpdateCitiesStatus(ctx context.Context, cityID uuid.UUID, status st
 	return a.GetCityByID(ctx, cityID)
 }
 
-func (a App) UpdateCitiesStatusByOwner(ctx context.Context, initiatorID, cityID uuid.UUID, status string) (models.City, error) {
-	_, err := a.GetCityByID(ctx, cityID)
-	if err != nil {
-		return models.City{}, err
-	}
-
-	country, err := a.GetCountryByID(ctx, initiatorID)
-	if err != nil {
-		return models.City{}, err
-	}
-
-	if country.Status != enum.CountryStatusSupported {
-		return models.City{}, errx.RaiseCountryStatusIsNotApplicable(
-			ctx,
-			fmt.Errorf("country with ID '%s' is not %s, current status: %s", country.ID, enum.CountryStatusSupported, country.Status),
-			country.ID,
-			country.Status,
-			enum.CountryStatusSupported,
-		)
-	}
-
-	initiator, err := a.getInitiatorCityAdmin(ctx, cityID, initiatorID)
-	if err != nil {
-		return models.City{}, errx.RaiseInternal(ctx, err)
-	}
-
-	if initiator.Role != enum.CityAdminRoleOwner {
-		return models.City{}, errx.RaiseCityAdminHaveNotEnoughRights(
-			ctx,
-			fmt.Errorf("initiator: '%s', is not owner of city: '%s'",
-				initiatorID,
-				cityID,
-			),
-			cityID,
-			initiatorID,
-		)
-	}
-
-	_, err = enum.ParseCityStatus(status)
-	if err != nil {
-		return models.City{}, errx.RaiseInvalidCityStatus(ctx, err, status)
-	}
-
-	return a.UpdateCitiesStatus(ctx, cityID, status)
-}
-
 // updateStatusForCitiesByCountryID updates the status of all cities in a given country.
 // Its internal method used to update cities status when country status is changed.
 func (a App) updateStatusForCitiesByCountryID(ctx context.Context, countryID uuid.UUID, status string) error {
@@ -308,7 +245,7 @@ func (a App) updateStatusForCitiesByCountryID(ctx context.Context, countryID uui
 }
 
 // internal methods  for city
-func cityModel(city dbx.CityModels) models.City {
+func cityModel(city dbx.CityModel) models.City {
 	return models.City{
 		ID:        city.ID,
 		CountryID: city.CountryID,
@@ -319,7 +256,7 @@ func cityModel(city dbx.CityModels) models.City {
 	}
 }
 
-func citiesArray(cities []dbx.CityModels, limit, offset, total uint64) ([]models.City, pagination.Response) {
+func citiesArray(cities []dbx.CityModel, limit, offset, total uint64) ([]models.City, pagination.Response) {
 	res := make([]models.City, 0, len(cities))
 	for _, city := range cities {
 		res = append(res, cityModel(city))

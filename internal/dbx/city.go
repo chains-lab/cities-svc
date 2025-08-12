@@ -12,7 +12,7 @@ import (
 
 const citiesTable = "cities"
 
-type CityModels struct {
+type CityModel struct {
 	ID        uuid.UUID `db:"id"`
 	CountryID uuid.UUID `db:"country_id"`
 	Name      string    `db:"name"`
@@ -46,7 +46,7 @@ func (q CityQ) New() CityQ {
 	return NewCityQ(q.db)
 }
 
-func (q CityQ) Insert(ctx context.Context, input CityModels) error {
+func (q CityQ) Insert(ctx context.Context, input CityModel) error {
 	values := map[string]interface{}{
 		"country_id": input.CountryID,
 		"name":       input.Name,
@@ -68,13 +68,13 @@ func (q CityQ) Insert(ctx context.Context, input CityModels) error {
 	return err
 }
 
-func (q CityQ) Get(ctx context.Context) (CityModels, error) {
+func (q CityQ) Get(ctx context.Context) (CityModel, error) {
 	query, args, err := q.selector.Limit(1).ToSql()
 	if err != nil {
-		return CityModels{}, fmt.Errorf("building selector query for table: %s: %w", citiesTable, err)
+		return CityModel{}, fmt.Errorf("building selector query for table: %s: %w", citiesTable, err)
 	}
 
-	var city CityModels
+	var city CityModel
 	var row *sql.Row
 	if tx, ok := ctx.Value(TxKey).(*sql.Tx); ok {
 		row = tx.QueryRowContext(ctx, query, args...)
@@ -93,13 +93,13 @@ func (q CityQ) Get(ctx context.Context) (CityModels, error) {
 	return city, err
 }
 
-func (q CityQ) Select(ctx context.Context) ([]CityModels, error) {
+func (q CityQ) Select(ctx context.Context) ([]CityModel, error) {
 	query, args, err := q.selector.ToSql()
 	if err != nil {
 		return nil, fmt.Errorf("building selector query for table: %s: %w", citiesTable, err)
 	}
 
-	var cities []CityModels
+	var cities []CityModel
 	var rows *sql.Rows
 	if tx, ok := ctx.Value(TxKey).(*sql.Tx); ok {
 		rows, err = tx.QueryContext(ctx, query, args...)
@@ -112,7 +112,7 @@ func (q CityQ) Select(ctx context.Context) ([]CityModels, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		var city CityModels
+		var city CityModel
 		if err := rows.Scan(
 			&city.CountryID,
 			&city.Name,

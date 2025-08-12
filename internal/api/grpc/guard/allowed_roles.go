@@ -1,4 +1,4 @@
-package middleware
+package guard
 
 import (
 	"context"
@@ -33,7 +33,7 @@ func AllowedRoles(ctx context.Context, req *userdata.UserData, action string, al
 		)
 
 		return uuid.Nil, problem.PermissionDeniedError(ctx,
-			fmt.Sprintf("initiator role can perform this '%s' action", action))
+			fmt.Sprintf("initiator role can't perform this '%s' action", action))
 	}
 	return initiatorID, nil
 }

@@ -12,7 +12,7 @@ import (
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 )
 
-func (s Service) ListCityAdmins(ctx context.Context, req *svc.ListCityAdminsRequest) (*svc.ListCitiesAdmins, error) {
+func (s Service) GetListCityGovs(ctx context.Context, req *svc.ListCityGovsRequest) (*svc.ListCityGovs, error) {
 	cityID, err := uuid.Parse(req.CityId)
 	if err != nil {
 		logger.Log(ctx).WithError(err).Error("invalid city ID format")
@@ -23,7 +23,7 @@ func (s Service) ListCityAdmins(ctx context.Context, req *svc.ListCityAdminsRequ
 		})
 	}
 
-	cityAdmins, pag, err := s.app.GetCityAdmins(ctx, cityID, pagination.Request{
+	cityAdmins, pag, err := s.app.GetCityGovs(ctx, cityID, pagination.Request{
 		Page: req.Pagination.Page,
 		Size: req.Pagination.Size,
 	})

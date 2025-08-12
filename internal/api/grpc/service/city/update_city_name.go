@@ -23,18 +23,19 @@ func (s Service) UpdateCityName(ctx context.Context, req *svc.UpdateCityNameRequ
 		})
 	}
 
-	initiatorID, err := uuid.Parse(req.Initiator.UserId)
+	initiator, err := s.OnlyCityAdmin(ctx, req.Initiator, cityID, "update city name")
 	if err != nil {
-		logger.Log(ctx).WithError(err).Error("invalid initiator ID format")
-
-		return nil, problem.UnauthenticatedError(ctx, "initiator id is invalid format")
-	}
-
-	city, err := s.app.UpdateCityName(ctx, cityID, initiatorID, req.Name)
-	if err != nil {
-		logger.Log(ctx).WithError(err).Error("failed to update city name")
 		return nil, err
 	}
+
+	city, err := s.app.UpdateCityName(ctx, cityID, req.Name)
+	if err != nil {
+		logger.Log(ctx).WithError(err).Error("failed to update city name")
+
+		return nil, err
+	}
+
+	logger.Log(ctx).Infof("city name updated by user %s for city ID %s", initiator.UserID, city.ID)
 
 	return response.City(city), nil
 }

@@ -2,17 +2,14 @@ package enum
 
 import (
 	"fmt"
-	"math"
 )
 
 const (
-	CityAdminRoleOwner     = "owner"
 	CityAdminRoleAdmin     = "admin"
 	CityAdminRoleModerator = "moderator"
 )
 
 var citiesAdminsRoles = []string{
-	CityAdminRoleOwner,
 	CityAdminRoleAdmin,
 	CityAdminRoleModerator,
 }
@@ -31,7 +28,6 @@ func ParseCityAdminRole(role string) (string, error) {
 
 func CompareCityAdminRole(role1, role2 string) int {
 	power := map[string]uint8{
-		CityAdminRoleOwner:     math.MaxUint8,
 		CityAdminRoleAdmin:     2,
 		CityAdminRoleModerator: 1,
 	}

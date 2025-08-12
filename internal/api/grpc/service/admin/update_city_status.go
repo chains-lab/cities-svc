@@ -1,19 +1,27 @@
-package citygov
+package admin
 
 import (
 	"context"
 
-	svc "github.com/chains-lab/cities-dir-proto/gen/go/citygov"
+	svc "github.com/chains-lab/cities-dir-proto/gen/go/city"
+	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/guard"
 	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/problem"
 	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/response"
-	"github.com/chains-lab/cities-dir-svc/internal/app"
+	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/service/city"
 	"github.com/chains-lab/cities-dir-svc/internal/constant/enum"
 	"github.com/chains-lab/cities-dir-svc/internal/logger"
+	"github.com/chains-lab/gatekit/roles"
 	"github.com/google/uuid"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 )
 
-func (s Service) CreateCityAdmin(ctx context.Context, req *svc.CreateCityAdminRequest) (*svc.CityAdmin, error) {
+func (s city.Service) UpdateCityStatusBySysAdmin(ctx context.Context, req *svc.UpdateCityStatusSysAdminRequest) (*svc.City, error) {
+	_, err := guard.AllowedRoles(ctx, req.Initiator, "update city status by system admin",
+		roles.SuperUser, roles.Admin)
+	if err != nil {
+		return nil, err
+	}
+
 	cityID, err := uuid.Parse(req.CityId)
 	if err != nil {
 		logger.Log(ctx).WithError(err).Error("invalid city ID format")
@@ -31,29 +39,22 @@ func (s Service) CreateCityAdmin(ctx context.Context, req *svc.CreateCityAdminRe
 		return nil, problem.UnauthenticatedError(ctx, "initiator id is invalid format")
 	}
 
-	userID, err := uuid.Parse(req.UserId)
-	if err != nil {
-		logger.Log(ctx).WithError(err).Error("invalid user ID format")
-
-		return nil, problem.InvalidArgumentError(ctx, "user id is invalid", &errdetails.BadRequest_FieldViolation{
-			Field:       "user_id",
-			Description: "invalid UUID format for user ID",
-		})
-	}
-
-	role, err := enum.ParseCityAdminRole(req.Role)
+	cityStatus, err := enum.ParseCityStatus(req.Status)
 	if err != nil {
 		logger.Log(ctx).Error(err)
 
-		return nil, problem.InvalidArgumentError(ctx, "city admin role is invalid", &errdetails.BadRequest_FieldViolation{
-			Field:       "role",
+		return nil, problem.InvalidArgumentError(ctx, "city status is invalid", &errdetails.BadRequest_FieldViolation{
+			Field:       "status",
 			Description: err.Error(),
 		})
 	}
 
-	cityAdmin, err := s.app.CreateCityAdmin(ctx, initiatorID, cityID, userID, app.CreateCityAdminInput{
-		Role: role,
-	})
+	city, err := s.app.UpdateCitiesStatusByOwner(ctx, initiatorID, cityID, cityStatus)
+	if err != nil {
+		logger.Log(ctx).WithError(err).Error("failed to update city status")
 
-	return response.CityAdmin(cityAdmin), nil
+		return nil, err
+	}
+
+	return response.City(city), nil
 }

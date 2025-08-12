@@ -32,81 +32,27 @@ type cityAdminQ interface {
 	Page(limit, offset uint64) dbx.CityAdminQ
 }
 
-// Create Methods for citygov
-
-func (a App) CreateCityOwner(ctx context.Context, cityID, userID uuid.UUID) (models.CityAdmin, error) {
-	_, err := a.GetCityByID(ctx, cityID)
-	if err != nil {
-		return models.CityAdmin{}, err
-	}
-
-	ID := uuid.New()
-
-	owner, err := a.adminsQ.New().FilterUserID(userID).FilterCityID(cityID).FilterRole(enum.CityAdminRoleOwner).Get(ctx)
-	if err != nil {
-		switch {
-		case errors.Is(err, sql.ErrNoRows):
-			// No existing owner, proceed to create a new one
-			break
-		default:
-			return models.CityAdmin{}, errx.RaiseInternal(ctx, err)
-		}
-	}
-	if err == nil || owner != (dbx.CityAdminModel{}) {
-		return models.CityAdmin{}, errx.RaiseCityOwnerAlreadyExits(
-			ctx,
-			fmt.Errorf("city owner already exists for user_id: %s, city_id: %s",
-				userID,
-				cityID,
-			),
-			owner.UserID,
-			cityID,
-		)
-	}
-
-	cityAdmin := dbx.CityAdminModel{
-		ID:        ID,
-		CityID:    cityID,
-		UserID:    userID,
-		Role:      enum.CityAdminRoleOwner,
-		UpdatedAt: time.Now().UTC(),
-		CreatedAt: time.Now().UTC(),
-	}
-
-	err = a.adminsQ.New().Insert(ctx, cityAdmin)
-	if err != nil {
-		switch {
-		default:
-			return models.CityAdmin{}, errx.RaiseInternal(ctx, err)
-		}
-	}
-
-	return cityAdminModel(cityAdmin), nil
-}
-
-type CreateCityAdminInput struct {
+type CreateCityGovInput struct {
 	Role string
 }
 
-func (a App) CreateCityAdmin(ctx context.Context, initiatorID, cityID, userID uuid.UUID, input CreateCityAdminInput) (models.CityAdmin, error) {
+func (a App) CreateCityGov(ctx context.Context, cityID, userID uuid.UUID, input CreateCityGovInput) (models.CityGov, error) {
 	_, err := a.GetCityByID(ctx, cityID)
 	if err != nil {
-		return models.CityAdmin{}, err
+		return models.CityGov{}, err
 	}
 
-	initiator, err := a.getInitiatorCityAdmin(ctx, cityID, initiatorID)
-
-	user, err := a.GetCityAdmin(ctx, cityID, userID)
+	user, err := a.GetCityGov(ctx, cityID, userID)
 	if err != nil {
 		switch {
 		case errors.Is(err, errx.ErrorCityAdminNotFound):
 			// No existing admin, proceed to create a new one
 		default:
-			return models.CityAdmin{}, err
+			return models.CityGov{}, err
 		}
 	}
-	if user != (models.CityAdmin{}) {
-		return models.CityAdmin{}, errx.RaiseUserIsAlreadyCityAdmin(
+	if user != (models.CityGov{}) {
+		return models.CityGov{}, errx.RaiseUserIsAlreadyCityAdmin(
 			ctx,
 			fmt.Errorf("user with user_id: %s is already city admin for city_id: %s",
 				userID,
@@ -119,21 +65,7 @@ func (a App) CreateCityAdmin(ctx context.Context, initiatorID, cityID, userID uu
 
 	role, err := enum.ParseCityAdminRole(input.Role)
 	if err != nil {
-		return models.CityAdmin{}, errx.RaiseInvalidCityAdminRole(ctx, err, input.Role)
-	}
-
-	if enum.CompareCityAdminRole(initiator.Role, role) < 1 {
-		return models.CityAdmin{}, errx.RaiseCityAdminHaveNotEnoughRights(
-			ctx,
-			fmt.Errorf("initiator user_id: %s has role %s, but trying to create admin with user_id: %s, city_id: %s, role %s",
-				initiatorID,
-				input.Role,
-				userID,
-				cityID,
-				role),
-			userID,
-			cityID,
-		)
+		return models.CityGov{}, errx.RaiseInvalidCityAdminRole(ctx, err, input.Role)
 	}
 
 	admin := dbx.CityAdminModel{
@@ -147,7 +79,7 @@ func (a App) CreateCityAdmin(ctx context.Context, initiatorID, cityID, userID uu
 	if err != nil {
 		switch {
 		default:
-			return models.CityAdmin{}, errx.RaiseInternal(ctx, err)
+			return models.CityGov{}, errx.RaiseInternal(ctx, err)
 		}
 	}
 
@@ -156,8 +88,8 @@ func (a App) CreateCityAdmin(ctx context.Context, initiatorID, cityID, userID uu
 
 // Read methods for citygov
 
-// getInitiatorCityAdmin retrieves the city admin for the given initiator and city.
-func (a App) getInitiatorCityAdmin(ctx context.Context, cityID, initiatorID uuid.UUID) (dbx.CityAdminModel, error) {
+// getInitiatorCityGov retrieves the city admin for the given initiator and city.
+func (a App) getInitiatorCityGov(ctx context.Context, cityID, initiatorID uuid.UUID) (dbx.CityAdminModel, error) {
 	initiator, err := a.adminsQ.New().FilterUserID(initiatorID).FilterCityID(cityID).Get(ctx)
 	if err != nil {
 		switch {
@@ -175,60 +107,31 @@ func (a App) getInitiatorCityAdmin(ctx context.Context, cityID, initiatorID uuid
 	return initiator, nil
 }
 
-func (a App) GetCityAdmin(ctx context.Context, cityID, userID uuid.UUID) (models.CityAdmin, error) {
+func (a App) GetCityGov(ctx context.Context, cityID, userID uuid.UUID) (models.CityGov, error) {
 	_, err := a.GetCityByID(ctx, cityID)
 	if err != nil {
-		return models.CityAdmin{}, err
+		return models.CityGov{}, err
 	}
 
 	cityAdmin, err := a.adminsQ.New().FilterUserID(userID).FilterCityID(cityID).Get(ctx)
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
-			return models.CityAdmin{}, errx.RaiseCityAdminNotFound(
+			return models.CityGov{}, errx.RaiseCityAdminNotFound(
 				ctx,
 				fmt.Errorf("city admin not found, cityID: %s, userID: %s, cause %s", cityID, userID, err),
 				cityID,
 				userID,
 			)
 		default:
-			return models.CityAdmin{}, errx.RaiseInternal(ctx, err)
+			return models.CityGov{}, errx.RaiseInternal(ctx, err)
 		}
 	}
 
 	return cityAdminModel(cityAdmin), nil
 }
 
-func (a App) GetUserCitiesAdmins(ctx context.Context, userID uuid.UUID, pag pagination.Request) ([]models.CityAdmin, pagination.Response, error) {
-
-	limit, offset := pagination.CalculateLimitOffset(pag)
-
-	cityAdmins, err := a.adminsQ.New().FilterUserID(userID).Page(limit, offset).Select(ctx)
-	if err != nil {
-		switch {
-		case errors.Is(err, sql.ErrNoRows):
-			return []models.CityAdmin{}, pagination.Response{}, nil
-		default:
-			return nil, pagination.Response{}, errx.RaiseInternal(ctx, err)
-		}
-	}
-
-	total, err := a.adminsQ.New().FilterUserID(userID).Count(ctx)
-	if err != nil {
-		switch {
-		case errors.Is(err, sql.ErrNoRows):
-			total = 0
-		default:
-			return nil, pagination.Response{}, errx.RaiseInternal(ctx, err)
-		}
-	}
-
-	res, pagRes := cityAdminsArray(cityAdmins, limit, offset, total)
-
-	return res, pagRes, nil
-}
-
-func (a App) GetCityAdmins(ctx context.Context, cityID uuid.UUID, pag pagination.Request) ([]models.CityAdmin, pagination.Response, error) {
+func (a App) GetCityGovs(ctx context.Context, cityID uuid.UUID, pag pagination.Request) ([]models.CityGov, pagination.Response, error) {
 	_, err := a.GetCityByID(ctx, cityID)
 	if err != nil {
 		return nil, pagination.Response{}, err
@@ -240,7 +143,7 @@ func (a App) GetCityAdmins(ctx context.Context, cityID uuid.UUID, pag pagination
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
-			return []models.CityAdmin{}, pagination.Response{}, nil
+			return []models.CityGov{}, pagination.Response{}, nil
 		default:
 			return nil, pagination.Response{}, errx.RaiseInternal(ctx, err)
 		}
@@ -263,75 +166,25 @@ func (a App) GetCityAdmins(ctx context.Context, cityID uuid.UUID, pag pagination
 
 // Update methods for citygov
 
-// TransferCityOwnership transfers the ownership of a city to a new owner.
-func (a App) TransferCityOwnership(ctx context.Context, initiatorID, newOwnerID, cityID uuid.UUID) error {
+// TransferCityAdminRight transfers the admin of a city to a new owner.
+func (a App) TransferCityAdminRight(ctx context.Context, cityID, initiatorID, newOwnerID uuid.UUID) error {
 	//TODO implement transfer ownership logic
 
 	return nil
 }
 
-func (a App) UpdateCityAdminRole(ctx context.Context, initiatorID, cityID, userID uuid.UUID, role string) error {
+func (a App) RefuseOwnCityGovRights(ctx context.Context, cityID, userID uuid.UUID) error {
 	_, err := a.GetCityByID(ctx, cityID)
 	if err != nil {
 		return err
 	}
 
-	_, err = enum.ParseCityAdminRole(role)
-	if err != nil {
-		return errx.RaiseInvalidCityAdminRole(ctx, err, role)
-	}
-
-	initiator, err := a.getInitiatorCityAdmin(ctx, cityID, initiatorID)
+	cityAdmin, err := a.GetCityGov(ctx, cityID, userID)
 	if err != nil {
 		return err
 	}
 
-	user, err := a.GetCityAdmin(ctx, cityID, userID)
-	if err != nil {
-		return err
-	}
-
-	if enum.CompareCityAdminRole(initiator.Role, user.Role) < 1 {
-		return errx.RaiseCityAdminHaveNotEnoughRights(
-			ctx,
-			fmt.Errorf("initiator user_id: %s has role %s, but trying to update admin with user_id: %s, city_id: %s, role %s",
-				initiatorID,
-				initiator.Role,
-				userID,
-				cityID,
-				role),
-			cityID,
-			userID)
-	}
-
-	updateInput := dbx.UpdateCityAdmin{
-		Role:      &role,
-		UpdatedAt: time.Now().UTC(),
-	}
-
-	err = a.adminsQ.New().FilterUserID(userID).Update(ctx, updateInput)
-	if err != nil {
-		switch {
-		default:
-			return errx.RaiseInternal(ctx, err)
-		}
-	}
-
-	return nil
-}
-
-func (a App) RefuseOwnAdminRights(ctx context.Context, cityID, userID uuid.UUID) error {
-	_, err := a.GetCityByID(ctx, cityID)
-	if err != nil {
-		return err
-	}
-
-	cityAdmin, err := a.GetCityAdmin(ctx, cityID, userID)
-	if err != nil {
-		return err
-	}
-
-	if cityAdmin.Role == enum.CityAdminRoleOwner {
+	if cityAdmin.Role == enum.CityAdminRoleAdmin {
 		return errx.RaiseCannotDeleteCityOwner(
 			ctx,
 			fmt.Errorf("city admin with user_id:%s cannot delete city owner with user_id: %s, city_id: %s",
@@ -365,34 +218,27 @@ func (a App) RefuseOwnAdminRights(ctx context.Context, cityID, userID uuid.UUID)
 
 // Delete methods for citygov
 
-func (a App) DeleteCityAdmin(ctx context.Context, initiatorID, cityID, userID uuid.UUID) error {
+func (a App) DeleteCityGov(ctx context.Context, cityID, userID uuid.UUID) error {
 	_, err := a.GetCityByID(ctx, cityID)
 	if err != nil {
 		return err
 	}
 
-	initiator, err := a.getInitiatorCityAdmin(ctx, cityID, initiatorID)
+	cityGov, err := a.GetCityGov(ctx, cityID, userID)
 	if err != nil {
 		return err
 	}
 
-	user, err := a.GetCityAdmin(ctx, cityID, userID)
-	if err != nil {
-		return err
-	}
-
-	if enum.CompareCityAdminRole(initiator.Role, user.Role) < 1 {
-		return errx.RaiseCityAdminHaveNotEnoughRights(
+	if cityGov.Role == enum.CityAdminRoleAdmin {
+		return errx.RaiseCannotDeleteCityOwner(
 			ctx,
-			fmt.Errorf("initiator user_id: %s has role %s, but trying to delete admin with user_id: %s, city_id: %s, role %s",
-				initiatorID,
-				initiator.Role,
+			fmt.Errorf("city admin with user_id:%s cannot delete city owner with user_id: %s, city_id: %s",
 				userID,
-				cityID,
-				user.Role,
+				cityGov.UserID,
+				cityGov.CityID,
 			),
-			initiatorID,
 			userID,
+			cityGov.CityID,
 		)
 	}
 
@@ -407,34 +253,10 @@ func (a App) DeleteCityAdmin(ctx context.Context, initiatorID, cityID, userID uu
 	return nil
 }
 
-func (a App) DeleteCityOwner(ctx context.Context, cityID, userID uuid.UUID) error {
-	_, err := a.GetCityByID(ctx, cityID)
-	if err != nil {
-		return err
-	}
-
-	err = a.adminsQ.New().FilterUserID(userID).FilterCityID(cityID).FilterRole(enum.CityAdminRoleOwner).Delete(ctx)
-	if err != nil {
-		switch {
-		case errors.Is(err, sql.ErrNoRows):
-			return errx.RaiseCityAdminNotFound(
-				ctx,
-				fmt.Errorf("city owner not found for user_id: %s, city_id: %s, cause %s", userID, cityID, err),
-				cityID,
-				userID,
-			)
-		default:
-			return errx.RaiseInternal(ctx, err)
-		}
-	}
-
-	return nil
-}
-
 // Helper functions for citygov
 
-func cityAdminModel(cityAdmin dbx.CityAdminModel) models.CityAdmin {
-	return models.CityAdmin{
+func cityAdminModel(cityAdmin dbx.CityAdminModel) models.CityGov {
+	return models.CityGov{
 		UserID:    cityAdmin.UserID,
 		CityID:    cityAdmin.CityID,
 		Role:      cityAdmin.Role,
@@ -443,8 +265,8 @@ func cityAdminModel(cityAdmin dbx.CityAdminModel) models.CityAdmin {
 	}
 }
 
-func cityAdminsArray(cityAdmins []dbx.CityAdminModel, limit, offset, total uint64) ([]models.CityAdmin, pagination.Response) {
-	res := make([]models.CityAdmin, len(cityAdmins))
+func cityAdminsArray(cityAdmins []dbx.CityAdminModel, limit, offset, total uint64) ([]models.CityGov, pagination.Response) {
+	res := make([]models.CityGov, len(cityAdmins))
 	for i, cityAdmin := range cityAdmins {
 		res[i] = cityAdminModel(cityAdmin)
 	}

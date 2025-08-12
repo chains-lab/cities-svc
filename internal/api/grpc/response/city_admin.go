@@ -5,8 +5,8 @@ import (
 	"github.com/chains-lab/cities-dir-svc/internal/app/models"
 )
 
-func CityAdmin(cityAdmin models.CityAdmin) *cityAdminProto.CityAdmin {
-	return &cityAdminProto.CityAdmin{
+func CityAdmin(cityAdmin models.CityGov) *cityAdminProto.CityGov {
+	return &cityAdminProto.CityGov{
 		CityId: cityAdmin.CityID.String(),
 		UserId: cityAdmin.UserID.String(),
 		Role:   cityAdmin.Role,
