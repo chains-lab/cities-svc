@@ -5,7 +5,7 @@ import (
 	"errors"
 
 	svc "github.com/chains-lab/cities-dir-proto/gen/go/svc/gov"
-	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/problem"
+	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/problems"
 	"github.com/chains-lab/cities-dir-svc/internal/app"
 	"github.com/chains-lab/cities-dir-svc/internal/app/models"
 	"github.com/chains-lab/cities-dir-svc/internal/config"
@@ -18,7 +18,11 @@ import (
 )
 
 type application interface {
-	CreateCityGov(ctx context.Context, cityID, userID uuid.UUID, input app.CreateCityGovInput) (models.CityGov, error)
+	CreateCityGovAdmin(ctx context.Context, cityID, userID uuid.UUID) (models.CityGov, error)
+	GetCityAdmin(ctx context.Context, cityID uuid.UUID) (models.CityGov, error)
+	DeleteCityAdmin(ctx context.Context, cityID uuid.UUID) error
+
+	CreateCityGovModer(ctx context.Context, cityID, userID uuid.UUID) (models.CityGov, error)
 
 	GetCityGov(ctx context.Context, cityID, userID uuid.UUID) (models.CityGov, error)
 	GetCityGovs(ctx context.Context, cityID uuid.UUID, pag pagination.Request) ([]models.CityGov, pagination.Response, error)
@@ -48,14 +52,14 @@ func (s Service) OnlyGov(ctx context.Context, initiatorID, cityID, action string
 	if err != nil {
 		logger.Log(ctx).WithError(err).Error("invalid initiator ID format")
 
-		return models.CityGov{}, problem.UnauthenticatedError(ctx, "initiator id is invalid format")
+		return models.CityGov{}, problems.UnauthenticatedError(ctx, "initiator id is invalid format")
 	}
 
 	CityID, err := uuid.Parse(cityID)
 	if err != nil {
 		logger.Log(ctx).WithError(err).Error("invalid city ID format")
 
-		return models.CityGov{}, problem.InvalidArgumentError(ctx, "city_id is invalid", &errdetails.BadRequest_FieldViolation{
+		return models.CityGov{}, problems.InvalidArgumentError(ctx, "city_id is invalid", &errdetails.BadRequest_FieldViolation{
 			Field:       "city_id",
 			Description: "invalid UUID format for city ID",
 		})
@@ -64,11 +68,11 @@ func (s Service) OnlyGov(ctx context.Context, initiatorID, cityID, action string
 	gov, err := s.app.GetCityGov(ctx, InitiatorID, CityID)
 	if err != nil {
 		switch {
-		case errors.Is(err, errx.ErrorCityAdminNotFound):
+		case errors.Is(err, errx.ErrorCityGovNotFound):
 			logger.Log(ctx).Warnf("user: %s is not a city government for city %s, but try to do action: '%s'",
 				InitiatorID, cityID, action)
 
-			return models.CityGov{}, problem.PermissionDeniedError(ctx, "you are not a city gov")
+			return models.CityGov{}, problems.PermissionDeniedError(ctx, "you are not a city gov")
 		default:
 			logger.Log(ctx).WithError(err).Error("failed to get city gov")
 
@@ -84,14 +88,14 @@ func (s Service) OnlyCityAdmin(ctx context.Context, initiatorID, cityID, action 
 	if err != nil {
 		logger.Log(ctx).WithError(err).Error("invalid initiator ID format")
 
-		return models.CityGov{}, problem.UnauthenticatedError(ctx, "initiator id is invalid format")
+		return models.CityGov{}, problems.UnauthenticatedError(ctx, "initiator id is invalid format")
 	}
 
 	CityID, err := uuid.Parse(cityID)
 	if err != nil {
 		logger.Log(ctx).WithError(err).Error("invalid city ID format")
 
-		return models.CityGov{}, problem.InvalidArgumentError(ctx, "city_id is invalid", &errdetails.BadRequest_FieldViolation{
+		return models.CityGov{}, problems.InvalidArgumentError(ctx, "city_id is invalid", &errdetails.BadRequest_FieldViolation{
 			Field:       "city_id",
 			Description: "invalid UUID format for city ID",
 		})
@@ -108,7 +112,7 @@ func (s Service) OnlyCityAdmin(ctx context.Context, initiatorID, cityID, action 
 		logger.Log(ctx).Warnf("user: %s is not a city admin for city %s, but try to do action: '%s'",
 			InitiatorID, cityID, action)
 
-		return models.CityGov{}, problem.PermissionDeniedError(ctx, "user is not a city admin")
+		return models.CityGov{}, problems.PermissionDeniedError(ctx, "user is not a city admin")
 	}
 
 	return gov, nil

@@ -13,7 +13,6 @@ type App struct {
 	citiesQ    cityQ
 	adminsQ    cityAdminQ
 	countriesQ countryQ
-	formQ      formQ
 
 	db *sql.DB
 }
@@ -28,7 +27,6 @@ func NewApp(cfg config.Config) (App, error) {
 		citiesQ:    dbx.NewCityQ(pg),
 		countriesQ: dbx.NewCountryQ(pg),
 		adminsQ:    dbx.NewCityAdminQ(pg),
-		formQ:      dbx.NewFormToCreateCityQ(pg),
 
 		db: pg,
 	}, nil

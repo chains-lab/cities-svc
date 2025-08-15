@@ -4,7 +4,6 @@ import (
 	"context"
 	"strings"
 
-	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/interceptor"
 	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/meta"
 	"github.com/chains-lab/cities-dir-svc/internal/config"
 	"github.com/chains-lab/svc-errors/ape"
@@ -12,24 +11,28 @@ import (
 	"google.golang.org/grpc"
 )
 
-func NewLogger(cfg config.Config) Logger {
-	base := logrus.New()
+func NewLogger(cfg config.Config) *logrus.Logger {
+	log := logrus.New()
 
-	lvl, err := logrus.ParseLevel(strings.ToLower(cfg.Logger.Level))
+	lvl, err := logrus.ParseLevel(strings.ToLower(cfg.Server.Log.Level))
 	if err != nil {
-		base.Warnf("invalid log level '%s', defaulting to 'info'", cfg.Logger.Level)
+		log.Warnf("invalid log level '%s', defaulting to 'info'", cfg.Server.Log.Level)
 		lvl = logrus.InfoLevel
 	}
-	base.SetLevel(lvl)
+	log.SetLevel(lvl)
 
-	switch strings.ToLower(cfg.Logger.Format) {
+	switch strings.ToLower(cfg.Server.Log.Format) {
 	case "json":
-		base.SetFormatter(&logrus.JSONFormatter{})
+		log.SetFormatter(&logrus.JSONFormatter{})
+	case "text":
+		fallthrough
 	default:
-		base.SetFormatter(&logrus.TextFormatter{FullTimestamp: true})
+		log.SetFormatter(&logrus.TextFormatter{
+			FullTimestamp: true,
+		})
 	}
 
-	return NewWithBase(base)
+	return log
 }
 
 func UnaryLogInterceptor(log Logger) grpc.UnaryServerInterceptor {
@@ -43,8 +46,8 @@ func UnaryLogInterceptor(log Logger) grpc.UnaryServerInterceptor {
 		// чтобы не потерять таймауты и другую информацию.
 		ctxWithLog := context.WithValue(
 			ctx,
-			interceptor.LogCtxKey,
-			log, // ваш интерфейс Logger
+			meta.LogCtxKey,
+			log, // ваш интерфейс Log
 		)
 
 		// Далее передаём новый контекст в реальный хэндлер
@@ -53,7 +56,7 @@ func UnaryLogInterceptor(log Logger) grpc.UnaryServerInterceptor {
 }
 
 func Log(ctx context.Context) Logger {
-	entry, ok := ctx.Value(interceptor.LogCtxKey).(Logger)
+	entry, ok := ctx.Value(meta.LogCtxKey).(Logger)
 	if !ok {
 		logrus.Info("no logger in context")
 

@@ -61,13 +61,18 @@ func (a App) CreateCity(ctx context.Context, input CreateCityInput) (models.City
 		)
 	}
 
+	status, err := enum.ParseCityStatus(input.Status)
+	if err != nil {
+		return models.City{}, errx.RaiseInvalidCityStatus(ctx, err, input.Status)
+	}
+
 	ID := uuid.New()
 
 	city := dbx.CityModel{
 		ID:        ID,
 		CountryID: input.CountryID,
 		Name:      input.Name,
-		Status:    input.Status,
+		Status:    status,
 		CreatedAt: time.Now().UTC(),
 		UpdatedAt: time.Now().UTC(),
 	}
@@ -148,20 +153,21 @@ func (a App) SearchCityInCountry(ctx context.Context, like string, countryID uui
 // Update methods for city
 
 func (a App) UpdateCityName(ctx context.Context, cityID uuid.UUID, name string) (models.City, error) {
-	_, err := a.GetCityByID(ctx, cityID)
-	if err != nil {
-		return models.City{}, err
-	}
-
 	cityUpdate := dbx.UpdateCityInput{
 		Name:      &name,
 		UpdatedAt: time.Now().UTC(),
 	}
 
-	err = a.citiesQ.New().FilterID(cityID).Update(ctx, cityUpdate)
+	err := a.citiesQ.New().FilterID(cityID).Update(ctx, cityUpdate)
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
+			return models.City{}, errx.RaiseCityNotFoundByID(
+				ctx,
+				fmt.Errorf("city with ID '%s' not found cause: %s", cityID, err),
+				cityID,
+			)
+		default:
 			return models.City{}, errx.RaiseInternal(ctx, err)
 		}
 	}
@@ -195,11 +201,14 @@ func (a App) UpdateCitiesStatus(ctx context.Context, cityID uuid.UUID, status st
 		return models.City{}, errx.RaiseInvalidCityStatus(ctx, err, status)
 	}
 
-	err = a.citiesQ.New().FilterID(city.ID).Update(ctx, dbx.UpdateCityInput{
+	err = a.citiesQ.New().FilterID(cityID).Update(ctx, dbx.UpdateCityInput{
 		Status: &status,
 	})
 	if err != nil {
-		return models.City{}, errx.RaiseInternal(ctx, err)
+		switch {
+		default:
+			return models.City{}, errx.RaiseInternal(ctx, err)
+		}
 	}
 
 	return a.GetCityByID(ctx, cityID)

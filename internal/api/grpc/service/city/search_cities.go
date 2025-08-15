@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	svc "github.com/chains-lab/cities-dir-proto/gen/go/svc/city"
-	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/problem"
-	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/response"
+	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/problems"
+	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/responses"
 	"github.com/chains-lab/cities-dir-svc/internal/logger"
 	"github.com/chains-lab/cities-dir-svc/internal/pagination"
 	"github.com/google/uuid"
@@ -18,7 +18,7 @@ func (s Service) SearchCities(ctx context.Context, req *svc.SearchCitiesRequest)
 	if err != nil {
 		logger.Log(ctx).WithError(err).Error("invalid country id format")
 
-		return nil, problem.InvalidArgumentError(ctx, fmt.Sprint("country_id is invalid"), &errdetails.BadRequest_FieldViolation{
+		return nil, problems.InvalidArgumentError(ctx, fmt.Sprint("country_id is invalid"), &errdetails.BadRequest_FieldViolation{
 			Field:       "country_id",
 			Description: "invalid UUID format for country ID",
 		})
@@ -33,5 +33,5 @@ func (s Service) SearchCities(ctx context.Context, req *svc.SearchCitiesRequest)
 		return nil, err
 	}
 
-	return response.CitiesList(cities, pag), nil
+	return responses.CitiesList(cities, pag), nil
 }

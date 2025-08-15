@@ -4,7 +4,8 @@ import (
 	"context"
 
 	svc "github.com/chains-lab/cities-dir-proto/gen/go/svc/gov"
-	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/problem"
+	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/meta"
+	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/problems"
 	"github.com/chains-lab/cities-dir-svc/internal/logger"
 	"github.com/google/uuid"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
@@ -12,7 +13,9 @@ import (
 )
 
 func (s Service) TransferAdminRight(ctx context.Context, req *svc.TransferAdminRightRequest) (*emptypb.Empty, error) {
-	initiator, err := s.OnlyCityAdmin(ctx, req.Initiator.UserId, req.CityId, "transfer city admin right")
+	user := meta.User(ctx)
+
+	initiator, err := s.OnlyCityAdmin(ctx, user.ID.String(), req.CityId, "transfer city admin right")
 	if err != nil {
 		return nil, err
 	}
@@ -21,7 +24,7 @@ func (s Service) TransferAdminRight(ctx context.Context, req *svc.TransferAdminR
 	if err != nil {
 		logger.Log(ctx).WithError(err).Error("invalid user ID format")
 
-		return nil, problem.InvalidArgumentError(ctx, "user id is invalid format", &errdetails.BadRequest_FieldViolation{
+		return nil, problems.InvalidArgumentError(ctx, "user id is invalid format", &errdetails.BadRequest_FieldViolation{
 			Field:       "new_owner_id",
 			Description: "invalid UUID format for user ID",
 		})

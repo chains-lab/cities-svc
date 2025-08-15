@@ -32,27 +32,56 @@ type cityAdminQ interface {
 	Page(limit, offset uint64) dbx.CityAdminQ
 }
 
-type CreateCityGovInput struct {
-	Role string
-}
-
-func (a App) CreateCityGov(ctx context.Context, cityID, userID uuid.UUID, input CreateCityGovInput) (models.CityGov, error) {
-	_, err := a.GetCityByID(ctx, cityID)
+func (a App) GetCityAdmin(ctx context.Context, cityID uuid.UUID) (models.CityGov, error) {
+	cityAdmin, err := a.adminsQ.New().FilterCityID(cityID).FilterRole(enum.CityAdminRoleAdmin).Get(ctx)
 	if err != nil {
-		return models.CityGov{}, err
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return models.CityGov{}, errx.RaiseCityAdminNotFound(ctx, err, cityID)
+		default:
+			return models.CityGov{}, errx.RaiseInternal(ctx, err)
+		}
 	}
 
+	return cityAdminModel(cityAdmin), nil
+}
+
+func (a App) DeleteCityAdmin(ctx context.Context, cityID uuid.UUID) error {
+	_, err := a.GetCityByID(ctx, cityID)
+	if err != nil {
+		return err
+	}
+
+	cityAdmin, err := a.GetCityAdmin(ctx, cityID)
+	if err != nil {
+		return err
+	}
+
+	err = a.adminsQ.New().FilterUserID(cityAdmin.UserID).FilterCityID(cityID).Delete(ctx)
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return errx.RaiseCityAdminNotFound(ctx, err, cityID)
+		default:
+			return errx.RaiseInternal(ctx, err)
+		}
+	}
+	return nil
+}
+
+func (a App) CreateCityGovAdmin(ctx context.Context, cityID, userID uuid.UUID) (models.CityGov, error) {
 	user, err := a.GetCityGov(ctx, cityID, userID)
 	if err != nil {
 		switch {
-		case errors.Is(err, errx.ErrorCityAdminNotFound):
+		case errors.Is(err, errx.ErrorCityGovNotFound):
 			// No existing admin, proceed to create a new one
 		default:
 			return models.CityGov{}, err
 		}
 	}
-	if user != (models.CityGov{}) {
-		return models.CityGov{}, errx.RaiseUserIsAlreadyCityAdmin(
+
+	if user != (models.CityGov{}) || err == nil {
+		return models.CityGov{}, errx.RaiseUserIsAlreadyCityGov(
 			ctx,
 			fmt.Errorf("user with user_id: %s is already city admin for city_id: %s",
 				userID,
@@ -63,15 +92,57 @@ func (a App) CreateCityGov(ctx context.Context, cityID, userID uuid.UUID, input 
 		)
 	}
 
-	role, err := enum.ParseCityAdminRole(input.Role)
+	admin := dbx.CityAdminModel{
+		CityID:    cityID,
+		UserID:    userID,
+		Role:      enum.CityAdminRoleAdmin,
+		UpdatedAt: time.Now().UTC(),
+		CreatedAt: time.Now().UTC(),
+	}
+	err = a.adminsQ.New().Insert(ctx, admin)
 	if err != nil {
-		return models.CityGov{}, errx.RaiseInvalidCityAdminRole(ctx, err, input.Role)
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return models.CityGov{}, errx.RaiseCityAlreadyHaveAdmin(
+				ctx,
+				err,
+				cityID,
+			)
+		default:
+			return models.CityGov{}, errx.RaiseInternal(ctx, err)
+		}
+	}
+
+	return cityAdminModel(admin), nil
+}
+
+func (a App) CreateCityGovModer(ctx context.Context, cityID, userID uuid.UUID) (models.CityGov, error) {
+	user, err := a.GetCityGov(ctx, cityID, userID)
+	if err != nil {
+		switch {
+		case errors.Is(err, errx.ErrorCityGovNotFound):
+			// No existing admin, proceed to create a new one
+		default:
+			return models.CityGov{}, err
+		}
+	}
+
+	if user != (models.CityGov{}) || err == nil {
+		return models.CityGov{}, errx.RaiseUserIsAlreadyCityGov(
+			ctx,
+			fmt.Errorf("user with user_id: %s is already city admin for city_id: %s",
+				userID,
+				cityID,
+			),
+			cityID,
+			userID,
+		)
 	}
 
 	admin := dbx.CityAdminModel{
 		CityID:    cityID,
 		UserID:    userID,
-		Role:      role,
+		Role:      enum.CityAdminRoleModerator,
 		UpdatedAt: time.Now().UTC(),
 		CreatedAt: time.Now().UTC(),
 	}
@@ -94,7 +165,7 @@ func (a App) getInitiatorCityGov(ctx context.Context, cityID, initiatorID uuid.U
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
-			return dbx.CityAdminModel{}, errx.RaiseInitiatorIsNotCityAdmin(
+			return dbx.CityAdminModel{}, errx.RaiseInitiatorIsNotCityGov(
 				ctx,
 				fmt.Errorf("initiator: %s, not city admin for cit: %s", initiatorID, cityID),
 				initiatorID,
@@ -108,16 +179,16 @@ func (a App) getInitiatorCityGov(ctx context.Context, cityID, initiatorID uuid.U
 }
 
 func (a App) GetCityGov(ctx context.Context, cityID, userID uuid.UUID) (models.CityGov, error) {
-	_, err := a.GetCityByID(ctx, cityID)
-	if err != nil {
-		return models.CityGov{}, err
-	}
-
 	cityAdmin, err := a.adminsQ.New().FilterUserID(userID).FilterCityID(cityID).Get(ctx)
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
-			return models.CityGov{}, errx.RaiseCityAdminNotFound(
+			_, err := a.GetCityByID(ctx, cityID)
+			if err != nil {
+				return models.CityGov{}, err
+			}
+
+			return models.CityGov{}, errx.RaiseCityGovNotFound(
 				ctx,
 				fmt.Errorf("city admin not found, cityID: %s, userID: %s, cause %s", cityID, userID, err),
 				cityID,
@@ -185,9 +256,9 @@ func (a App) RefuseOwnCityGovRights(ctx context.Context, cityID, userID uuid.UUI
 	}
 
 	if cityAdmin.Role == enum.CityAdminRoleAdmin {
-		return errx.RaiseCannotDeleteCityOwner(
+		return errx.RaiseCannotDeleteCityAdmin(
 			ctx,
-			fmt.Errorf("city admin with user_id:%s cannot delete city owner with user_id: %s, city_id: %s",
+			fmt.Errorf("city admin with user_id:%s cannot delete city admin with user_id: %s, city_id: %s",
 				userID,
 				cityAdmin.UserID,
 				cityAdmin.CityID,
@@ -202,7 +273,7 @@ func (a App) RefuseOwnCityGovRights(ctx context.Context, cityID, userID uuid.UUI
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
-			return errx.RaiseCityAdminNotFound(
+			return errx.RaiseCityGovNotFound(
 				ctx,
 				fmt.Errorf("city admin not found, city_id: %s, user_id: %s, cause %s", cityID, userID, err),
 				cityID,
@@ -230,9 +301,9 @@ func (a App) DeleteCityGov(ctx context.Context, cityID, userID uuid.UUID) error 
 	}
 
 	if cityGov.Role == enum.CityAdminRoleAdmin {
-		return errx.RaiseCannotDeleteCityOwner(
+		return errx.RaiseCannotDeleteCityAdmin(
 			ctx,
-			fmt.Errorf("city admin with user_id:%s cannot delete city owner with user_id: %s, city_id: %s",
+			fmt.Errorf("city admin with user_id:%s cannot delete city admin with user_id: %s, city_id: %s",
 				userID,
 				cityGov.UserID,
 				cityGov.CityID,

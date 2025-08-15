@@ -239,11 +239,7 @@ func (q CityQ) Count(ctx context.Context) (uint64, error) {
 		err = q.db.QueryRowContext(ctx, query, args...).Scan(&count)
 	}
 
-	if err != nil {
-		return 0, err
-	}
-
-	return count, nil
+	return count, err
 }
 
 func (q CityQ) Page(limit, offset uint64) CityQ {

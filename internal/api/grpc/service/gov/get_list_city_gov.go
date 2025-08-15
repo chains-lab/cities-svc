@@ -4,8 +4,8 @@ import (
 	"context"
 
 	svc "github.com/chains-lab/cities-dir-proto/gen/go/svc/gov"
-	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/problem"
-	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/response"
+	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/problems"
+	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/responses"
 	"github.com/chains-lab/cities-dir-svc/internal/logger"
 	"github.com/chains-lab/cities-dir-svc/internal/pagination"
 	"github.com/google/uuid"
@@ -17,7 +17,7 @@ func (s Service) GetListCityGovs(ctx context.Context, req *svc.ListCityGovsReque
 	if err != nil {
 		logger.Log(ctx).WithError(err).Error("invalid city ID format")
 
-		return nil, problem.InvalidArgumentError(ctx, "city id is invalid", &errdetails.BadRequest_FieldViolation{
+		return nil, problems.InvalidArgumentError(ctx, "city id is invalid", &errdetails.BadRequest_FieldViolation{
 			Field:       "city_id",
 			Description: "invalid UUID format for city ID",
 		})
@@ -33,5 +33,5 @@ func (s Service) GetListCityGovs(ctx context.Context, req *svc.ListCityGovsReque
 		return nil, err
 	}
 
-	return response.CitiesAdminsList(cityAdmins, pag), nil
+	return responses.CitiesAdminsList(cityAdmins, pag), nil
 }

@@ -4,8 +4,8 @@ import (
 	"context"
 
 	svc "github.com/chains-lab/cities-dir-proto/gen/go/svc/country"
-	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/problem"
-	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/response"
+	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/problems"
+	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/responses"
 	"github.com/chains-lab/cities-dir-svc/internal/constant/enum"
 	"github.com/chains-lab/cities-dir-svc/internal/logger"
 	"github.com/chains-lab/cities-dir-svc/internal/pagination"
@@ -17,7 +17,7 @@ func (s Service) SearchCountries(ctx context.Context, req *svc.SearchCountriesRe
 	if err != nil {
 		logger.Log(ctx).Error(err)
 
-		return nil, problem.InvalidArgumentError(ctx, "invalid country status", &errdetails.BadRequest_FieldViolation{
+		return nil, problems.InvalidArgumentError(ctx, "invalid country status", &errdetails.BadRequest_FieldViolation{
 			Field:       "status",
 			Description: err.Error(),
 		})
@@ -33,5 +33,5 @@ func (s Service) SearchCountries(ctx context.Context, req *svc.SearchCountriesRe
 		return nil, err
 	}
 
-	return response.CountriesList(countries, pag), nil
+	return responses.CountriesList(countries, pag), nil
 }

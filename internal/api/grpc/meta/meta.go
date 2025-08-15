@@ -3,8 +3,15 @@ package meta
 import (
 	"context"
 
-	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/interceptor"
 	"github.com/google/uuid"
+)
+
+type ctxKey int
+
+const (
+	LogCtxKey ctxKey = iota
+	RequestIDCtxKey
+	UserCtxKey
 )
 
 func RequestID(ctx context.Context) string {
@@ -12,7 +19,7 @@ func RequestID(ctx context.Context) string {
 		return "unknow"
 	}
 
-	requestID, ok := ctx.Value(interceptor.RequestIDCtxKey).(uuid.UUID)
+	requestID, ok := ctx.Value(RequestIDCtxKey).(uuid.UUID)
 	if !ok {
 		return "unknow"
 	}
