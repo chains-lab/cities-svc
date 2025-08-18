@@ -87,3 +87,7 @@ func RaiseCountryStatusIsNotApplicable(ctx context.Context, cause error, country
 	)
 	return ErrorCountryStatusIsNotApplicable.Raise(cause, st)
 }
+
+git add .
+git commit -m 'smal fix'
+git push
