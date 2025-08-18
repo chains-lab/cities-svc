@@ -12,7 +12,7 @@ import (
 
 const countriesTable = "countries"
 
-type CountryModel struct {
+type Country struct {
 	ID        uuid.UUID `db:"id"`
 	Name      string    `db:"name"`
 	Status    string    `db:"status"`
@@ -44,7 +44,7 @@ func (q CountryQ) New() CountryQ {
 	return NewCountryQ(q.db)
 }
 
-func (q CountryQ) Insert(ctx context.Context, input CountryModel) error {
+func (q CountryQ) Insert(ctx context.Context, input Country) error {
 	values := map[string]interface{}{
 		"id":         input.ID,
 		"name":       input.Name,
@@ -67,13 +67,13 @@ func (q CountryQ) Insert(ctx context.Context, input CountryModel) error {
 	return err
 }
 
-func (q CountryQ) Get(ctx context.Context) (CountryModel, error) {
+func (q CountryQ) Get(ctx context.Context) (Country, error) {
 	query, args, err := q.selector.Limit(1).ToSql()
 	if err != nil {
-		return CountryModel{}, fmt.Errorf("building selector query for table: %s: %w", countriesTable, err)
+		return Country{}, fmt.Errorf("building selector query for table: %s: %w", countriesTable, err)
 	}
 
-	var model CountryModel
+	var model Country
 	var row *sql.Row
 	if tx, ok := ctx.Value(TxKey).(*sql.Tx); ok {
 		row = tx.QueryRowContext(ctx, query, args...)
@@ -91,7 +91,7 @@ func (q CountryQ) Get(ctx context.Context) (CountryModel, error) {
 	return model, err
 }
 
-func (q CountryQ) Select(ctx context.Context) ([]CountryModel, error) {
+func (q CountryQ) Select(ctx context.Context) ([]Country, error) {
 	query, args, err := q.selector.ToSql()
 	if err != nil {
 		return nil, fmt.Errorf("building selector query for table: %s: %w", countriesTable, err)
@@ -108,9 +108,9 @@ func (q CountryQ) Select(ctx context.Context) ([]CountryModel, error) {
 	}
 	defer rows.Close()
 
-	var models []CountryModel
+	var models []Country
 	for rows.Next() {
-		var model CountryModel
+		var model Country
 		if err := rows.Scan(
 			&model.ID,
 			&model.Name,

@@ -2,12 +2,10 @@ package errx
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/meta"
 	"github.com/chains-lab/cities-dir-svc/internal/constant"
 	"github.com/chains-lab/svc-errors/ape"
-	"github.com/google/uuid"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -30,20 +28,46 @@ func RaiseInternal(ctx context.Context, cause error) error {
 	return ErrorInternal.Raise(cause, st)
 }
 
-var ErrorRoleIsNotApplicable = ape.Declare("ROLE_IS_NOT_APPLICABLE")
+var ErrorNoPermissions = ape.Declare("NO_PERMISSIONS")
 
-func RaiseRoleIsNotApplicable(ctx context.Context, cause error, userID uuid.UUID, role string) error {
-	msg := fmt.Sprintf("role is not applicable: user=%s role=%s", userID, role)
-	st := status.New(codes.PermissionDenied, msg)
-	st, _ = st.WithDetails(
+func RaiseNoPermissions(ctx context.Context, cause error) error {
+	res, _ := status.New(codes.PermissionDenied, cause.Error()).WithDetails(
 		&errdetails.ErrorInfo{
-			Reason: ErrorRoleIsNotApplicable.Error(),
+			Reason: ErrorNoPermissions.Error(),
 			Domain: constant.ServiceName,
 			Metadata: map[string]string{
 				"timestamp": nowRFC3339Nano(),
 			},
 		},
-		&errdetails.RequestInfo{RequestId: meta.RequestID(ctx)},
+		&errdetails.RequestInfo{
+			RequestId: meta.RequestID(ctx),
+		},
 	)
-	return ErrorRoleIsNotApplicable.Raise(cause, st)
+
+	return ErrorNoPermissions.Raise(
+		cause,
+		res,
+	)
+}
+
+var ErrorUnauthenticated = ape.Declare("UNAUTHENTICATED")
+
+func RaiseUnauthenticated(ctx context.Context, cause error) error {
+	res, _ := status.New(codes.Unauthenticated, cause.Error()).WithDetails(
+		&errdetails.ErrorInfo{
+			Reason: ErrorUnauthenticated.Error(),
+			Domain: constant.ServiceName,
+			Metadata: map[string]string{
+				"timestamp": nowRFC3339Nano(),
+			},
+		},
+		&errdetails.RequestInfo{
+			RequestId: meta.RequestID(ctx),
+		},
+	)
+
+	return ErrorUnauthenticated.Raise(
+		cause,
+		res,
+	)
 }

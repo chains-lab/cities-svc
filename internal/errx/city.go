@@ -72,25 +72,3 @@ func RaiseInvalidCityStatus(ctx context.Context, cause error, cityStatus string)
 	)
 	return ErrorInvalidCityStatus.Raise(cause, st)
 }
-
-var ErrorCityStatusIsNotApplicable = ape.Declare("CITY_STATUS_IS_NOT_APPLICABLE")
-
-func RaiseCityStatusIsNotApplicable(ctx context.Context, cause error, cityID uuid.UUID, expectedStatus, curStatus string) error {
-	st := status.New(
-		codes.FailedPrecondition,
-		fmt.Sprintf("status change is not applicable: city=%s expected=%s current=%s", cityID, expectedStatus, curStatus),
-	)
-	st, _ = st.WithDetails(
-		&errdetails.ErrorInfo{
-			Reason: ErrorCityStatusIsNotApplicable.Error(),
-			Domain: constant.ServiceName,
-			Metadata: map[string]string{
-				"timestamp": nowRFC3339Nano(),
-			},
-		},
-		&errdetails.RequestInfo{
-			RequestId: meta.RequestID(ctx),
-		},
-	)
-	return ErrorCityStatusIsNotApplicable.Raise(cause, st)
-}

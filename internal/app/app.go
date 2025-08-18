@@ -11,7 +11,7 @@ import (
 
 type App struct {
 	citiesQ    cityQ
-	adminsQ    cityAdminQ
+	adminsQ    cityGovQ
 	countriesQ countryQ
 
 	db *sql.DB
@@ -26,7 +26,7 @@ func NewApp(cfg config.Config) (App, error) {
 	return App{
 		citiesQ:    dbx.NewCityQ(pg),
 		countriesQ: dbx.NewCountryQ(pg),
-		adminsQ:    dbx.NewCityAdminQ(pg),
+		adminsQ:    dbx.NewCityGovQ(pg),
 
 		db: pg,
 	}, nil

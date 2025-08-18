@@ -15,53 +15,48 @@ import (
 	"github.com/google/uuid"
 )
 
-type cityAdminQ interface {
-	New() dbx.CityAdminQ
+type cityGovQ interface {
+	New() dbx.CityGovQ
 
-	Insert(ctx context.Context, input dbx.CityAdminModel) error
+	Insert(ctx context.Context, input dbx.CityGov) error
 	Update(ctx context.Context, input dbx.UpdateCityAdmin) error
-	Get(ctx context.Context) (dbx.CityAdminModel, error)
-	Select(ctx context.Context) ([]dbx.CityAdminModel, error)
+	Get(ctx context.Context) (dbx.CityGov, error)
+	Select(ctx context.Context) ([]dbx.CityGov, error)
 	Delete(ctx context.Context) error
 
-	FilterUserID(UserID uuid.UUID) dbx.CityAdminQ
-	FilterCityID(cityID uuid.UUID) dbx.CityAdminQ
-	FilterRole(role string) dbx.CityAdminQ
+	FilterUserID(UserID uuid.UUID) dbx.CityGovQ
+	FilterCityID(cityID uuid.UUID) dbx.CityGovQ
+	FilterRole(role string) dbx.CityGovQ
 
 	Count(ctx context.Context) (uint64, error)
-	Page(limit, offset uint64) dbx.CityAdminQ
+	Page(limit, offset uint64) dbx.CityGovQ
 }
 
 func (a App) GetCityAdmin(ctx context.Context, cityID uuid.UUID) (models.CityGov, error) {
-	cityAdmin, err := a.adminsQ.New().FilterCityID(cityID).FilterRole(enum.CityAdminRoleAdmin).Get(ctx)
+	cityAdmin, err := a.adminsQ.New().FilterCityID(cityID).FilterRole(enum.CityGovRoleAdmin).Get(ctx)
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
-			return models.CityGov{}, errx.RaiseCityAdminNotFound(ctx, err, cityID)
+			return models.CityGov{}, errx.RaiseCityGovAdminNotFound(ctx, err, cityID)
 		default:
 			return models.CityGov{}, errx.RaiseInternal(ctx, err)
 		}
 	}
 
-	return cityAdminModel(cityAdmin), nil
+	return cityGovModel(cityAdmin), nil
 }
 
 func (a App) DeleteCityAdmin(ctx context.Context, cityID uuid.UUID) error {
-	_, err := a.GetCityByID(ctx, cityID)
-	if err != nil {
-		return err
-	}
-
 	cityAdmin, err := a.GetCityAdmin(ctx, cityID)
 	if err != nil {
 		return err
 	}
 
-	err = a.adminsQ.New().FilterUserID(cityAdmin.UserID).FilterCityID(cityID).Delete(ctx)
+	err = a.adminsQ.New().FilterUserID(cityAdmin.UserID).FilterRole(enum.CityGovRoleAdmin).FilterCityID(cityID).Delete(ctx)
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
-			return errx.RaiseCityAdminNotFound(ctx, err, cityID)
+			return errx.RaiseCityGovAdminNotFound(ctx, err, cityID)
 		default:
 			return errx.RaiseInternal(ctx, err)
 		}
@@ -83,7 +78,7 @@ func (a App) CreateCityGovAdmin(ctx context.Context, cityID, userID uuid.UUID) (
 	if user != (models.CityGov{}) || err == nil {
 		return models.CityGov{}, errx.RaiseUserIsAlreadyCityGov(
 			ctx,
-			fmt.Errorf("user with user_id: %s is already city admin for city_id: %s",
+			fmt.Errorf("user with user_id: %s is already city gov for city_id: %s",
 				userID,
 				cityID,
 			),
@@ -92,28 +87,29 @@ func (a App) CreateCityGovAdmin(ctx context.Context, cityID, userID uuid.UUID) (
 		)
 	}
 
-	admin := dbx.CityAdminModel{
+	admin := dbx.CityGov{
 		CityID:    cityID,
 		UserID:    userID,
-		Role:      enum.CityAdminRoleAdmin,
+		Role:      enum.CityGovRoleAdmin,
 		UpdatedAt: time.Now().UTC(),
 		CreatedAt: time.Now().UTC(),
 	}
 	err = a.adminsQ.New().Insert(ctx, admin)
 	if err != nil {
 		switch {
-		case errors.Is(err, sql.ErrNoRows):
-			return models.CityGov{}, errx.RaiseCityAlreadyHaveAdmin(
-				ctx,
-				err,
-				cityID,
-			)
 		default:
 			return models.CityGov{}, errx.RaiseInternal(ctx, err)
 		}
 	}
 
-	return cityAdminModel(admin), nil
+	return cityGovModel(admin), nil
+}
+
+// TransferCityAdminRight transfers the admin of a city to a new owner.
+func (a App) TransferCityAdminRight(ctx context.Context, cityID, initiatorID, newOwnerID uuid.UUID) error {
+	//TODO implement transfer ownership logic
+
+	return nil
 }
 
 func (a App) CreateCityGovModer(ctx context.Context, cityID, userID uuid.UUID) (models.CityGov, error) {
@@ -139,10 +135,10 @@ func (a App) CreateCityGovModer(ctx context.Context, cityID, userID uuid.UUID) (
 		)
 	}
 
-	admin := dbx.CityAdminModel{
+	admin := dbx.CityGov{
 		CityID:    cityID,
 		UserID:    userID,
-		Role:      enum.CityAdminRoleModerator,
+		Role:      enum.CityGovRoleModerator,
 		UpdatedAt: time.Now().UTC(),
 		CreatedAt: time.Now().UTC(),
 	}
@@ -154,25 +150,25 @@ func (a App) CreateCityGovModer(ctx context.Context, cityID, userID uuid.UUID) (
 		}
 	}
 
-	return cityAdminModel(admin), nil
+	return cityGovModel(admin), nil
 }
 
 // Read methods for citygov
 
 // getInitiatorCityGov retrieves the city admin for the given initiator and city.
-func (a App) getInitiatorCityGov(ctx context.Context, cityID, initiatorID uuid.UUID) (dbx.CityAdminModel, error) {
+func (a App) getInitiatorCityGov(ctx context.Context, cityID, initiatorID uuid.UUID) (dbx.CityGov, error) {
 	initiator, err := a.adminsQ.New().FilterUserID(initiatorID).FilterCityID(cityID).Get(ctx)
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
-			return dbx.CityAdminModel{}, errx.RaiseInitiatorIsNotCityGov(
+			return dbx.CityGov{}, errx.RaiseInitiatorIsNotCityGov(
 				ctx,
 				fmt.Errorf("initiator: %s, not city admin for cit: %s", initiatorID, cityID),
 				initiatorID,
 				cityID,
 			)
 		default:
-			return dbx.CityAdminModel{}, errx.RaiseInternal(ctx, err)
+			return dbx.CityGov{}, errx.RaiseInternal(ctx, err)
 		}
 	}
 	return initiator, nil
@@ -199,15 +195,10 @@ func (a App) GetCityGov(ctx context.Context, cityID, userID uuid.UUID) (models.C
 		}
 	}
 
-	return cityAdminModel(cityAdmin), nil
+	return cityGovModel(cityAdmin), nil
 }
 
 func (a App) GetCityGovs(ctx context.Context, cityID uuid.UUID, pag pagination.Request) ([]models.CityGov, pagination.Response, error) {
-	_, err := a.GetCityByID(ctx, cityID)
-	if err != nil {
-		return nil, pagination.Response{}, err
-	}
-
 	limit, offset := pagination.CalculateLimitOffset(pag)
 
 	cityAdmins, err := a.adminsQ.New().FilterCityID(cityID).Page(limit, offset).Select(ctx)
@@ -230,32 +221,20 @@ func (a App) GetCityGovs(ctx context.Context, cityID uuid.UUID, pag pagination.R
 		}
 	}
 
-	res, pagRes := cityAdminsArray(cityAdmins, limit, offset, total)
+	res, pagRes := cityGovsArray(cityAdmins, limit, offset, total)
 
 	return res, pagRes, nil
 }
 
 // Update methods for citygov
 
-// TransferCityAdminRight transfers the admin of a city to a new owner.
-func (a App) TransferCityAdminRight(ctx context.Context, cityID, initiatorID, newOwnerID uuid.UUID) error {
-	//TODO implement transfer ownership logic
-
-	return nil
-}
-
 func (a App) RefuseOwnCityGovRights(ctx context.Context, cityID, userID uuid.UUID) error {
-	_, err := a.GetCityByID(ctx, cityID)
+	cityAdmin, err := a.getInitiatorCityGov(ctx, cityID, userID)
 	if err != nil {
 		return err
 	}
 
-	cityAdmin, err := a.GetCityGov(ctx, cityID, userID)
-	if err != nil {
-		return err
-	}
-
-	if cityAdmin.Role == enum.CityAdminRoleAdmin {
+	if cityAdmin.Role == enum.CityGovRoleAdmin {
 		return errx.RaiseCannotDeleteCityAdmin(
 			ctx,
 			fmt.Errorf("city admin with user_id:%s cannot delete city admin with user_id: %s, city_id: %s",
@@ -290,17 +269,12 @@ func (a App) RefuseOwnCityGovRights(ctx context.Context, cityID, userID uuid.UUI
 // Delete methods for citygov
 
 func (a App) DeleteCityGov(ctx context.Context, cityID, userID uuid.UUID) error {
-	_, err := a.GetCityByID(ctx, cityID)
-	if err != nil {
-		return err
-	}
-
 	cityGov, err := a.GetCityGov(ctx, cityID, userID)
 	if err != nil {
 		return err
 	}
 
-	if cityGov.Role == enum.CityAdminRoleAdmin {
+	if cityGov.Role == enum.CityGovRoleAdmin {
 		return errx.RaiseCannotDeleteCityAdmin(
 			ctx,
 			fmt.Errorf("city admin with user_id:%s cannot delete city admin with user_id: %s, city_id: %s",
@@ -326,20 +300,20 @@ func (a App) DeleteCityGov(ctx context.Context, cityID, userID uuid.UUID) error 
 
 // Helper functions for citygov
 
-func cityAdminModel(cityAdmin dbx.CityAdminModel) models.CityGov {
+func cityGovModel(gov dbx.CityGov) models.CityGov {
 	return models.CityGov{
-		UserID:    cityAdmin.UserID,
-		CityID:    cityAdmin.CityID,
-		Role:      cityAdmin.Role,
-		UpdatedAt: cityAdmin.UpdatedAt,
-		CreatedAt: cityAdmin.CreatedAt,
+		UserID:    gov.UserID,
+		CityID:    gov.CityID,
+		Role:      gov.Role,
+		UpdatedAt: gov.UpdatedAt,
+		CreatedAt: gov.CreatedAt,
 	}
 }
 
-func cityAdminsArray(cityAdmins []dbx.CityAdminModel, limit, offset, total uint64) ([]models.CityGov, pagination.Response) {
-	res := make([]models.CityGov, len(cityAdmins))
-	for i, cityAdmin := range cityAdmins {
-		res[i] = cityAdminModel(cityAdmin)
+func cityGovsArray(govs []dbx.CityGov, limit, offset, total uint64) ([]models.CityGov, pagination.Response) {
+	res := make([]models.CityGov, len(govs))
+	for i, cityAdmin := range govs {
+		res[i] = cityGovModel(cityAdmin)
 	}
 
 	pag := pagination.Response{

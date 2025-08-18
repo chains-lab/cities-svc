@@ -10,9 +10,9 @@ import (
 	"github.com/google/uuid"
 )
 
-const citiesAdminsTable = "cities_admins"
+const cityGovTable = "city_governments"
 
-type CityAdminModel struct {
+type CityGov struct {
 	ID        uuid.UUID `db:"id"`
 	UserID    uuid.UUID `db:"user_id"`
 	CityID    uuid.UUID `db:"city_id"`
@@ -21,7 +21,7 @@ type CityAdminModel struct {
 	CreatedAt time.Time `db:"created_at"`
 }
 
-type CityAdminQ struct {
+type CityGovQ struct {
 	db       *sql.DB
 	selector sq.SelectBuilder
 	inserter sq.InsertBuilder
@@ -30,23 +30,23 @@ type CityAdminQ struct {
 	counter  sq.SelectBuilder
 }
 
-func NewCityAdminQ(db *sql.DB) CityAdminQ {
+func NewCityGovQ(db *sql.DB) CityGovQ {
 	builder := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
-	return CityAdminQ{
+	return CityGovQ{
 		db:       db,
-		selector: builder.Select("*").From(citiesAdminsTable),
-		inserter: builder.Insert(citiesAdminsTable),
-		updater:  builder.Update(citiesAdminsTable),
-		deleter:  builder.Delete(citiesAdminsTable),
-		counter:  builder.Select("COUNT(*) AS count").From(citiesAdminsTable),
+		selector: builder.Select("*").From(cityGovTable),
+		inserter: builder.Insert(cityGovTable),
+		updater:  builder.Update(cityGovTable),
+		deleter:  builder.Delete(cityGovTable),
+		counter:  builder.Select("COUNT(*) AS count").From(cityGovTable),
 	}
 }
 
-func (q CityAdminQ) New() CityAdminQ {
-	return NewCityAdminQ(q.db)
+func (q CityGovQ) New() CityGovQ {
+	return NewCityGovQ(q.db)
 }
 
-func (q CityAdminQ) Insert(ctx context.Context, input CityAdminModel) error {
+func (q CityGovQ) Insert(ctx context.Context, input CityGov) error {
 	values := map[string]interface{}{
 		"id":         input.ID,
 		"user_id":    input.UserID,
@@ -58,7 +58,7 @@ func (q CityAdminQ) Insert(ctx context.Context, input CityAdminModel) error {
 
 	query, args, err := q.inserter.SetMap(values).ToSql()
 	if err != nil {
-		return fmt.Errorf("building insertor query for table: %s: %w", citiesAdminsTable, err)
+		return fmt.Errorf("building insertor query for table: %s: %w", cityGovTable, err)
 	}
 
 	if tx, ok := ctx.Value(TxKey).(*sql.Tx); ok {
@@ -70,13 +70,13 @@ func (q CityAdminQ) Insert(ctx context.Context, input CityAdminModel) error {
 	return err
 }
 
-func (q CityAdminQ) Get(ctx context.Context) (CityAdminModel, error) {
+func (q CityGovQ) Get(ctx context.Context) (CityGov, error) {
 	query, args, err := q.selector.Limit(1).ToSql()
 	if err != nil {
-		return CityAdminModel{}, fmt.Errorf("building selector query for table: %s: %w", citiesAdminsTable, err)
+		return CityGov{}, fmt.Errorf("building selector query for table: %s: %w", cityGovTable, err)
 	}
 
-	var model CityAdminModel
+	var model CityGov
 	var row *sql.Row
 	if tx, ok := ctx.Value(TxKey).(*sql.Tx); ok {
 		row = tx.QueryRowContext(ctx, query, args...)
@@ -95,10 +95,10 @@ func (q CityAdminQ) Get(ctx context.Context) (CityAdminModel, error) {
 	return model, err
 }
 
-func (q CityAdminQ) Select(ctx context.Context) ([]CityAdminModel, error) {
+func (q CityGovQ) Select(ctx context.Context) ([]CityGov, error) {
 	query, args, err := q.selector.ToSql()
 	if err != nil {
-		return nil, fmt.Errorf("building selector query for table: %s: %w", citiesAdminsTable, err)
+		return nil, fmt.Errorf("building selector query for table: %s: %w", cityGovTable, err)
 	}
 
 	var rows *sql.Rows
@@ -112,9 +112,9 @@ func (q CityAdminQ) Select(ctx context.Context) ([]CityAdminModel, error) {
 	}
 	defer rows.Close()
 
-	var models []CityAdminModel
+	var models []CityGov
 	for rows.Next() {
-		var model CityAdminModel
+		var model CityGov
 		if err := rows.Scan(
 			&model.ID,
 			&model.UserID,
@@ -136,7 +136,7 @@ type UpdateCityAdmin struct {
 	UpdatedAt time.Time `db:"updated_at"`
 }
 
-func (q CityAdminQ) Update(ctx context.Context, input UpdateCityAdmin) error {
+func (q CityGovQ) Update(ctx context.Context, input UpdateCityAdmin) error {
 	updates := map[string]interface{}{
 		"updated_at": input.UpdatedAt,
 	}
@@ -146,7 +146,7 @@ func (q CityAdminQ) Update(ctx context.Context, input UpdateCityAdmin) error {
 
 	query, args, err := q.updater.SetMap(updates).ToSql()
 	if err != nil {
-		return fmt.Errorf("building updater query for table: %s: %w", citiesAdminsTable, err)
+		return fmt.Errorf("building updater query for table: %s: %w", cityGovTable, err)
 	}
 
 	if tx, ok := ctx.Value(TxKey).(*sql.Tx); ok {
@@ -158,10 +158,10 @@ func (q CityAdminQ) Update(ctx context.Context, input UpdateCityAdmin) error {
 	return err
 }
 
-func (q CityAdminQ) Delete(ctx context.Context) error {
+func (q CityGovQ) Delete(ctx context.Context) error {
 	query, args, err := q.deleter.ToSql()
 	if err != nil {
-		return fmt.Errorf("building deleter query for table: %s: %w", citiesAdminsTable, err)
+		return fmt.Errorf("building deleter query for table: %s: %w", cityGovTable, err)
 	}
 
 	if tx, ok := ctx.Value(TxKey).(*sql.Tx); ok {
@@ -173,7 +173,7 @@ func (q CityAdminQ) Delete(ctx context.Context) error {
 	return err
 }
 
-func (q CityAdminQ) FilterUserID(userID uuid.UUID) CityAdminQ {
+func (q CityGovQ) FilterUserID(userID uuid.UUID) CityGovQ {
 	q.selector = q.selector.Where(sq.Eq{"user_id": userID})
 	q.counter = q.counter.Where(sq.Eq{"user_id": userID})
 	q.deleter = q.deleter.Where(sq.Eq{"user_id": userID})
@@ -182,7 +182,7 @@ func (q CityAdminQ) FilterUserID(userID uuid.UUID) CityAdminQ {
 	return q
 }
 
-func (q CityAdminQ) FilterCityID(cityID uuid.UUID) CityAdminQ {
+func (q CityGovQ) FilterCityID(cityID uuid.UUID) CityGovQ {
 	q.selector = q.selector.Where(sq.Eq{"city_id": cityID})
 	q.counter = q.counter.Where(sq.Eq{"city_id": cityID})
 	q.deleter = q.deleter.Where(sq.Eq{"city_id": cityID})
@@ -191,7 +191,7 @@ func (q CityAdminQ) FilterCityID(cityID uuid.UUID) CityAdminQ {
 	return q
 }
 
-func (q CityAdminQ) FilterRole(role string) CityAdminQ {
+func (q CityGovQ) FilterRole(role string) CityGovQ {
 	q.selector = q.selector.Where(sq.Eq{"role": role})
 	q.counter = q.counter.Where(sq.Eq{"role": role})
 	q.deleter = q.deleter.Where(sq.Eq{"role": role})
@@ -200,10 +200,10 @@ func (q CityAdminQ) FilterRole(role string) CityAdminQ {
 	return q
 }
 
-func (q CityAdminQ) Count(ctx context.Context) (uint64, error) {
+func (q CityGovQ) Count(ctx context.Context) (uint64, error) {
 	query, args, err := q.counter.ToSql()
 	if err != nil {
-		return 0, fmt.Errorf("building counter query for table: %s: %w", citiesAdminsTable, err)
+		return 0, fmt.Errorf("building counter query for table: %s: %w", cityGovTable, err)
 	}
 
 	var count uint64
@@ -221,7 +221,7 @@ func (q CityAdminQ) Count(ctx context.Context) (uint64, error) {
 	return count, nil
 }
 
-func (q CityAdminQ) Page(limit, offset uint64) CityAdminQ {
+func (q CityGovQ) Page(limit, offset uint64) CityGovQ {
 	q.counter = q.counter.Limit(limit).Offset(offset)
 	q.selector = q.selector.Limit(limit).Offset(offset)
 	return q

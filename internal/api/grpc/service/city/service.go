@@ -104,7 +104,7 @@ func (s Service) OnlyCityAdmin(ctx context.Context, initiatorID, cityID, action 
 		return models.CityGov{}, err
 	}
 
-	if gov.Role != enum.CityAdminRoleAdmin {
+	if gov.Role != enum.CityGovRoleAdmin {
 		logger.Log(ctx).Warnf("user: %s is not a city admin for city %s, but try to do action: '%s'",
 			InitiatorID, cityID, action)
 

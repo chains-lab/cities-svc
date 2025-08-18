@@ -18,10 +18,10 @@ import (
 type countryQ interface {
 	New() dbx.CountryQ
 
-	Insert(ctx context.Context, input dbx.CountryModel) error
+	Insert(ctx context.Context, input dbx.Country) error
 	Update(ctx context.Context, input dbx.UpdateCountryInput) error
-	Get(ctx context.Context) (dbx.CountryModel, error)
-	Select(ctx context.Context) ([]dbx.CountryModel, error)
+	Get(ctx context.Context) (dbx.Country, error)
+	Select(ctx context.Context) ([]dbx.Country, error)
 	Delete(ctx context.Context) error
 
 	FilterID(ID uuid.UUID) dbx.CountryQ
@@ -35,7 +35,7 @@ type countryQ interface {
 // Create methods for countries
 
 func (a App) CreateCountry(ctx context.Context, name string) (models.Country, error) {
-	country := dbx.CountryModel{
+	country := dbx.Country{
 		ID:        uuid.New(),
 		Name:      name,
 		Status:    enum.CountryStatusUnsupported,
@@ -193,7 +193,7 @@ func (a App) UpdateCountryName(ctx context.Context, ID uuid.UUID, name string) (
 
 // Helper functions for countries
 
-func countryModel(country dbx.CountryModel) models.Country {
+func countryModel(country dbx.Country) models.Country {
 	return models.Country{
 		ID:        country.ID,
 		Name:      country.Name,
@@ -203,7 +203,7 @@ func countryModel(country dbx.CountryModel) models.Country {
 	}
 }
 
-func countriesArray(countries []dbx.CountryModel, limit, offset, total uint64) ([]models.Country, pagination.Response) {
+func countriesArray(countries []dbx.Country, limit, offset, total uint64) ([]models.Country, pagination.Response) {
 	result := make([]models.Country, 0, len(countries))
 	for _, country := range countries {
 		result = append(result, countryModel(country))

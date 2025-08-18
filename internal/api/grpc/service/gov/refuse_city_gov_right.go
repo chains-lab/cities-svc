@@ -19,7 +19,7 @@ func (s Service) RefuseCityGovRight(ctx context.Context, req *svc.RefuseCityGovR
 		return nil, err
 	}
 
-	if initiator.Role == enum.CityAdminRoleAdmin {
+	if initiator.Role == enum.CityGovRoleAdmin {
 		logger.Log(ctx).Error("city admin try to refuse own admin rights")
 
 		return nil, problems.PermissionDeniedError(ctx, "city admin cannot transfer own admin rights, but u can transfer to another user")

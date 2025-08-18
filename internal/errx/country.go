@@ -30,8 +30,6 @@ func RaiseCountryAlreadyExists(ctx context.Context, cause error, countryName str
 	return ErrorCountryAlreadyExists.Raise(cause, st)
 }
 
-// --- COUNTRY_NOT_FOUND ---
-
 var ErrorCountryNotFound = ape.Declare("COUNTRY_NOT_FOUND")
 
 func RaiseCountryNotFoundByID(ctx context.Context, cause error, id uuid.UUID) error {
@@ -49,8 +47,6 @@ func RaiseCountryNotFoundByID(ctx context.Context, cause error, id uuid.UUID) er
 	return ErrorCountryNotFound.Raise(cause, st)
 }
 
-// --- INVALID_COUNTRY_STATUS ---
-
 var ErrorInvalidCountryStatus = ape.Declare("INVALID_COUNTRY_STATUS")
 
 func RaiseInvalidCountryStatus(ctx context.Context, cause error, statusStr string) error {
@@ -67,27 +63,3 @@ func RaiseInvalidCountryStatus(ctx context.Context, cause error, statusStr strin
 	)
 	return ErrorInvalidCountryStatus.Raise(cause, st)
 }
-
-// --- COUNTRY_STATUS_IS_NOT_APPLICABLE ---
-
-var ErrorCountryStatusIsNotApplicable = ape.Declare("COUNTRY_STATUS_IS_NOT_APPLICABLE")
-
-func RaiseCountryStatusIsNotApplicable(ctx context.Context, cause error, countryID uuid.UUID, expectedStatus, curStatus string) error {
-	msg := fmt.Sprintf("status change is not applicable: country=%s expected=%s current=%s", countryID, expectedStatus, curStatus)
-	st := status.New(codes.FailedPrecondition, msg)
-	st, _ = st.WithDetails(
-		&errdetails.ErrorInfo{
-			Reason: ErrorCountryStatusIsNotApplicable.Error(),
-			Domain: constant.ServiceName,
-			Metadata: map[string]string{
-				"timestamp": nowRFC3339Nano(),
-			},
-		},
-		&errdetails.RequestInfo{RequestId: meta.RequestID(ctx)},
-	)
-	return ErrorCountryStatusIsNotApplicable.Raise(cause, st)
-}
-
-git add .
-git commit -m 'smal fix'
-git push
