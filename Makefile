@@ -3,19 +3,19 @@ OPENAPI_GENERATOR := java -jar ~/openapi-generator-cli.jar
 CONFIG_FILE := ./config.yaml
 
 build:
-	KV_VIPER_FILE=$(CONFIG_FILE) go build -o ./cmd/cities-dir-svc/main ./cmd/cities-dir-svc/main.go
+	KV_VIPER_FILE=$(CONFIG_FILE) go build -o ./cmd/cities-svc/main ./cmd/cities-svc/main.go
 
 migrate-up:
-	KV_VIPER_FILE=$(CONFIG_FILE) go build -o ./cmd/cities-dir-svc/main ./cmd/cities-dir-svc/main.go
-	KV_VIPER_FILE=$(CONFIG_FILE) ./cmd/cities-dir-svc/main migrate up
+	KV_VIPER_FILE=$(CONFIG_FILE) go build -o ./cmd/cities-svc/main ./cmd/cities-svc/main.go
+	KV_VIPER_FILE=$(CONFIG_FILE) ./cmd/cities-svc/main migrate up
 
 migrate-down:
-	KV_VIPER_FILE=$(CONFIG_FILE) go build -o ./cmd/cities-dir-svc/main ./cmd/cities-dir-svc/main.go
-	KV_VIPER_FILE=$(CONFIG_FILE) ./cmd/cities-dir-svc/main migrate down
+	KV_VIPER_FILE=$(CONFIG_FILE) go build -o ./cmd/cities-svc/main ./cmd/cities-svc/main.go
+	KV_VIPER_FILE=$(CONFIG_FILE) ./cmd/cities-svc/main migrate down
 
 run-server:
-	KV_VIPER_FILE=$(CONFIG_FILE) go build -o ./cmd/cities-dir-svc/main ./cmd/cities-dir-svc/main.go
-	KV_VIPER_FILE=$(CONFIG_FILE) ./cmd/cities-dir-svc/main run service
+	KV_VIPER_FILE=$(CONFIG_FILE) go build -o ./cmd/cities-svc/main ./cmd/cities-svc/main.go
+	KV_VIPER_FILE=$(CONFIG_FILE) ./cmd/cities-svc/main run service
 
 docker-uo:
 	docker compose up -d

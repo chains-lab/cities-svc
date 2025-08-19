@@ -1,8 +1,8 @@
 package responses
 
 import (
-	countryProto "github.com/chains-lab/cities-dir-proto/gen/go/svc/country"
-	"github.com/chains-lab/cities-dir-svc/internal/app/models"
+	countryProto "github.com/chains-lab/cities-proto/gen/go/svc/country"
+	"github.com/chains-lab/cities-svc/internal/app/models"
 )
 
 func Country(country models.Country) *countryProto.Country {

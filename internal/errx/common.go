@@ -2,14 +2,19 @@ package errx
 
 import (
 	"context"
+	"time"
 
-	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/meta"
-	"github.com/chains-lab/cities-dir-svc/internal/constant"
+	"github.com/chains-lab/cities-svc/internal/api/grpc/meta"
+	"github.com/chains-lab/cities-svc/internal/constant"
 	"github.com/chains-lab/svc-errors/ape"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
+
+func nowRFC3339Nano() string {
+	return time.Now().UTC().Format(time.RFC3339Nano)
+}
 
 var ErrorInternal = ape.Declare("INTERNAL_ERROR")
 

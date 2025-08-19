@@ -7,11 +7,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/chains-lab/cities-dir-svc/internal/app/models"
-	"github.com/chains-lab/cities-dir-svc/internal/constant/enum"
-	"github.com/chains-lab/cities-dir-svc/internal/dbx"
-	"github.com/chains-lab/cities-dir-svc/internal/errx"
-	"github.com/chains-lab/cities-dir-svc/internal/pagination"
+	"github.com/chains-lab/cities-svc/internal/app/models"
+	"github.com/chains-lab/cities-svc/internal/constant/enum"
+	"github.com/chains-lab/cities-svc/internal/dbx"
+	"github.com/chains-lab/cities-svc/internal/errx"
+	"github.com/chains-lab/cities-svc/internal/pagination"
 	"github.com/google/uuid"
 )
 

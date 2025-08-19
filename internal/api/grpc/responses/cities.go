@@ -1,8 +1,8 @@
 package responses
 
 import (
-	cityProto "github.com/chains-lab/cities-dir-proto/gen/go/svc/city"
-	"github.com/chains-lab/cities-dir-svc/internal/app/models"
+	cityProto "github.com/chains-lab/cities-proto/gen/go/svc/city"
+	"github.com/chains-lab/cities-svc/internal/app/models"
 )
 
 func City(city models.City) *cityProto.City {

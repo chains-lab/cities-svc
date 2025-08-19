@@ -5,16 +5,14 @@ import (
 	"fmt"
 	"net"
 
-	cityProto "github.com/chains-lab/cities-dir-proto/gen/go/svc/city"
-	countryProto "github.com/chains-lab/cities-dir-proto/gen/go/svc/country"
-	cityGovProto "github.com/chains-lab/cities-dir-proto/gen/go/svc/gov"
-	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/interceptors"
-	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/service/city"
-	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/service/country"
-	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/service/gov"
-	"github.com/chains-lab/cities-dir-svc/internal/app"
-	"github.com/chains-lab/cities-dir-svc/internal/config"
-	"github.com/chains-lab/cities-dir-svc/internal/logger"
+	cityProto "github.com/chains-lab/cities-proto/gen/go/svc/city"
+	countryProto "github.com/chains-lab/cities-proto/gen/go/svc/country"
+	"github.com/chains-lab/cities-svc/internal/api/grpc/interceptors"
+	"github.com/chains-lab/cities-svc/internal/api/grpc/service/city"
+	"github.com/chains-lab/cities-svc/internal/api/grpc/service/country"
+	"github.com/chains-lab/cities-svc/internal/app"
+	"github.com/chains-lab/cities-svc/internal/config"
+	"github.com/chains-lab/cities-svc/internal/logger"
 	"google.golang.org/grpc"
 )
 
@@ -34,7 +32,6 @@ func Run(ctx context.Context, cfg config.Config, log logger.Logger, app *app.App
 	)
 
 	cityProto.RegisterCityServiceServer(grpcServer, city.NewService(cfg, app))
-	cityGovProto.RegisterGovServiceServer(grpcServer, gov.NewService(cfg, app))
 	countryProto.RegisterCountryServiceServer(grpcServer, country.NewService(cfg, app))
 
 	lis, err := net.Listen("tcp", cfg.Server.Port)

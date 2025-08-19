@@ -3,12 +3,12 @@ package country
 import (
 	"context"
 
-	svc "github.com/chains-lab/cities-dir-proto/gen/go/svc/country"
-	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/problems"
-	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/responses"
-	"github.com/chains-lab/cities-dir-svc/internal/constant/enum"
-	"github.com/chains-lab/cities-dir-svc/internal/logger"
-	"github.com/chains-lab/cities-dir-svc/internal/pagination"
+	svc "github.com/chains-lab/cities-proto/gen/go/svc/country"
+	"github.com/chains-lab/cities-svc/internal/api/grpc/problems"
+	"github.com/chains-lab/cities-svc/internal/api/grpc/responses"
+	"github.com/chains-lab/cities-svc/internal/constant/enum"
+	"github.com/chains-lab/cities-svc/internal/logger"
+	"github.com/chains-lab/cities-svc/internal/pagination"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 )
 

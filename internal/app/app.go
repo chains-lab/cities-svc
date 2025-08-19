@@ -5,13 +5,12 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/chains-lab/cities-dir-svc/internal/config"
-	"github.com/chains-lab/cities-dir-svc/internal/dbx"
+	"github.com/chains-lab/cities-svc/internal/config"
+	"github.com/chains-lab/cities-svc/internal/dbx"
 )
 
 type App struct {
 	citiesQ    cityQ
-	adminsQ    cityGovQ
 	countriesQ countryQ
 
 	db *sql.DB
@@ -26,7 +25,6 @@ func NewApp(cfg config.Config) (App, error) {
 	return App{
 		citiesQ:    dbx.NewCityQ(pg),
 		countriesQ: dbx.NewCountryQ(pg),
-		adminsQ:    dbx.NewCityGovQ(pg),
 
 		db: pg,
 	}, nil

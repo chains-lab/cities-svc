@@ -1,5 +1,5 @@
 server:
-  name: "cities-dir-svc"
+  name: "cities-svc"
   port: ":8002"
   log:
     level: "debug"

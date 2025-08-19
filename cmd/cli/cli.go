@@ -8,11 +8,11 @@ import (
 	"syscall"
 
 	"github.com/alecthomas/kingpin"
-	"github.com/chains-lab/cities-dir-svc/internal/api"
-	"github.com/chains-lab/cities-dir-svc/internal/app"
-	"github.com/chains-lab/cities-dir-svc/internal/config"
-	"github.com/chains-lab/cities-dir-svc/internal/dbx"
-	"github.com/chains-lab/cities-dir-svc/internal/logger"
+	"github.com/chains-lab/cities-svc/internal/api"
+	"github.com/chains-lab/cities-svc/internal/app"
+	"github.com/chains-lab/cities-svc/internal/config"
+	"github.com/chains-lab/cities-svc/internal/dbx"
+	"github.com/chains-lab/cities-svc/internal/logger"
 )
 
 func Run(args []string) bool {

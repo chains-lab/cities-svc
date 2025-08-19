@@ -1,10 +1,10 @@
 package responses
 
 import (
-	pagProto "github.com/chains-lab/cities-dir-proto/gen/go/common/pagination"
-	countryProto "github.com/chains-lab/cities-dir-proto/gen/go/svc/country"
-	"github.com/chains-lab/cities-dir-svc/internal/app/models"
-	"github.com/chains-lab/cities-dir-svc/internal/pagination"
+	pagProto "github.com/chains-lab/cities-proto/gen/go/common/pagination"
+	countryProto "github.com/chains-lab/cities-proto/gen/go/svc/country"
+	"github.com/chains-lab/cities-svc/internal/app/models"
+	"github.com/chains-lab/cities-svc/internal/pagination"
 )
 
 func CountriesList(arr []models.Country, response pagination.Response) *countryProto.CountriesList {

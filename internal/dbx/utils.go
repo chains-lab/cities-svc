@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"embed"
 
-	"github.com/chains-lab/cities-dir-svc/internal/config"
+	"github.com/chains-lab/cities-svc/internal/config"
 	"github.com/pkg/errors"
 	migrate "github.com/rubenv/sql-migrate"
 	"github.com/sirupsen/logrus"

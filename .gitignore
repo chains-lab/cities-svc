@@ -3,7 +3,7 @@ vendor
 node_modules
 
 main
-cmd/cities-dir-svc/m ain
+cmd/cities-svc/m ain
 
 config_local.yaml
 config_docker.yaml

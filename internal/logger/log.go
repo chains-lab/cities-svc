@@ -4,8 +4,8 @@ import (
 	"context"
 	"strings"
 
-	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/meta"
-	"github.com/chains-lab/cities-dir-svc/internal/config"
+	"github.com/chains-lab/cities-svc/internal/api/grpc/meta"
+	"github.com/chains-lab/cities-svc/internal/config"
 	"github.com/chains-lab/svc-errors/ape"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"

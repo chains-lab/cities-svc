@@ -1,3 +1,3 @@
 package constant
 
-const ServiceName = "cities-die-svc"
+const ServiceName = "cities-svc"

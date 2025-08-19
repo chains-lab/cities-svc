@@ -3,11 +3,11 @@ package country
 import (
 	"context"
 
-	svc "github.com/chains-lab/cities-dir-proto/gen/go/svc/country"
-	"github.com/chains-lab/cities-dir-svc/internal/app"
-	"github.com/chains-lab/cities-dir-svc/internal/app/models"
-	"github.com/chains-lab/cities-dir-svc/internal/config"
-	"github.com/chains-lab/cities-dir-svc/internal/pagination"
+	svc "github.com/chains-lab/cities-proto/gen/go/svc/country"
+	"github.com/chains-lab/cities-svc/internal/app"
+	"github.com/chains-lab/cities-svc/internal/app/models"
+	"github.com/chains-lab/cities-svc/internal/config"
+	"github.com/chains-lab/cities-svc/internal/pagination"
 	"github.com/google/uuid"
 )
 

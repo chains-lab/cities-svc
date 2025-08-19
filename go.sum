@@ -6,8 +6,8 @@ github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751 h1:JYp7IbQjafo
 github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
 github.com/alecthomas/units v0.0.0-20240927000941-0f3dac36c52b h1:mimo19zliBX/vSQ6PWWSL9lK8qwHozUj03+zLoEB8O0=
 github.com/alecthomas/units v0.0.0-20240927000941-0f3dac36c52b/go.mod h1:fvzegU4vN3H1qMT+8wDmzjAcDONcgo2/SZ/TyfdUOFs=
-github.com/chains-lab/cities-dir-proto v0.4.8 h1:0cUDxxN2FDYiQodWPOwaR3QSkRTuOaES8zWC/QQJphA=
-github.com/chains-lab/cities-dir-proto v0.4.8/go.mod h1:1j+jDebihIaPNKIuE8YyDz6czHeAQjoyGDpb4CyTBVY=
+github.com/chains-lab/cities-proto v0.4.9 h1:8EtygVTMi2zX28jVxiK68WGJBO3fxj56Sgl5Jiq7h/Y=
+github.com/chains-lab/cities-proto v0.4.9/go.mod h1:mSrKLx7RPCkEU9WHnwdyZ+ISi0IcWHwWIP95OBHgdh8=
 github.com/chains-lab/gatekit v0.2.0 h1:h0VmrUqOrR/P1ioRhUq/Co794ig9zMVNGtLCvUXPN9s=
 github.com/chains-lab/gatekit v0.2.0/go.mod h1:4Bm8BXPMR+HTnMg7uEPGA4nCLMA8xD+fYifuKkn766Q=
 github.com/chains-lab/svc-errors v0.2.2 h1:70aJpuCHhptxOXQTIntfSwG8xi0WmthSPUpj3o2F0ds=

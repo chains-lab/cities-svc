@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/meta"
-	"github.com/chains-lab/cities-dir-svc/internal/constant"
+	"github.com/chains-lab/cities-svc/internal/api/grpc/meta"
+	"github.com/chains-lab/cities-svc/internal/constant"
 	"github.com/chains-lab/svc-errors/ape"
 	"github.com/google/uuid"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"

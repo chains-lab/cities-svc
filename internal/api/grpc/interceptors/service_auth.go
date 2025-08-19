@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/chains-lab/cities-dir-svc/internal/api/grpc/problems"
-	"github.com/chains-lab/cities-dir-svc/internal/constant"
-	"github.com/chains-lab/cities-dir-svc/internal/logger"
+	"github.com/chains-lab/cities-svc/internal/api/grpc/problems"
+	"github.com/chains-lab/cities-svc/internal/constant"
+	"github.com/chains-lab/cities-svc/internal/logger"
 	"github.com/chains-lab/gatekit/auth"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
