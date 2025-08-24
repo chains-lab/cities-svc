@@ -12,7 +12,7 @@ import (
 	"github.com/chains-lab/cities-svc/internal/api/grpc/service/country"
 	"github.com/chains-lab/cities-svc/internal/app"
 	"github.com/chains-lab/cities-svc/internal/config"
-	"github.com/chains-lab/cities-svc/internal/logger"
+
 	"google.golang.org/grpc"
 )
 

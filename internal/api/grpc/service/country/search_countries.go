@@ -4,11 +4,10 @@ import (
 	"context"
 
 	svc "github.com/chains-lab/cities-proto/gen/go/svc/country"
-	"github.com/chains-lab/cities-svc/internal/api/grpc/problems"
 	"github.com/chains-lab/cities-svc/internal/api/grpc/responses"
-	"github.com/chains-lab/cities-svc/internal/constant/enum"
-	"github.com/chains-lab/cities-svc/internal/logger"
-	"github.com/chains-lab/cities-svc/internal/pagination"
+	"github.com/chains-lab/cities-svc/internal/config/constant/enum"
+
+	"github.com/chains-lab/cities-svc/internal/problems"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 )
 

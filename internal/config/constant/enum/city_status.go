@@ -3,15 +3,13 @@ package enum
 import "fmt"
 
 const (
-	CityStatusSupported   = "supported"
-	CityStatusSuspended   = "suspended"
-	CityStatusUnsupported = "unsupported"
+	CityStatusSupported = "supported"
+	CityStatusSuspended = "suspended"
 )
 
 var cityStatuses = []string{
 	CityStatusSupported,
 	CityStatusSuspended,
-	CityStatusUnsupported,
 }
 
 var ErrorCityStatusNotSupported = fmt.Errorf("invalid city status must be one of: %v", GetAllCitiesStatuses())

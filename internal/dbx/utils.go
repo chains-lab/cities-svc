@@ -12,7 +12,7 @@ import (
 
 type txKeyType struct{}
 
-var TxKey = txKeyType{}
+var txKey = txKeyType{}
 
 //go:embed migrations/*.sql
 var Migrations embed.FS

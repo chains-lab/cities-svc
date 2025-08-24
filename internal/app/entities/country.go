@@ -1,4 +1,4 @@
-package app
+package entities
 
 import (
 	"context"
@@ -7,11 +7,14 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/chains-lab/cities-proto/gen/go/common/pagination"
 	"github.com/chains-lab/cities-svc/internal/app/models"
-	"github.com/chains-lab/cities-svc/internal/constant/enum"
+	"github.com/chains-lab/cities-svc/internal/config"
+	"github.com/chains-lab/cities-svc/internal/config/constant/enum"
 	"github.com/chains-lab/cities-svc/internal/dbx"
-	"github.com/chains-lab/cities-svc/internal/errx"
-	"github.com/chains-lab/cities-svc/internal/pagination"
+	"github.com/chains-lab/pagi"
+
+	"github.com/chains-lab/cities-svc/internal/problems"
 	"github.com/google/uuid"
 )
 
@@ -19,7 +22,7 @@ type countryQ interface {
 	New() dbx.CountryQ
 
 	Insert(ctx context.Context, input dbx.Country) error
-	Update(ctx context.Context, input dbx.UpdateCountryInput) error
+	Update(ctx context.Context, input map[string]any) error
 	Get(ctx context.Context) (dbx.Country, error)
 	Select(ctx context.Context) ([]dbx.Country, error)
 	Delete(ctx context.Context) error
@@ -32,9 +35,24 @@ type countryQ interface {
 	Page(limit, offset uint64) dbx.CountryQ
 }
 
+type Country struct {
+	country countryQ
+}
+
+func NewCountryService(cfg config.Config) (Country, error) {
+	pg, err := sql.Open("postgres", cfg.Database.SQL.URL)
+	if err != nil {
+		return Country{}, err
+	}
+
+	return Country{
+		country: dbx.NewCountryQ(pg),
+	}, nil
+}
+
 // Create methods for countries
 
-func (a App) CreateCountry(ctx context.Context, name string) (models.Country, error) {
+func (a Country) CreateCountry(ctx context.Context, name string) (models.Country, error) {
 	country := dbx.Country{
 		ID:        uuid.New(),
 		Name:      name,
@@ -43,17 +61,17 @@ func (a App) CreateCountry(ctx context.Context, name string) (models.Country, er
 		UpdatedAt: time.Now().UTC(),
 	}
 
-	err := a.countriesQ.New().Insert(ctx, country)
+	err := a.country.New().Insert(ctx, country)
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
-			return models.Country{}, errx.RaiseCountryAlreadyExists(
+			return models.Country{}, problems.RaiseCountryAlreadyExists(
 				ctx,
 				fmt.Errorf("country with name '%s' already existt, cause: %s", name, err),
 				name,
 			)
 		default:
-			return models.Country{}, errx.RaiseInternal(ctx, err)
+			return models.Country{}, problems.RaiseInternal(ctx, err)
 		}
 	}
 
@@ -62,52 +80,52 @@ func (a App) CreateCountry(ctx context.Context, name string) (models.Country, er
 
 // Read methods for countries
 
-func (a App) GetCountryByID(ctx context.Context, ID uuid.UUID) (models.Country, error) {
-	country, err := a.countriesQ.New().FilterID(ID).Get(ctx)
+func (a Country) GetCountryByID(ctx context.Context, ID uuid.UUID) (models.Country, error) {
+	country, err := a.country.New().FilterID(ID).Get(ctx)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return models.Country{}, errx.RaiseCountryNotFoundByID(
+			return models.Country{}, problems.RaiseCountryNotFoundByID(
 				ctx,
 				fmt.Errorf("country with id '%s' does not exist, cause: %s", ID, err),
 				ID,
 			)
 		}
-		return models.Country{}, errx.RaiseInternal(ctx, err)
+		return models.Country{}, problems.RaiseInternal(ctx, err)
 	}
 
 	return countryModel(country), nil
 }
 
-func (a App) SearchCountries(ctx context.Context, name string, status string, pag pagination.Request) ([]models.Country, pagination.Response, error) {
-	limit, offset := pagination.CalculateLimitOffset(pag)
+func (a Country) SearchCountries(ctx context.Context, name string, status string, pag pagi.Request) ([]models.Country, pagi.Response, error) {
+	limit, offset := pagi.CalculateLimitOffset(pag)
 
-	countries, err := a.countriesQ.New().
+	countries, err := a.country.New().
 		FilterName(name).
 		FilterStatus(status).
 		Page(limit, offset).
 		Select(ctx)
 	if err != nil {
-		return nil, pagination.Response{}, errx.RaiseInternal(ctx, err)
+		return nil, pagi.Response{}, problems.RaiseInternal(ctx, err)
 	}
 
-	total, err := a.countriesQ.New().Count(ctx)
+	total, err := a.country.New().Count(ctx)
 	if err != nil {
-		return nil, pagination.Response{}, errx.RaiseInternal(ctx, err)
+		return nil, pagi.Response{}, problems.RaiseInternal(ctx, err)
 	}
 
-	res, pagRes := countriesArray(countries, limit, offset, total)
+	res, pagRes := countriesArray(countries, limit, pag.Page, total)
 
 	return res, pagRes, nil
 }
 
 // Update methods for countries
 
-func (a App) UpdateCountryStatus(ctx context.Context, ID uuid.UUID, status string) (models.Country, error) {
+func (a Country) UpdateCountryStatus(ctx context.Context, ID uuid.UUID, status string) (models.Country, error) {
 	//TODO in future create event to kafka about country status change
 
 	_, err := enum.ParseCountryStatus(status)
 	if err != nil {
-		return models.Country{}, errx.RaiseInvalidCountryStatus(
+		return models.Country{}, problems.RaiseInvalidCountryStatus(
 			ctx,
 			fmt.Errorf("invalid country status '%s', cause: %s", status, err),
 			status,
@@ -121,13 +139,13 @@ func (a App) UpdateCountryStatus(ctx context.Context, ID uuid.UUID, status strin
 		if err != nil {
 			switch {
 			case errors.Is(err, sql.ErrNoRows):
-				return errx.RaiseCountryNotFoundByID(
+				return problems.RaiseCountryNotFoundByID(
 					ctx,
 					fmt.Errorf("country with id '%s' does not exist, cause: %s", ID, err),
 					ID,
 				)
 			default:
-				return errx.RaiseInternal(ctx, err)
+				return problems.RaiseInternal(ctx, err)
 			}
 		}
 
@@ -154,18 +172,18 @@ func (a App) UpdateCountryStatus(ctx context.Context, ID uuid.UUID, status strin
 	return a.GetCountryByID(ctx, ID)
 }
 
-func (a App) UpdateCountryName(ctx context.Context, ID uuid.UUID, name string) (models.Country, error) {
+func (a Country) UpdateCountryName(ctx context.Context, ID uuid.UUID, name string) (models.Country, error) {
 	country, err := a.countriesQ.New().FilterName(name).Get(ctx)
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
 			// country with this name does not exist, so we can update it
 		default:
-			return models.Country{}, errx.RaiseInternal(ctx, err)
+			return models.Country{}, problems.RaiseInternal(ctx, err)
 		}
 	}
 	if err == nil && country.ID != ID {
-		return models.Country{}, errx.RaiseCountryAlreadyExists(
+		return models.Country{}, problems.RaiseCountryAlreadyExists(
 			ctx,
 			fmt.Errorf("country with id '%s' already exists, cause: %s", ID, country),
 			name,
@@ -178,13 +196,13 @@ func (a App) UpdateCountryName(ctx context.Context, ID uuid.UUID, name string) (
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
-			return models.Country{}, errx.RaiseCountryNotFoundByID(
+			return models.Country{}, problems.RaiseCountryNotFoundByID(
 				ctx,
 				fmt.Errorf("country with id '%s' does not exist, cause: %s", ID, err),
 				ID,
 			)
 		default:
-			return models.Country{}, errx.RaiseInternal(ctx, err)
+			return models.Country{}, problems.RaiseInternal(ctx, err)
 		}
 	}
 
@@ -203,14 +221,14 @@ func countryModel(country dbx.Country) models.Country {
 	}
 }
 
-func countriesArray(countries []dbx.Country, limit, offset, total uint64) ([]models.Country, pagination.Response) {
+func countriesArray(countries []dbx.Country, limit, page, total uint64) ([]models.Country, pagi.Response) {
 	result := make([]models.Country, 0, len(countries))
 	for _, country := range countries {
 		result = append(result, countryModel(country))
 	}
 
-	pag := pagination.Response{
-		Page:  offset/limit + 1,
+	pag := pagi.Response{
+		Page:  page,
 		Size:  limit,
 		Total: total,
 	}

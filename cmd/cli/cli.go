@@ -12,7 +12,6 @@ import (
 	"github.com/chains-lab/cities-svc/internal/app"
 	"github.com/chains-lab/cities-svc/internal/config"
 	"github.com/chains-lab/cities-svc/internal/dbx"
-	"github.com/chains-lab/cities-svc/internal/logger"
 )
 
 func Run(args []string) bool {

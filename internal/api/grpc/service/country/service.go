@@ -7,7 +7,7 @@ import (
 	"github.com/chains-lab/cities-svc/internal/app"
 	"github.com/chains-lab/cities-svc/internal/app/models"
 	"github.com/chains-lab/cities-svc/internal/config"
-	"github.com/chains-lab/cities-svc/internal/pagination"
+
 	"github.com/google/uuid"
 )
 

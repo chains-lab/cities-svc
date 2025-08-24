@@ -6,10 +6,10 @@ import (
 	countryProto "github.com/chains-lab/cities-proto/gen/go/svc/country"
 	svc "github.com/chains-lab/cities-proto/gen/go/svc/country"
 	"github.com/chains-lab/cities-svc/internal/api/grpc/meta"
-	"github.com/chains-lab/cities-svc/internal/api/grpc/problems"
 	"github.com/chains-lab/cities-svc/internal/api/grpc/responses"
-	"github.com/chains-lab/cities-svc/internal/constant/enum"
-	"github.com/chains-lab/cities-svc/internal/logger"
+	"github.com/chains-lab/cities-svc/internal/config/constant/enum"
+
+	"github.com/chains-lab/cities-svc/internal/problems"
 	"github.com/google/uuid"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 )

@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/chains-lab/cities-svc/internal/api/grpc/meta"
-	"github.com/chains-lab/cities-svc/internal/api/grpc/problems"
-	"github.com/chains-lab/cities-svc/internal/logger"
+
+	"github.com/chains-lab/cities-svc/internal/problems"
 	"github.com/chains-lab/gatekit/auth"
 	"github.com/google/uuid"
 	"google.golang.org/grpc"

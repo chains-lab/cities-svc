@@ -4,7 +4,6 @@ import (
 	pagProto "github.com/chains-lab/cities-proto/gen/go/common/pagination"
 	cityProto "github.com/chains-lab/cities-proto/gen/go/svc/city"
 	"github.com/chains-lab/cities-svc/internal/app/models"
-	"github.com/chains-lab/cities-svc/internal/pagination"
 )
 
 func CitiesList(cities []models.City, pag pagination.Response) *cityProto.CitiesList {

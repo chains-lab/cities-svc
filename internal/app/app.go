@@ -38,7 +38,7 @@ func (a App) transaction(fn func(ctx context.Context) error) error {
 		return fmt.Errorf("failed to start transaction: %w", err)
 	}
 
-	ctxWithTx := context.WithValue(ctx, dbx.TxKey, tx)
+	ctxWithTx := context.WithValue(ctx, dbx.txKey, tx)
 
 	if err := fn(ctxWithTx); err != nil {
 		if rbErr := tx.Rollback(); rbErr != nil {

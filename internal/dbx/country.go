@@ -58,7 +58,7 @@ func (q CountryQ) Insert(ctx context.Context, input Country) error {
 		return err
 	}
 
-	if tx, ok := ctx.Value(TxKey).(*sql.Tx); ok {
+	if tx, ok := ctx.Value(txKey).(*sql.Tx); ok {
 		_, err = tx.ExecContext(ctx, query, args...)
 	} else {
 		_, err = q.db.ExecContext(ctx, query, args...)
@@ -75,7 +75,7 @@ func (q CountryQ) Get(ctx context.Context) (Country, error) {
 
 	var model Country
 	var row *sql.Row
-	if tx, ok := ctx.Value(TxKey).(*sql.Tx); ok {
+	if tx, ok := ctx.Value(txKey).(*sql.Tx); ok {
 		row = tx.QueryRowContext(ctx, query, args...)
 	} else {
 		row = q.db.QueryRowContext(ctx, query, args...)
@@ -98,7 +98,7 @@ func (q CountryQ) Select(ctx context.Context) ([]Country, error) {
 	}
 
 	var rows *sql.Rows
-	if tx, ok := ctx.Value(TxKey).(*sql.Tx); ok {
+	if tx, ok := ctx.Value(txKey).(*sql.Tx); ok {
 		rows, err = tx.QueryContext(ctx, query, args...)
 	} else {
 		rows, err = q.db.QueryContext(ctx, query, args...)
@@ -126,21 +126,19 @@ func (q CountryQ) Select(ctx context.Context) ([]Country, error) {
 	return models, rows.Err()
 }
 
-type UpdateCountryInput struct {
-	Name      *string   `db:"name"`
-	Status    *string   `db:"status"`
-	UpdatedAt time.Time `db:"updated_at"`
-}
+func (q CountryQ) Update(ctx context.Context, input map[string]any) error {
+	updates := map[string]interface{}{}
 
-func (q CountryQ) Update(ctx context.Context, input UpdateCountryInput) error {
-	updates := map[string]interface{}{
-		"updated_at": input.UpdatedAt,
+	if name, ok := input["name"]; ok {
+		updates["name"] = name
 	}
-	if input.Name != nil {
-		updates["name"] = *input.Name
+	if status, ok := input["status"]; ok {
+		updates["status"] = status
 	}
-	if input.Status != nil {
-		updates["status"] = *input.Status
+	if updatedAt, ok := input["updated_at"]; ok {
+		updates["updated_at"] = updatedAt
+	} else {
+		updates["updated_at"] = time.Now().UTC()
 	}
 
 	query, args, err := q.updater.SetMap(updates).ToSql()
@@ -148,7 +146,7 @@ func (q CountryQ) Update(ctx context.Context, input UpdateCountryInput) error {
 		return fmt.Errorf("building updater query for table: %s: %w", countriesTable, err)
 	}
 
-	if tx, ok := ctx.Value(TxKey).(*sql.Tx); ok {
+	if tx, ok := ctx.Value(txKey).(*sql.Tx); ok {
 		_, err = tx.ExecContext(ctx, query, args...)
 	} else {
 		_, err = q.db.ExecContext(ctx, query, args...)
@@ -163,7 +161,7 @@ func (q CountryQ) Delete(ctx context.Context) error {
 		return fmt.Errorf("building deleter query for table: %s: %w", countriesTable, err)
 	}
 
-	if tx, ok := ctx.Value(TxKey).(*sql.Tx); ok {
+	if tx, ok := ctx.Value(txKey).(*sql.Tx); ok {
 		_, err = tx.ExecContext(ctx, query, args...)
 	} else {
 		_, err = q.db.ExecContext(ctx, query, args...)
@@ -206,7 +204,7 @@ func (q CountryQ) Count(ctx context.Context) (uint64, error) {
 	}
 
 	var count uint64
-	if tx, ok := ctx.Value(TxKey).(*sql.Tx); ok {
+	if tx, ok := ctx.Value(txKey).(*sql.Tx); ok {
 		err = tx.QueryRowContext(ctx, query, args...).Scan(&count)
 	} else {
 		err = q.db.QueryRowContext(ctx, query, args...).Scan(&count)

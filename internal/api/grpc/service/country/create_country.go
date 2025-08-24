@@ -7,7 +7,6 @@ import (
 	svc "github.com/chains-lab/cities-proto/gen/go/svc/country"
 	"github.com/chains-lab/cities-svc/internal/api/grpc/meta"
 	"github.com/chains-lab/cities-svc/internal/api/grpc/responses"
-	"github.com/chains-lab/cities-svc/internal/logger"
 )
 
 func (s Service) CreateCountry(ctx context.Context, req *svc.CreateCountryRequest) (*countryProto.Country, error) {

@@ -1,15 +1,17 @@
 module github.com/chains-lab/cities-svc
 
-go 1.24.4
+go 1.24.5
 
 require (
 	github.com/Masterminds/squirrel v1.5.4
 	github.com/alecthomas/kingpin v2.2.6+incompatible
 	github.com/chains-lab/cities-proto v0.4.9
 	github.com/chains-lab/gatekit v0.2.0
+	github.com/chains-lab/pagi v0.1.0
 	github.com/chains-lab/svc-errors v0.2.2
 	github.com/google/uuid v1.6.0
 	github.com/lib/pq v1.10.9
+	github.com/paulmach/orb v0.11.1
 	github.com/pkg/errors v0.9.1
 	github.com/rubenv/sql-migrate v1.8.0
 	github.com/sirupsen/logrus v1.9.3
@@ -35,6 +37,7 @@ require (
 	github.com/spf13/cast v1.7.1 // indirect
 	github.com/spf13/pflag v1.0.6 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
+	go.mongodb.org/mongo-driver v1.11.4 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.9.0 // indirect
 	golang.org/x/net v0.40.0 // indirect
