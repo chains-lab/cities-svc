@@ -1,13 +1,8 @@
 package problems
 
 import (
-	"context"
-	"fmt"
-
-	"github.com/chains-lab/cities-svc/internal/api/grpc/meta"
 	"github.com/chains-lab/cities-svc/internal/config/constant"
 	"github.com/chains-lab/svc-errors/ape"
-	"github.com/google/uuid"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -15,8 +10,8 @@ import (
 
 var ErrorCityNotFound = ape.Declare("CITY_NOT_FOUND")
 
-func RaiseCityNotFoundByID(ctx context.Context, cause error, cityID uuid.UUID) error {
-	st := status.New(codes.NotFound, fmt.Sprintf("city %s not found", cityID))
+func RaiseCityNotFoundByID(cause error, message string) error {
+	st := status.New(codes.NotFound, message)
 	st, _ = st.WithDetails(
 		&errdetails.ErrorInfo{
 			Reason: ErrorCityNotFound.Error(),
@@ -24,16 +19,13 @@ func RaiseCityNotFoundByID(ctx context.Context, cause error, cityID uuid.UUID) e
 			Metadata: map[string]string{
 				"timestamp": nowRFC3339Nano(),
 			},
-		},
-		&errdetails.RequestInfo{
-			RequestId: meta.RequestID(ctx),
 		},
 	)
 	return ErrorCityNotFound.Raise(cause, st)
 }
 
-func RaiseCityNotFoundByName(ctx context.Context, cause error, cityName string) error {
-	st := status.New(codes.NotFound, fmt.Sprintf("city with name %q not found", cityName))
+func RaiseCityNotFoundByName(cause error, message string) error {
+	st := status.New(codes.NotFound, message)
 	st, _ = st.WithDetails(
 		&errdetails.ErrorInfo{
 			Reason: ErrorCityNotFound.Error(),
@@ -41,9 +33,6 @@ func RaiseCityNotFoundByName(ctx context.Context, cause error, cityName string) 
 			Metadata: map[string]string{
 				"timestamp": nowRFC3339Nano(),
 			},
-		},
-		&errdetails.RequestInfo{
-			RequestId: meta.RequestID(ctx),
 		},
 	)
 	return ErrorCityNotFound.Raise(cause, st)
@@ -51,8 +40,8 @@ func RaiseCityNotFoundByName(ctx context.Context, cause error, cityName string) 
 
 var ErrorInvalidCityStatus = ape.Declare("INVALID_CITY_STATUS")
 
-func RaiseInvalidCityStatus(ctx context.Context, cause error, cityStatus string) error {
-	st := status.New(codes.InvalidArgument, fmt.Sprintf("invalid city status: %s", cityStatus))
+func RaiseInvalidCityStatus(cause error, message string) error {
+	st := status.New(codes.InvalidArgument, message)
 	st, _ = st.WithDetails(
 		&errdetails.ErrorInfo{
 			Reason: ErrorInvalidCityStatus.Error(),
@@ -61,17 +50,14 @@ func RaiseInvalidCityStatus(ctx context.Context, cause error, cityStatus string)
 				"timestamp": nowRFC3339Nano(),
 			},
 		},
-		&errdetails.RequestInfo{
-			RequestId: meta.RequestID(ctx),
-		},
 	)
 	return ErrorInvalidCityStatus.Raise(cause, st)
 }
 
 var ErrorCityDetailsNotFound = ape.Declare("CITY_DETAILS_NOT_FOUND")
 
-func RaiseCityDetailsNotFound(ctx context.Context, cause error, cityID uuid.UUID) error {
-	st := status.New(codes.NotFound, fmt.Sprintf("city details not found: city=%s", cityID))
+func RaiseCityDetailsNotFound(cause error, message string) error {
+	st := status.New(codes.NotFound, message)
 	st, _ = st.WithDetails(
 		&errdetails.ErrorInfo{
 			Reason: ErrorCityDetailsNotFound.Error(),
@@ -80,7 +66,6 @@ func RaiseCityDetailsNotFound(ctx context.Context, cause error, cityID uuid.UUID
 				"timestamp": nowRFC3339Nano(),
 			},
 		},
-		&errdetails.RequestInfo{RequestId: meta.RequestID(ctx)},
 	)
 	return ErrorCityDetailsNotFound.Raise(cause, st)
 }

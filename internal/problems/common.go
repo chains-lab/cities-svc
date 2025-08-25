@@ -1,10 +1,8 @@
 package problems
 
 import (
-	"context"
 	"time"
 
-	"github.com/chains-lab/cities-svc/internal/api/grpc/meta"
 	"github.com/chains-lab/cities-svc/internal/config/constant"
 	"github.com/chains-lab/svc-errors/ape"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
@@ -18,7 +16,7 @@ func nowRFC3339Nano() string {
 
 var ErrorInternal = ape.Declare("INTERNAL_ERROR")
 
-func RaiseInternal(ctx context.Context, cause error) error {
+func RaiseInternal(cause error) error {
 	res, _ := status.New(codes.Internal, "internal server error").WithDetails(
 		&errdetails.ErrorInfo{
 			Reason: ErrorInternal.Error(),
@@ -27,21 +25,15 @@ func RaiseInternal(ctx context.Context, cause error) error {
 				"timestamp": nowRFC3339Nano(),
 			},
 		},
-		&errdetails.RequestInfo{
-			RequestId: meta.RequestID(ctx),
-		},
 	)
 
-	return ErrorInternal.Raise(
-		cause,
-		res,
-	)
+	return ErrorInternal.Raise(cause, res)
 }
 
 var ErrorPermissionDenied = ape.Declare("PERMISSION_DENIED")
 
-func RaisePermissionDenied(ctx context.Context, cause error) error {
-	res, _ := status.New(codes.PermissionDenied, cause.Error()).WithDetails(
+func RaisePermissionDenied(cause error, message string) error {
+	res, _ := status.New(codes.PermissionDenied, message).WithDetails(
 		&errdetails.ErrorInfo{
 			Reason: ErrorPermissionDenied.Error(),
 			Domain: constant.ServiceName,
@@ -49,21 +41,15 @@ func RaisePermissionDenied(ctx context.Context, cause error) error {
 				"timestamp": nowRFC3339Nano(),
 			},
 		},
-		&errdetails.RequestInfo{
-			RequestId: meta.RequestID(ctx),
-		},
 	)
 
-	return ErrorPermissionDenied.Raise(
-		cause,
-		res,
-	)
+	return ErrorInternal.Raise(cause, res)
 }
 
 var ErrorUnauthenticated = ape.Declare("UNAUTHENTICATED")
 
-func RaiseUnauthenticated(ctx context.Context, cause error) error {
-	res, _ := status.New(codes.Unauthenticated, cause.Error()).WithDetails(
+func RaiseUnauthenticated(cause error, message string) error {
+	res, _ := status.New(codes.Unauthenticated, message).WithDetails(
 		&errdetails.ErrorInfo{
 			Reason: ErrorUnauthenticated.Error(),
 			Domain: constant.ServiceName,
@@ -71,21 +57,15 @@ func RaiseUnauthenticated(ctx context.Context, cause error) error {
 				"timestamp": nowRFC3339Nano(),
 			},
 		},
-		&errdetails.RequestInfo{
-			RequestId: meta.RequestID(ctx),
-		},
 	)
 
-	return ErrorUnauthenticated.Raise(
-		cause,
-		res,
-	)
+	return ErrorInternal.Raise(cause, res)
 }
 
 var ErrorInvalidArgument = ape.Declare("INVALID_ARGUMENT")
 
-func RaiseInvalidArgument(ctx context.Context, cause error, details ...*errdetails.BadRequest_FieldViolation) error {
-	res, _ := status.New(codes.InvalidArgument, cause.Error()).WithDetails(
+func RaiseInvalidArgument(cause error, message string, details ...*errdetails.BadRequest_FieldViolation) error {
+	res, _ := status.New(codes.InvalidArgument, message).WithDetails(
 		&errdetails.ErrorInfo{
 			Reason: ErrorInvalidArgument.Error(),
 			Domain: constant.ServiceName,
@@ -96,13 +76,23 @@ func RaiseInvalidArgument(ctx context.Context, cause error, details ...*errdetai
 		&errdetails.BadRequest{
 			FieldViolations: details,
 		},
-		&errdetails.RequestInfo{
-			RequestId: meta.RequestID(ctx),
+	)
+
+	return ErrorInternal.Raise(cause, res)
+}
+
+var ErrorNotFound = ape.Declare("NOT_FOUND")
+
+func RaiseNotFound(cause error, message string) error {
+	res, _ := status.New(codes.NotFound, message).WithDetails(
+		&errdetails.ErrorInfo{
+			Reason: ErrorNotFound.Error(),
+			Domain: constant.ServiceName,
+			Metadata: map[string]string{
+				"timestamp": nowRFC3339Nano(),
+			},
 		},
 	)
 
-	return ErrorInvalidArgument.Raise(
-		cause,
-		res,
-	)
+	return ErrorInternal.Raise(cause, res)
 }

@@ -34,18 +34,6 @@ CREATE TABLE "city" (
     "updated_at" TIMESTAMP                    NOT NULL
 );
 
-CREATE TYPE "city_languages" AS ENUM (
-    'es', 'fr', 'de', 'it', 'pt', 'uk'
-);
-
-CREATE TABLE "city_details" (
-    "city_id"     UUID           NOT NULL REFERENCES "city" ("id") ON DELETE CASCADE,
-    "language"    city_languages NOT NULL,
-    "name"        VARCHAR(255)   NOT NULL,
-
-    PRIMARY KEY (city_id, language)
-);
-
 -- +migrate Down
 DROP TABLE IF EXISTS "countries" CASCADE;
 DROP TABLE IF EXISTS "city_details" CASCADE;

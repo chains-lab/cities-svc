@@ -1,11 +1,10 @@
 package app
 
 import (
-	"context"
+	"database/sql"
 
 	"github.com/chains-lab/cities-svc/internal/app/entities"
 	"github.com/chains-lab/cities-svc/internal/config"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type App struct {
@@ -13,14 +12,20 @@ type App struct {
 	city    entities.City
 	gov     entities.Gov
 
-	db *pgxpool.Pool
+	db *sql.DB
 }
 
-func NewApp(ctx context.Context, cfg config.Config, db *pgxpool.Pool) App {
-	pool, err := pgxpool.New(ctx, cfg.Database.SQL.URL)
+func NewApp(cfg config.Config) (App, error) {
+	pg, err := sql.Open("postgres", cfg.Database.SQL.URL)
 	if err != nil {
-		return nil, err
+		return App{}, err
 	}
 
-	return App{}
+	return App{
+		country: entities.NewCountry(pg),
+		city:    entities.NewCitySvc(pg),
+		gov:     entities.NewGov(pg),
+
+		db: pg,
+	}, nil
 }

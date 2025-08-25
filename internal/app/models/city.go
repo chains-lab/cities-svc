@@ -20,9 +20,3 @@ type City struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
-
-type CityDetail struct {
-	CityID   uuid.UUID
-	Name     string
-	Language string
-}

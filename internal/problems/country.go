@@ -1,13 +1,8 @@
 package problems
 
 import (
-	"context"
-	"fmt"
-
-	"github.com/chains-lab/cities-svc/internal/api/grpc/meta"
 	"github.com/chains-lab/cities-svc/internal/config/constant"
 	"github.com/chains-lab/svc-errors/ape"
-	"github.com/google/uuid"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -15,8 +10,8 @@ import (
 
 var ErrorCountryAlreadyExists = ape.Declare("COUNTRY_ALREADY_EXISTS")
 
-func RaiseCountryAlreadyExists(ctx context.Context, cause error, countryName string) error {
-	st := status.New(codes.AlreadyExists, fmt.Sprintf("country %q already exists", countryName))
+func RaiseCountryAlreadyExists(cause error, message string) error {
+	st := status.New(codes.AlreadyExists, message)
 	st, _ = st.WithDetails(
 		&errdetails.ErrorInfo{
 			Reason: ErrorCountryAlreadyExists.Error(),
@@ -25,17 +20,15 @@ func RaiseCountryAlreadyExists(ctx context.Context, cause error, countryName str
 				"timestamp": nowRFC3339Nano(),
 			},
 		},
-		&errdetails.RequestInfo{
-			RequestId: meta.RequestID(ctx),
-		},
 	)
+
 	return ErrorCountryAlreadyExists.Raise(cause, st)
 }
 
 var ErrorCountryNotFound = ape.Declare("COUNTRY_NOT_FOUND")
 
-func RaiseCountryNotFoundByID(ctx context.Context, cause error, id uuid.UUID) error {
-	st := status.New(codes.NotFound, fmt.Sprintf("country not found: id=%s", id))
+func RaiseCountryNotFound(cause error, message string) error {
+	st := status.New(codes.NotFound, message)
 	st, _ = st.WithDetails(
 		&errdetails.ErrorInfo{
 			Reason: ErrorCountryNotFound.Error(),
@@ -44,17 +37,15 @@ func RaiseCountryNotFoundByID(ctx context.Context, cause error, id uuid.UUID) er
 				"timestamp": nowRFC3339Nano(),
 			},
 		},
-		&errdetails.RequestInfo{
-			RequestId: meta.RequestID(ctx),
-		},
 	)
+
 	return ErrorCountryNotFound.Raise(cause, st)
 }
 
 var ErrorInvalidCountryStatus = ape.Declare("INVALID_COUNTRY_STATUS")
 
-func RaiseInvalidCountryStatus(ctx context.Context, cause error, statusStr string) error {
-	st := status.New(codes.InvalidArgument, fmt.Sprintf("invalid country status: %s", statusStr))
+func RaiseInvalidCountryStatus(cause error, message string) error {
+	st := status.New(codes.InvalidArgument, message)
 	st, _ = st.WithDetails(
 		&errdetails.ErrorInfo{
 			Reason: ErrorInvalidCountryStatus.Error(),
@@ -63,9 +54,7 @@ func RaiseInvalidCountryStatus(ctx context.Context, cause error, statusStr strin
 				"timestamp": nowRFC3339Nano(),
 			},
 		},
-		&errdetails.RequestInfo{
-			RequestId: meta.RequestID(ctx),
-		},
 	)
+
 	return ErrorInvalidCountryStatus.Raise(cause, st)
 }
