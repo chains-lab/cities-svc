@@ -25,7 +25,9 @@ func RaiseCountryAlreadyExists(ctx context.Context, cause error, countryName str
 				"timestamp": nowRFC3339Nano(),
 			},
 		},
-		&errdetails.RequestInfo{RequestId: meta.RequestID(ctx)},
+		&errdetails.RequestInfo{
+			RequestId: meta.RequestID(ctx),
+		},
 	)
 	return ErrorCountryAlreadyExists.Raise(cause, st)
 }
@@ -42,7 +44,9 @@ func RaiseCountryNotFoundByID(ctx context.Context, cause error, id uuid.UUID) er
 				"timestamp": nowRFC3339Nano(),
 			},
 		},
-		&errdetails.RequestInfo{RequestId: meta.RequestID(ctx)},
+		&errdetails.RequestInfo{
+			RequestId: meta.RequestID(ctx),
+		},
 	)
 	return ErrorCountryNotFound.Raise(cause, st)
 }
@@ -59,7 +63,9 @@ func RaiseInvalidCountryStatus(ctx context.Context, cause error, statusStr strin
 				"timestamp": nowRFC3339Nano(),
 			},
 		},
-		&errdetails.RequestInfo{RequestId: meta.RequestID(ctx)},
+		&errdetails.RequestInfo{
+			RequestId: meta.RequestID(ctx),
+		},
 	)
 	return ErrorInvalidCountryStatus.Raise(cause, st)
 }

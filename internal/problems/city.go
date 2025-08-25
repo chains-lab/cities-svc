@@ -67,3 +67,20 @@ func RaiseInvalidCityStatus(ctx context.Context, cause error, cityStatus string)
 	)
 	return ErrorInvalidCityStatus.Raise(cause, st)
 }
+
+var ErrorCityDetailsNotFound = ape.Declare("CITY_DETAILS_NOT_FOUND")
+
+func RaiseCityDetailsNotFound(ctx context.Context, cause error, cityID uuid.UUID) error {
+	st := status.New(codes.NotFound, fmt.Sprintf("city details not found: city=%s", cityID))
+	st, _ = st.WithDetails(
+		&errdetails.ErrorInfo{
+			Reason: ErrorCityDetailsNotFound.Error(),
+			Domain: constant.ServiceName,
+			Metadata: map[string]string{
+				"timestamp": nowRFC3339Nano(),
+			},
+		},
+		&errdetails.RequestInfo{RequestId: meta.RequestID(ctx)},
+	)
+	return ErrorCityDetailsNotFound.Raise(cause, st)
+}

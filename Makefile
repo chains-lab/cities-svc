@@ -2,6 +2,9 @@ DB_URL=postgresql://postgres:postgres@localhost:7000/postgres?sslmode=disable
 OPENAPI_GENERATOR := java -jar ~/openapi-generator-cli.jar
 CONFIG_FILE := ./config.yaml
 
+sqlc-build:
+	KV_VIPER_FILE=$(CONFIG_FILE) sqlc generate
+
 build:
 	KV_VIPER_FILE=$(CONFIG_FILE) go build -o ./cmd/cities-svc/main ./cmd/cities-svc/main.go
 

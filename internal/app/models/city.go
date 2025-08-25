@@ -11,20 +11,18 @@ type City struct {
 	ID        uuid.UUID
 	CountryID uuid.UUID
 	Status    string
-	Center    orb.Point        // [lon, lat]
-	Boundary  orb.MultiPolygon // многоугольники границы
+	Zone      orb.MultiPolygon
+	Name      string
 	Icon      string
 	Slug      string
 	Timezone  string
-
-	Details CityDetail
 
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
 
 type CityDetail struct {
-	Name        string
-	Description *string
-	Language    string
+	CityID   uuid.UUID
+	Name     string
+	Language string
 }
