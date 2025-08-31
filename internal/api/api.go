@@ -3,7 +3,6 @@ package api
 import (
 	"context"
 
-	"github.com/chains-lab/cities-svc/internal/api/grpc"
 	"github.com/chains-lab/cities-svc/internal/app"
 	"github.com/chains-lab/cities-svc/internal/config"
 	"github.com/sirupsen/logrus"

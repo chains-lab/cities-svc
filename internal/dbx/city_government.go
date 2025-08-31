@@ -13,11 +13,12 @@ import (
 const cityGovTable = "city_governments"
 
 type CityGov struct {
-	UserID    uuid.UUID `db:"user_id"`
-	CityID    uuid.UUID `db:"city_id"`
-	Role      string    `db:"role"`
-	UpdatedAt time.Time `db:"updated_at"`
-	CreatedAt time.Time `db:"created_at"`
+	UserID    uuid.UUID      `db:"user_id"`
+	CityID    uuid.UUID      `db:"city_id"`
+	Role      string         `db:"role"`
+	Label     sql.NullString `db:"label"`
+	UpdatedAt time.Time      `db:"updated_at"`
+	CreatedAt time.Time      `db:"created_at"`
 }
 
 type CityGovQ struct {
@@ -50,6 +51,7 @@ func (q CityGovQ) Insert(ctx context.Context, input CityGov) error {
 		"user_id":    input.UserID,
 		"city_id":    input.CityID,
 		"role":       input.Role,
+		"label":      input.Label,
 		"updated_at": input.UpdatedAt,
 		"created_at": input.CreatedAt,
 	}
@@ -85,6 +87,7 @@ func (q CityGovQ) Get(ctx context.Context) (CityGov, error) {
 		&model.UserID,
 		&model.CityID,
 		&model.Role,
+		&model.Label,
 		&model.UpdatedAt,
 		&model.CreatedAt,
 	)
@@ -116,6 +119,7 @@ func (q CityGovQ) Select(ctx context.Context) ([]CityGov, error) {
 			&model.UserID,
 			&model.CityID,
 			&model.Role,
+			&model.Label,
 			&model.UpdatedAt,
 			&model.CreatedAt,
 		); err != nil {
@@ -127,15 +131,32 @@ func (q CityGovQ) Select(ctx context.Context) ([]CityGov, error) {
 	return models, nil
 }
 
-func (q CityGovQ) Update(ctx context.Context, input map[string]any) error {
+type UpdateCityGovParams struct {
+	CityID    *uuid.UUID      `db:"city_id"`
+	Role      *string         `db:"role"`
+	Label     *sql.NullString `db:"label"`
+	UpdatedAt *time.Time      `db:"updated_at"`
+}
+
+func (q CityGovQ) Update(ctx context.Context, params UpdateCityGovParams) error {
 	updates := map[string]interface{}{}
 
-	if v, ok := input["role"]; ok {
-		updates["role"] = v
+	if params.CityID != nil {
+		updates["city_id"] = *params.CityID
 	}
-	if v, ok := input["updated_at"]; ok {
-		updates["updated_at"] = v
-	} else {
+	if params.Role != nil {
+		updates["role"] = *params.Role
+	}
+	if params.Label != nil {
+		if params.Label.Valid {
+			updates["label"] = params.Label
+		} else {
+			updates["label"] = nil
+		}
+	}
+	if params.UpdatedAt != nil {
+		updates["updated_at"] = *params.UpdatedAt
+	} else if params.UpdatedAt == nil {
 		updates["updated_at"] = time.Now().UTC()
 	}
 
@@ -186,12 +207,42 @@ func (q CityGovQ) FilterCityID(cityID uuid.UUID) CityGovQ {
 	return q
 }
 
-func (q CityGovQ) FilterRole(role string) CityGovQ {
+func (q CityGovQ) FilterRole(role ...string) CityGovQ {
 	q.selector = q.selector.Where(sq.Eq{"role": role})
 	q.counter = q.counter.Where(sq.Eq{"role": role})
 	q.deleter = q.deleter.Where(sq.Eq{"role": role})
 	q.updater = q.updater.Where(sq.Eq{"role": role})
 
+	return q
+}
+
+func (q CityGovQ) FilterLabelLike(label string) CityGovQ {
+	cond := sq.Expr("label ILIKE ?", fmt.Sprintf("%%%s%%", label))
+	q.selector = q.selector.Where(cond)
+	q.counter = q.counter.Where(cond)
+	q.updater = q.updater.Where(cond)
+	q.deleter = q.deleter.Where(cond)
+
+	return q
+}
+
+func (q CityGovQ) OrderByRole(asc bool) CityGovQ {
+	dir := "ASC"
+	if !asc {
+		dir = "DESC"
+	}
+	q.selector = q.selector.OrderBy("role " + dir)
+	q.counter = q.counter.OrderBy("role " + dir)
+	return q
+}
+
+func (q CityGovQ) OrderByCreatedAt(asc bool) CityGovQ {
+	dir := "ASC"
+	if !asc {
+		dir = "DESC"
+	}
+	q.selector = q.selector.OrderBy("created_at " + dir)
+	q.counter = q.counter.OrderBy("created_at " + dir)
 	return q
 }
 

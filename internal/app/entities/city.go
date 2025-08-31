@@ -5,12 +5,13 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"regexp"
 	"time"
 
 	"github.com/chains-lab/cities-svc/internal/app/models"
-	"github.com/chains-lab/cities-svc/internal/config/constant/enum"
+	"github.com/chains-lab/cities-svc/internal/constant"
 	"github.com/chains-lab/cities-svc/internal/dbx"
-	"github.com/chains-lab/cities-svc/internal/problems"
+	"github.com/chains-lab/cities-svc/internal/errx"
 	"github.com/chains-lab/pagi"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -18,167 +19,234 @@ import (
 )
 
 type City struct {
-	queries dbx.CitiesQ
+	citiesQ dbx.CitiesQ
+
+	slugRegexp *regexp.Regexp
+	nameRegexp *regexp.Regexp
 }
 
-func NewCitySvc(db *sql.DB) City {
+func CreateCityEntity(db *sql.DB) City {
 	return City{
-		queries: dbx.NewCitiesQ(db),
+		citiesQ:    dbx.NewCitiesQ(db),
+		slugRegexp: regexp.MustCompile(`^[a-z]+(-[a-z]+)*$`),
+		nameRegexp: regexp.MustCompile(`^[A-Za-z -]+$`),
 	}
 }
 
-// Create methods for city
-
-func (c City) CreateCity(
-	ctx context.Context,
-	CountryID uuid.UUID,
-	Icon, Slug, TimeZone string,
-	Zone orb.MultiPolygon,
-) (models.City, error) {
-	cityID := uuid.New()
-	now := time.Now().UTC()
-
-	err := c.queries.Insert(ctx, dbx.City{
-		ID:        cityID,
-		CountryID: CountryID,
-		Status:    enum.CityStatusSupported,
-		Zone:      Zone,
-		Icon:      Icon,
-		Slug:      Slug,
-		Timezone:  TimeZone,
-		CreatedAt: now,
-		UpdatedAt: now,
-	})
+func (c City) validateTimezone(tz string) error {
+	if tz == "" {
+		return errx.ErrorInvalidTimeZone.Raise(
+			fmt.Errorf("timezone must not be empty"),
+		)
+	}
+	_, err := time.LoadLocation(tz)
 	if err != nil {
-		return models.City{}, problems.RaiseInternal(
-			fmt.Errorf("error creating city: %w", err),
+		return errx.ErrorInvalidTimeZone.Raise(
+			fmt.Errorf("invalid timezone: %s", tz),
+		)
+	}
+	return nil
+}
+
+func (c City) validatePoint(p orb.Point) error {
+	lon, lat := p[0], p[1]
+
+	if lon < -180 || lon > 180 {
+		return errx.ErrorInvalidPoint.Raise(
+			fmt.Errorf("invalid longitude: %.6f (must be between -180 and 180)", lon),
+		)
+	}
+	if lat < -90 || lat > 90 {
+		return errx.ErrorInvalidPoint.Raise(
+			fmt.Errorf("invalid latitude: %.6f (must be between -90 and 90)", lat),
+		)
+	}
+	return nil
+}
+
+func (c City) validateSlug(slug string) error {
+	if slug == "" {
+		return errx.ErrorInvalidSlug.Raise(
+			fmt.Errorf("slug must not be empty"),
+		)
+	}
+	if !c.slugRegexp.MatchString(slug) {
+		return errx.ErrorInvalidSlug.Raise(
+			fmt.Errorf("invalid slug: %s", slug),
+		)
+	}
+	return nil
+}
+
+func (c City) validateName(name string) error {
+	if name == "" {
+		return errx.ErrorInvalidCityName.Raise(
+			fmt.Errorf("city name must not be empty"),
+		)
+	}
+	if !c.nameRegexp.MatchString(name) {
+		return errx.ErrorInvalidCityName.Raise(
+			fmt.Errorf("invalid city name: %s", name),
+		)
+	}
+	return nil
+}
+
+type CreateCityParams struct {
+	CountryID uuid.UUID
+	Status    string
+	Name      string
+	Icon      *string
+	Slug      *string
+	Timezone  string
+	Point     orb.Point
+}
+
+func (c City) Create(ctx context.Context, params CreateCityParams) (models.City, error) {
+	err := constant.CheckCityStatus(params.Status)
+	if err != nil {
+		return models.City{}, errx.ErrorInvalidCityStatus.Raise(
+			fmt.Errorf("failed to invalid city status, cause: %w", err),
 		)
 	}
 
-	return models.City{
+	err = c.validateTimezone(params.Timezone)
+	if err != nil {
+		return models.City{}, err
+	}
+
+	err = c.validatePoint(params.Point)
+	if err != nil {
+		return models.City{}, err
+	}
+
+	err = c.validateName(params.Name)
+	if err != nil {
+		return models.City{}, err
+	}
+
+	cityID := uuid.New()
+	now := time.Now().UTC()
+
+	resp := models.City{
 		ID:        cityID,
-		CountryID: CountryID,
-		Status:    enum.CityStatusSupported,
-		Zone:      Zone,
-		Icon:      Icon,
-		Slug:      Slug,
-		Timezone:  TimeZone,
+		CountryID: params.CountryID,
+		Status:    params.Status,
+		Timezone:  params.Timezone,
 		CreatedAt: now,
 		UpdatedAt: now,
-	}, nil
+	}
+
+	stmt := dbx.City{
+		ID:        cityID,
+		CountryID: params.CountryID,
+		Point:     params.Point,
+		Status:    params.Status,
+		Name:      params.Name,
+		Timezone:  params.Timezone,
+		CreatedAt: now,
+		UpdatedAt: now,
+	}
+
+	if params.Slug != nil {
+		_, err = c.citiesQ.New().FilterSlug(*params.Slug).Get(ctx)
+		if err == nil {
+			return models.City{}, errx.ErrorCityAlreadyExists.Raise(
+				fmt.Errorf("failed to city already exists with slug: %v", params.Slug),
+			)
+		}
+
+		stmt.Slug = sql.NullString{String: *params.Slug, Valid: true}
+		resp.Slug = params.Slug
+	}
+
+	if params.Icon != nil {
+		stmt.Icon = sql.NullString{String: *params.Icon, Valid: true}
+		resp.Icon = params.Icon
+	}
+
+	err = c.citiesQ.Insert(ctx, stmt)
+	if err != nil {
+		return models.City{}, errx.ErrorInternal.Raise(
+			fmt.Errorf("failed to creating city: %w", err),
+		)
+	}
+
+	return resp, nil
 }
 
 // Read methods for city
 
-func (c City) GetCityByID(ctx context.Context, cityID uuid.UUID) (models.City, error) {
-	city, err := c.queries.New().FilterID(cityID).Get(ctx)
+func (c City) GetByID(ctx context.Context, cityID uuid.UUID) (models.City, error) {
+	city, err := c.citiesQ.New().FilterID(cityID).Get(ctx)
 	if err != nil {
 		switch {
 		case errors.Is(err, pgx.ErrNoRows):
-			return models.City{}, problems.RaiseCityNotFoundByID(
-				fmt.Errorf("city not found by id: %s, cause: %w", cityID, err),
-				fmt.Sprintf("city not found by id: %s", cityID),
+			return models.City{}, errx.ErrorCityNotFound.Raise(
+				fmt.Errorf("ity not found by id: %s, cause: %w", cityID, err),
 			)
 		default:
-			return models.City{}, problems.RaiseInternal(
-				fmt.Errorf("get city by id: %s, cause: %w", cityID, err),
+			return models.City{}, errx.ErrorInternal.Raise(
+				fmt.Errorf("failed to get city by id: %s, cause: %w", cityID, err),
 			)
 		}
 	}
 
-	return models.City{
-		ID:        city.ID,
-		CountryID: city.CountryID,
-		Status:    city.Status,
-		Zone:      city.Zone,
-		Icon:      city.Icon,
-		Slug:      city.Slug,
-		Timezone:  city.Timezone,
-		CreatedAt: city.CreatedAt,
-		UpdatedAt: city.UpdatedAt,
-	}, nil
+	return cityFromDb(city), nil
 }
 
-func (c City) GetNearestCity(ctx context.Context, lon, lat float64) (models.City, error) {
-	city, err := c.queries.New().
-		FilterStatus(enum.CityStatusSupported).
-		OrderByDistance(lon, lat, false).
+func (c City) GetByRadius(ctx context.Context, point orb.Point, radius uint64) (models.City, error) {
+	city, err := c.citiesQ.New().
+		FilterWithinRadiusMeters(point, radius).
+		OrderByNearest(point, true).
 		Get(ctx)
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
-			return models.City{}, problems.RaiseNotFound(
-				fmt.Errorf("no supported cities found, cause: %w", err),
-				fmt.Sprintf("city not found by id: %s", city.ID),
+			return models.City{}, errx.ErrorCityNotFound.Raise(
+				fmt.Errorf("nearest city not found, cause: %w", err),
 			)
 		default:
-			return models.City{}, problems.RaiseInternal(
-				fmt.Errorf("get nearest city: %w", err),
+			return models.City{}, errx.ErrorInternal.Raise(
+				fmt.Errorf("failed to get nearest city, cause: %w", err),
 			)
 		}
 	}
 
-	return models.City{
-		ID:        city.ID,
-		CountryID: city.CountryID,
-		Status:    city.Status,
-		Zone:      city.Zone,
-		Icon:      city.Icon,
-		Slug:      city.Slug,
-		Timezone:  city.Timezone,
-		CreatedAt: city.CreatedAt,
-		UpdatedAt: city.UpdatedAt,
-	}, nil
+	return cityFromDb(city), nil
 }
 
-func (c City) GetCityBySlug(ctx context.Context, slug string) (models.City, error) {
-	city, err := c.queries.New().FilterSlug(slug).Get(ctx)
+func (c City) GetBySlug(ctx context.Context, slug string) (models.City, error) {
+	city, err := c.citiesQ.New().FilterSlug(slug).Get(ctx)
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
-			return models.City{}, problems.RaiseCityGovNotFound(
+			return models.City{}, errx.ErrorCityNotFound.Raise(
 				fmt.Errorf("city not found by slug: %s, cause: %w", slug, err),
-				fmt.Sprintf("city not found by slug: %s", slug),
 			)
 		default:
-			return models.City{}, problems.RaiseInternal(
-				fmt.Errorf("get city by slug: %w", err),
+			return models.City{}, errx.ErrorInternal.Raise(
+				fmt.Errorf("failed to get city by slug, cause: %w", err),
 			)
 		}
 	}
 
-	return models.City{
-		ID:        city.ID,
-		CountryID: city.CountryID,
-		Status:    city.Status,
-		Zone:      city.Zone,
-		Icon:      city.Icon,
-		Slug:      city.Slug,
-		Timezone:  city.Timezone,
-		CreatedAt: city.CreatedAt,
-		UpdatedAt: city.UpdatedAt,
-	}, nil
+	return cityFromDb(city), nil
 }
 
-func (c City) SearchCityDetails(
+type CitySearchParams struct {
+	Name    *string
+	Status  []string
+	Country *uuid.UUID
+	Point   *orb.Point
+}
+
+func (c City) SearchCities(
 	ctx context.Context,
-	name string,
-	statuses []string,
-	countryIDs []uuid.UUID,
+	params CitySearchParams,
 	pag pagi.Request,
+	sort []pagi.SortField,
 ) ([]models.City, pagi.Response, error) {
-	queries := c.queries.New()
-
-	if name != "" {
-		queries = queries.FilterNameLike(name)
-	}
-	if len(statuses) > 0 {
-		queries = queries.FilterStatus(statuses...)
-	}
-	if len(countryIDs) > 0 {
-		queries = queries.FilterCountryID(countryIDs...)
-	}
-
 	if pag.Page == 0 {
 		pag.Page = 1
 	}
@@ -192,102 +260,168 @@ func (c City) SearchCityDetails(
 	limit := pag.Size + 1 // +1 чтобы определить наличие next
 	offset := (pag.Page - 1) * pag.Size
 
-	rows, err := queries.Page(limit, offset).OrderByAlphabetical(true).Select(ctx)
+	query := c.citiesQ.New()
+
+	if params.Name != nil {
+		query = query.FilterNameLike(*params.Name)
+	}
+
+	for _, s := range params.Status {
+		err := constant.CheckCityStatus(s)
+		if err != nil {
+			return nil, pagi.Response{}, errx.ErrorInvalidCityStatus.Raise(
+				fmt.Errorf("failed to invalid city status: %s, cause: %w", s, err),
+			)
+		}
+	}
+	if len(params.Status) > 0 {
+		query = query.FilterStatus(params.Status...)
+	}
+	if params.Country != nil {
+		query = query.FilterCountryID(*params.Country)
+	}
+
+	for _, s := range sort {
+		switch s.Field {
+		case "name":
+			query = query.OrderByAlphabetical(s.Ascend)
+		case "distance":
+			if params.Point != nil {
+				query = query.OrderByNearest(*params.Point, s.Ascend)
+			}
+		}
+	}
+
+	total, err := query.Count(ctx)
 	if err != nil {
-		return nil, pagi.Response{}, problems.RaiseInternal(
-			fmt.Errorf("search city details: %w", err),
+		return nil, pagi.Response{}, errx.ErrorInternal.Raise(
+			fmt.Errorf("failed to count cities, cause: %w", err),
 		)
 	}
 
-	prev := pag.Page > 1
-	next := len(rows) > int(pag.Size)
+	rows, err := query.Page(limit, offset).Select(ctx)
+	if err != nil {
+		return nil, pagi.Response{}, errx.ErrorInternal.Raise(
+			fmt.Errorf("failed to search cities, cause: %w", err),
+		)
+	}
+
 	if len(rows) == int(limit) {
 		rows = rows[:pag.Size]
 	}
 
-	response := make([]models.City, 0, len(rows))
+	cities := make([]models.City, 0, len(rows))
 	for _, city := range rows {
-		response = append(response, models.City{
-			ID:        city.ID,
-			CountryID: city.CountryID,
-			Status:    city.Status,
-			Zone:      city.Zone,
-			Name:      city.Name,
-			Icon:      city.Icon,
-			Slug:      city.Slug,
-			Timezone:  city.Timezone,
-			CreatedAt: city.CreatedAt,
-			UpdatedAt: city.UpdatedAt,
-		})
+		cities = append(cities, cityFromDb(city))
 	}
 
-	return response, pagi.Response{
-		Size: pag.Size,
-		Page: pag.Page,
-		Next: next,
-		Prev: prev,
+	return cities, pagi.Response{
+		Size:  pag.Size,
+		Page:  pag.Page,
+		Total: total,
 	}, nil
 }
 
-// Update methods for city
+type UpdateCityStatusParams struct {
+	CountryID *uuid.UUID
+	Point     *orb.Point
+	Status    *string
+	Name      *string
+	Icon      *string
+	Slug      *string
+	Timezone  *string
 
-func (c City) UpdateCityStatus(ctx context.Context, cityID uuid.UUID, status string) error {
-	cityStatus, err := enum.ParseCityStatus(status)
-	if err != nil {
-		return err
-	}
-
-	err = c.queries.New().FilterID(cityID).Update(ctx, map[string]any{
-		"status":     cityStatus,
-		"updated_at": time.Now(),
-	})
-	if err != nil {
-		return problems.RaiseInternal(
-			fmt.Errorf("updating city status: %w", err),
-		)
-	}
-
-	return nil
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
-func (c City) UpdateCityZone(ctx context.Context, cityID uuid.UUID, zone orb.MultiPolygon) error {
-	err := c.queries.New().FilterID(cityID).Update(ctx, map[string]any{
-		"zone":       zone,
-		"updated_at": time.Now(),
-	})
+func (c City) Update(ctx context.Context, cityID uuid.UUID, params UpdateCityStatusParams) (models.City, error) {
+	city, err := c.GetByID(ctx, cityID)
 	if err != nil {
-		return problems.RaiseInternal(
-			fmt.Errorf("updating city zone: %w", err),
-		)
+		return models.City{}, err
 	}
 
-	return nil
+	stmt := dbx.UpdateCityParams{}
+	if params.CountryID != nil {
+		stmt.CountryID = params.CountryID
+	}
+	if params.Point != nil {
+		err = c.validatePoint(*params.Point)
+		if err != nil {
+			return models.City{}, err
+		}
+		stmt.Point = params.Point
+	}
+	if params.Status != nil {
+		err = constant.CheckCityStatus(*params.Status)
+		if err != nil {
+			return models.City{}, errx.ErrorInvalidCityStatus.Raise(
+				fmt.Errorf("failed to invalid city status, cause: %s", err),
+			)
+		}
+		stmt.Status = params.Status
+	}
+	if params.Name != nil {
+		err = c.validateName(*params.Name)
+		if err != nil {
+			return models.City{}, err
+		}
+		stmt.Name = params.Name
+	}
+	if params.Icon != nil {
+		stmt.Icon = &sql.NullString{String: *params.Icon, Valid: true}
+	} else if *city.Icon == "" {
+		stmt.Icon = &sql.NullString{String: "", Valid: false}
+	}
+	if params.Slug != nil {
+		err = c.validateSlug(*params.Slug)
+		if err != nil {
+			return models.City{}, err
+		}
+
+		if city.Slug == nil || *city.Slug != *params.Slug {
+			_, err = c.citiesQ.New().FilterSlug(*params.Slug).Get(ctx)
+			if err == nil {
+				return models.City{}, errx.ErrorCityAlreadyExists.Raise(
+					fmt.Errorf("failed to city already exists with slug: %v", params.Slug),
+				)
+			}
+		}
+
+		stmt.Slug = &sql.NullString{String: *params.Slug, Valid: true}
+	} else if *city.Slug == "" {
+		// if slug is empty string, we set it to NULL in DB
+		stmt.Slug = &sql.NullString{String: "", Valid: false}
+	}
+	if params.Timezone != nil {
+		err = c.validateTimezone(*params.Timezone)
+		if err != nil {
+			return models.City{}, err
+		}
+		stmt.Timezone = params.Timezone
+	}
+
+	stmt.UpdatedAt = time.Now().UTC()
+
+	return c.GetByID(ctx, cityID)
 }
 
-func (c City) UpdateCityIcon(ctx context.Context, cityID uuid.UUID, icon string) error {
-	err := c.queries.New().FilterID(cityID).Update(ctx, map[string]any{
-		"icon":       icon,
-		"updated_at": time.Now(),
-	})
-	if err != nil {
-		return problems.RaiseInternal(
-			fmt.Errorf("updating city icon: %w", err),
-		)
+func cityFromDb(c dbx.City) models.City {
+	res := models.City{
+		ID:        c.ID,
+		CountryID: c.CountryID,
+		Status:    c.Status,
+		Name:      c.Name,
+		Timezone:  c.Timezone,
+		CreatedAt: c.CreatedAt,
+		UpdatedAt: c.UpdatedAt,
+	}
+	if c.Icon.Valid {
+		res.Icon = &c.Icon.String
+	}
+	if c.Slug.Valid {
+		res.Slug = &c.Slug.String
 	}
 
-	return nil
-}
-
-func (c City) UpdateCitySlug(ctx context.Context, cityID uuid.UUID, slug string) error {
-	err := c.queries.New().FilterID(cityID).Update(ctx, map[string]any{
-		"slug":       slug,
-		"updated_at": time.Now(),
-	})
-	if err != nil {
-		return problems.RaiseInternal(
-			fmt.Errorf("updating city slug: %w", err),
-		)
-	}
-
-	return nil
+	return res
 }

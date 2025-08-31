@@ -8,45 +8,45 @@ import (
 	"time"
 
 	"github.com/chains-lab/cities-svc/internal/app/models"
-	"github.com/chains-lab/cities-svc/internal/config/constant/enum"
+	"github.com/chains-lab/cities-svc/internal/constant"
 	"github.com/chains-lab/cities-svc/internal/dbx"
-	"github.com/chains-lab/cities-svc/internal/problems"
+	"github.com/chains-lab/cities-svc/internal/errx"
 	"github.com/chains-lab/pagi"
 	"github.com/google/uuid"
 )
 
 type Country struct {
-	queries dbx.CountryQ
+	countryQ dbx.CountryQ
 }
 
-func NewCountry(db *sql.DB) Country {
-	return Country{
-		queries: dbx.NewCountryQ(db),
-	}
-}
-
-// Create methods for countries
-
-func (a Country) CreateCountry(ctx context.Context, name string) (models.Country, error) {
+func (c Country) Create(ctx context.Context, name string, status string) (models.Country, error) {
 	now := time.Now().UTC()
 	ID := uuid.New()
-	err := a.queries.New().Insert(ctx, dbx.Country{
+
+	err := constant.CheckCountryStatus(status)
+	if err != nil {
+		return models.Country{}, errx.ErrorInvalidCountryStatus.Raise(
+			fmt.Errorf("failed to parse country status: %w", err),
+		)
+	}
+
+	err = c.countryQ.New().Insert(ctx, dbx.Country{
 		ID:        ID,
 		Name:      name,
-		Status:    enum.CountryStatusSupported,
+		Status:    constant.CountryStatusSupported,
 		CreatedAt: now,
 		UpdatedAt: now,
 	})
 	if err != nil {
-		return models.Country{}, problems.RaiseInternal(
-			fmt.Errorf("error creating country: %w", err),
+		return models.Country{}, errx.ErrorInternal.Raise(
+			fmt.Errorf("failed to creating country: %w", err),
 		)
 	}
 
 	return models.Country{
 		ID:        ID,
 		Name:      name,
-		Status:    enum.CountryStatusSupported,
+		Status:    constant.CountryStatusSupported,
 		CreatedAt: now,
 		UpdatedAt: now,
 	}, nil
@@ -54,36 +54,34 @@ func (a Country) CreateCountry(ctx context.Context, name string) (models.Country
 
 // Read methods for countries
 
-func (a Country) GetCountryByID(ctx context.Context, ID uuid.UUID) (models.Country, error) {
-	country, err := a.queries.New().FilterID(ID).Get(ctx)
+func (c Country) Get(ctx context.Context, ID uuid.UUID) (models.Country, error) {
+	country, err := c.countryQ.New().FilterID(ID).Get(ctx)
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
-			return models.Country{}, problems.RaiseCountryNotFound(
-				fmt.Errorf("country not found: %w", err),
-				fmt.Sprintf("country with ID %s not found", ID),
+			return models.Country{}, errx.ErrorCountryNotFound.Raise(
+				fmt.Errorf("failed to country not found, cause: %w", err),
 			)
 		default:
-			return models.Country{}, problems.RaiseInternal(
-				fmt.Errorf("get country by ID: %w", err),
+			return models.Country{}, errx.ErrorInternal.Raise(
+				fmt.Errorf("failed to get country by ID, cause: %w", err),
 			)
 		}
 	}
 
-	return models.Country{
-		ID:        country.ID,
-		Name:      country.Name,
-		Status:    country.Status,
-		CreatedAt: country.CreatedAt,
-		UpdatedAt: country.UpdatedAt,
-	}, nil
+	return countryFromDb(country), nil
 }
 
-func (a Country) SearchCountries(
+type SelectCountriesParams struct {
+	Name   string
+	Status []string
+}
+
+func (c Country) Select(
 	ctx context.Context,
-	name string,
-	status []string,
+	params SelectCountriesParams,
 	pag pagi.Request,
+	sort []pagi.SortField,
 ) ([]models.Country, pagi.Response, error) {
 	if pag.Page == 0 {
 		pag.Page = 1
@@ -98,15 +96,47 @@ func (a Country) SearchCountries(
 	limit := pag.Size + 1 // +1 чтобы определить наличие next
 	offset := (pag.Page - 1) * pag.Size
 
-	rows, err := a.queries.New().FilterName(name).FilterStatus(status...).Page(limit, offset).Select(ctx)
+	query := c.countryQ.New()
+
+	if params.Status != nil {
+		for _, s := range params.Status {
+			if err := constant.CheckCountryStatus(s); err != nil {
+				return nil, pagi.Response{}, errx.ErrorInvalidCountryStatus.Raise(
+					fmt.Errorf("failed to parse country status, cause: %w", err),
+				)
+			}
+		}
+
+		query = query.FilterStatus(params.Status...)
+	}
+
+	if params.Name != "" {
+		query = query.FilterNameLike(params.Name)
+	}
+
+	for _, sort := range sort {
+		switch sort.Field {
+		case "name":
+			query = query.OrderAlphabetical(sort.Ascend)
+		default:
+
+		}
+	}
+
+	total, err := query.Count(ctx)
 	if err != nil {
-		return nil, pagi.Response{}, problems.RaiseInternal(
-			fmt.Errorf("search countries: %w", err),
+		return nil, pagi.Response{}, errx.ErrorInternal.Raise(
+			fmt.Errorf("failed to count countries, cause: %w", err),
 		)
 	}
 
-	prev := pag.Page > 1
-	next := len(rows) > int(pag.Size)
+	rows, err := query.Page(limit, offset).Select(ctx)
+	if err != nil {
+		return nil, pagi.Response{}, errx.ErrorInternal.Raise(
+			fmt.Errorf("failed to search countries, cause: %w", err),
+		)
+	}
+
 	if len(rows) == int(limit) {
 		rows = rows[:pag.Size]
 	}
@@ -123,47 +153,50 @@ func (a Country) SearchCountries(
 	}
 
 	return countries, pagi.Response{
-		Page: pag.Page,
-		Size: pag.Size,
-		Prev: prev,
-		Next: next,
+		Page:  pag.Page,
+		Size:  pag.Size,
+		Total: total,
 	}, nil
 }
 
 // Update methods for countries
 
-func (a Country) UpdateCountryStatus(ctx context.Context, ID uuid.UUID, status string) error {
-	st, err := enum.ParseCountryStatus(status)
-	if err != nil {
-		return problems.RaiseInvalidCountryStatus(
-			fmt.Errorf("parse country status: %w", err),
-			fmt.Sprintf("invalid country status: %s", status),
-		)
-	}
+type UpdateCountryParams struct {
+	Name   *string
+	Status *string
+}
 
-	err = a.queries.New().FilterID(ID).Update(ctx, map[string]any{
-		"status":     st,
-		"updated_at": time.Now().UTC(),
-	})
+func (c Country) Update(ctx context.Context, ID uuid.UUID, params UpdateCountryParams) error {
+	stmt := dbx.UpdateCountryParams{}
+	if params.Name != nil {
+		stmt.Name = params.Name
+	}
+	if params.Status != nil {
+		err := constant.CheckCountryStatus(*params.Status)
+		if err != nil {
+			return errx.ErrorInvalidCountryStatus.Raise(
+				fmt.Errorf("failed to invalid country status, cause: %w", err),
+			)
+		}
+	}
+	stmt.UpdatedAt = time.Now().UTC()
+
+	err := c.countryQ.New().FilterID(ID).Update(ctx, stmt)
 	if err != nil {
-		return problems.RaiseInternal(
-			fmt.Errorf("update country status: %w", err),
+		return errx.ErrorInternal.Raise(
+			fmt.Errorf("failed to update country, cause: %w", err),
 		)
 	}
 
 	return nil
 }
 
-func (a Country) UpdateCountryName(ctx context.Context, ID uuid.UUID, name string) error {
-	err := a.queries.New().FilterID(ID).Update(ctx, map[string]any{
-		"name":       name,
-		"updated_at": time.Now().UTC(),
-	})
-	if err != nil {
-		return problems.RaiseInternal(
-			fmt.Errorf("update country name: %w", err),
-		)
+func countryFromDb(c dbx.Country) models.Country {
+	return models.Country{
+		ID:        c.ID,
+		Name:      c.Name,
+		Status:    c.Status,
+		CreatedAt: c.CreatedAt,
+		UpdatedAt: c.UpdatedAt,
 	}
-
-	return nil
 }

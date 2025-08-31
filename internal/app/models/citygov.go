@@ -9,6 +9,7 @@ import (
 type CityGov struct {
 	UserID    uuid.UUID
 	CityID    uuid.UUID
+	Label     *string
 	Role      string
 	UpdatedAt time.Time
 	CreatedAt time.Time

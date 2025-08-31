@@ -10,11 +10,11 @@ import (
 type City struct {
 	ID        uuid.UUID
 	CountryID uuid.UUID
+	Point     orb.Point // [lon, lat]
 	Status    string
-	Zone      orb.MultiPolygon
 	Name      string
-	Icon      string
-	Slug      string
+	Icon      *string
+	Slug      *string
 	Timezone  string
 
 	CreatedAt time.Time

@@ -3,14 +3,12 @@ package dbx
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/google/uuid"
 	"github.com/paulmach/orb"
-	"github.com/paulmach/orb/geojson"
 )
 
 const citiesTable = "city"
@@ -18,11 +16,11 @@ const citiesTable = "city"
 type City struct {
 	ID        uuid.UUID
 	CountryID uuid.UUID
+	Point     orb.Point // [lon, lat]
 	Status    string
-	Zone      orb.MultiPolygon
 	Name      string
-	Icon      string
-	Slug      string
+	Icon      sql.NullString // was string, now nullable
+	Slug      sql.NullString // was string, now nullable
 	Timezone  string
 
 	CreatedAt time.Time
@@ -45,8 +43,9 @@ func NewCitiesQ(db *sql.DB) CitiesQ {
 		selector: b.Select(
 			"id",
 			"country_id",
+			"ST_X(point::geometry) AS point_lon",
+			"ST_Y(point::geometry) AS point_lat",
 			"status",
-			"ST_AsGeoJSON(zone) AS zone_geojson",
 			"name",
 			"icon",
 			"slug",
@@ -61,98 +60,54 @@ func NewCitiesQ(db *sql.DB) CitiesQ {
 	}
 }
 
+func (q CitiesQ) New() CitiesQ { return NewCitiesQ(q.db) }
+
 func scanCityRow(scanner interface{ Scan(dest ...any) error }) (City, error) {
 	var (
 		c        City
-		zoneJSON string
+		lon, lat float64
 	)
 	if err := scanner.Scan(
 		&c.ID,
 		&c.CountryID,
+		&lon,
+		&lat,
 		&c.Status,
-		&zoneJSON,
 		&c.Name,
-		&c.Icon,
-		&c.Slug,
+		&c.Icon, // sql.NullString
+		&c.Slug, // sql.NullString
 		&c.Timezone,
 		&c.CreatedAt,
 		&c.UpdatedAt,
 	); err != nil {
 		return City{}, err
 	}
-
-	if zoneJSON == "" {
-		return City{}, fmt.Errorf("zone must not be empty")
-	}
-
-	if g, err := geojson.UnmarshalGeometry([]byte(zoneJSON)); err == nil {
-		switch geom := g.Geometry().(type) {
-		case orb.MultiPolygon:
-			c.Zone = geom
-		case orb.Polygon:
-			c.Zone = orb.MultiPolygon{geom}
-		default:
-			return City{}, fmt.Errorf("unexpected geometry type for zone: %T", geom)
-		}
-		return c, nil
-	}
-
-	if f, err := geojson.UnmarshalFeature([]byte(zoneJSON)); err == nil {
-		switch geom := f.Geometry.(type) {
-		case orb.MultiPolygon:
-			c.Zone = geom
-		case orb.Polygon:
-			c.Zone = orb.MultiPolygon{geom}
-		default:
-			return City{}, fmt.Errorf("unexpected feature geometry type for zone: %T", geom)
-		}
-		return c, nil
-	}
-
-	var raw map[string]any
-	if err := json.Unmarshal([]byte(zoneJSON), &raw); err == nil {
-		if raw["type"] == "Polygon" || raw["type"] == "MultiPolygon" {
-			if g, err := geojson.UnmarshalGeometry([]byte(zoneJSON)); err == nil {
-				switch geom := g.Geometry().(type) {
-				case orb.MultiPolygon:
-					c.Zone = geom
-				case orb.Polygon:
-					c.Zone = orb.MultiPolygon{geom}
-				default:
-					return City{}, fmt.Errorf("unexpected geometry type after fallback: %T", geom)
-				}
-				return c, nil
-			}
-		}
-	}
-
-	return City{}, fmt.Errorf("failed to decode zone geojson")
+	c.Point = orb.Point{lon, lat}
+	return c, nil
 }
-
-func (q CitiesQ) applyConditions(conds ...sq.Sqlizer) CitiesQ {
-	q.selector = q.selector.Where(conds)
-	q.counter = q.counter.Where(conds)
-	q.updater = q.updater.Where(conds)
-	q.deleter = q.deleter.Where(conds)
-	return q
-}
-
-func (q CitiesQ) New() CitiesQ { return NewCitiesQ(q.db) }
 
 func (q CitiesQ) Insert(ctx context.Context, in City) error {
-	j, err := geojson.NewGeometry(in.Zone).MarshalJSON()
-	if err != nil {
-		return fmt.Errorf("marshal zone geojson: %w", err)
+	var icon any
+	if in.Icon.Valid {
+		icon = in.Icon.String
+	} else {
+		icon = nil
+	}
+	var slug any
+	if in.Slug.Valid {
+		slug = in.Slug.String
+	} else {
+		slug = nil
 	}
 
 	vals := map[string]any{
 		"id":         in.ID,
 		"country_id": in.CountryID,
+		"center":     sq.Expr("ST_SetSRID(ST_MakePoint(?, ?), 4326)::geography", in.Point[0], in.Point[1]),
 		"status":     in.Status,
-		"zone":       sq.Expr("ST_SetSRID(ST_GeomFromGeoJSON(?), 4326)", string(j)),
 		"name":       in.Name,
-		"icon":       in.Icon,
-		"slug":       in.Slug,
+		"icon":       icon, // may be NULL
+		"slug":       slug, // may be NULL
 		"timezone":   in.Timezone,
 		"created_at": in.CreatedAt,
 		"updated_at": in.UpdatedAt,
@@ -211,56 +166,61 @@ func (q CitiesQ) Get(ctx context.Context) (City, error) {
 	return scanCityRow(row)
 }
 
-func (q CitiesQ) Update(ctx context.Context, in map[string]any) error {
-	vals := map[string]any{}
+type UpdateCityParams struct {
+	CountryID *uuid.UUID
+	Point     *orb.Point // [lon, lat]
+	Status    *string
+	Name      *string
+	Icon      *sql.NullString // nullable
+	Slug      *sql.NullString // nullable
+	Timezone  *string
+	UpdatedAt time.Time
+}
 
-	if v, ok := in["country_id"]; ok {
-		vals["country_id"] = v
+func (q CitiesQ) Update(ctx context.Context, p UpdateCityParams) error {
+	updates := map[string]any{}
+
+	if p.CountryID != nil {
+		updates["country_id"] = *p.CountryID
 	}
-	if v, ok := in["status"]; ok {
-		vals["status"] = v
+	if p.Point != nil {
+		pt := *p.Point
+		updates["point"] = sq.Expr(
+			"ST_SetSRID(ST_MakePoint(?, ?), 4326)::geography",
+			pt[0], pt[1],
+		)
 	}
-	if v, ok := in["zone"]; ok {
-		switch g := v.(type) {
-		case orb.MultiPolygon:
-			j, err := geojson.NewGeometry(g).MarshalJSON()
-			if err != nil {
-				return fmt.Errorf("marshal zone: %w", err)
-			}
-			vals["zone"] = sq.Expr("ST_SetSRID(ST_GeomFromGeoJSON(?), 4326)", string(j))
-		case orb.Polygon:
-			j, err := geojson.NewGeometry(g).MarshalJSON()
-			if err != nil {
-				return fmt.Errorf("marshal zone: %w", err)
-			}
-			vals["zone"] = sq.Expr("ST_SetSRID(ST_GeomFromGeoJSON(?), 4326)", string(j))
-		default:
-			return fmt.Errorf("zone must be orb.MultiPolygon or orb.Polygon")
+	if p.Status != nil {
+		updates["status"] = *p.Status
+	}
+	if p.Name != nil {
+		updates["name"] = *p.Name
+	}
+	if p.Icon != nil {
+		if p.Icon.Valid {
+			updates["icon"] = p.Icon.String
+		} else {
+			updates["icon"] = nil // set NULL
 		}
 	}
-	if v, ok := in["name"]; ok {
-		vals["name"] = v
+	if p.Slug != nil {
+		if p.Slug.Valid {
+			updates["slug"] = p.Slug.String
+		} else {
+			updates["slug"] = nil // set NULL
+		}
 	}
-	if v, ok := in["icon"]; ok {
-		vals["icon"] = v
-	}
-	if v, ok := in["slug"]; ok {
-		vals["slug"] = v
-	}
-	if v, ok := in["timezone"]; ok {
-		vals["timezone"] = v
-	}
-	if v, ok := in["updated_at"]; ok {
-		vals["updated_at"] = v
-	} else {
-		vals["updated_at"] = time.Now().UTC()
+	if p.Timezone != nil {
+		updates["timezone"] = *p.Timezone
 	}
 
-	if len(vals) == 0 {
+	updates["updated_at"] = p.UpdatedAt
+
+	if len(updates) == 1 { // только updated_at
 		return nil
 	}
 
-	qry, args, err := q.updater.SetMap(vals).ToSql()
+	qry, args, err := q.updater.SetMap(updates).ToSql()
 	if err != nil {
 		return fmt.Errorf("build update %s: %w", citiesTable, err)
 	}
@@ -285,44 +245,56 @@ func (q CitiesQ) Delete(ctx context.Context) error {
 	return err
 }
 
+// -------- Фильтры/сортировки --------
+
 func (q CitiesQ) FilterID(id uuid.UUID) CitiesQ {
-	return q.applyConditions(sq.Eq{"id": id})
+	q.selector = q.selector.Where(sq.Eq{"id": id})
+	q.counter = q.counter.Where(sq.Eq{"id": id})
+	q.updater = q.updater.Where(sq.Eq{"id": id})
+	q.deleter = q.deleter.Where(sq.Eq{"id": id})
+	return q
 }
 
 func (q CitiesQ) FilterCountryID(countryID ...uuid.UUID) CitiesQ {
-	return q.applyConditions(sq.Eq{"country_id": countryID})
+	q.selector = q.selector.Where(sq.Eq{"country_id": countryID})
+	q.counter = q.counter.Where(sq.Eq{"country_id": countryID})
+	q.updater = q.updater.Where(sq.Eq{"country_id": countryID})
+	q.deleter = q.deleter.Where(sq.Eq{"country_id": countryID})
+	return q
 }
 
 func (q CitiesQ) FilterStatus(status ...string) CitiesQ {
-	return q.applyConditions(sq.Eq{"status": status})
+	q.selector = q.selector.Where(sq.Eq{"status": status})
+	q.counter = q.counter.Where(sq.Eq{"status": status})
+	q.updater = q.updater.Where(sq.Eq{"status": status})
+	q.deleter = q.deleter.Where(sq.Eq{"status": status})
+	return q
 }
 
 func (q CitiesQ) FilterSlug(slug string) CitiesQ {
-	return q.applyConditions(sq.Eq{"slug": slug})
+	q.selector = q.selector.Where(sq.Eq{"slug": slug})
+	q.counter = q.counter.Where(sq.Eq{"slug": slug})
+	q.updater = q.updater.Where(sq.Eq{"slug": slug})
+	q.deleter = q.deleter.Where(sq.Eq{"slug": slug})
+	return q
 }
 
 func (q CitiesQ) FilterNameLike(substr string) CitiesQ {
-	return q.applyConditions(sq.Expr("name ILIKE ?", fmt.Sprintf("%%%s%%", substr)))
+	cond := sq.Expr("name ILIKE ?", fmt.Sprintf("%%%s%%", substr))
+	q.selector = q.selector.Where(cond)
+	q.counter = q.counter.Where(cond)
+	q.updater = q.updater.Where(cond)
+	q.deleter = q.deleter.Where(cond)
+	return q
 }
 
-func (q CitiesQ) FilterWithinRadiusMeters(lon, lat float64, radiusM uint64) CitiesQ {
-	point := sq.Expr("ST_SetSRID(ST_MakePoint(?, ?), 4326)::geography", lon, lat)
-	cond := sq.Expr("ST_DWithin(zone::geography, ?, ?)", point, radiusM)
-	return q.applyConditions(cond)
-}
-
-func (q CitiesQ) OrderByDistance(lon, lat float64, asc bool) CitiesQ {
-	dir := "DESC"
-	if asc {
-		dir = "ASC"
-	}
-	// через geography в метрах
-	orderExpr := fmt.Sprintf(
-		"ST_Distance(zone::geography, ST_SetSRID(ST_MakePoint(%f,%f),4326)::geography) %s",
-		lon, lat, dir,
-	)
-	q.selector = q.selector.OrderBy(orderExpr)
-	q.counter = q.counter.OrderBy(orderExpr)
+func (q CitiesQ) FilterWithinRadiusMeters(point orb.Point, radiusM uint64) CitiesQ {
+	p := sq.Expr("ST_SetSRID(ST_MakePoint(?, ?), 4326)::geography", point[0], point[1])
+	cond := sq.Expr("ST_DWithin(point, ?, ?)", p, radiusM)
+	q.selector = q.selector.Where(cond)
+	q.counter = q.counter.Where(cond)
+	q.updater = q.updater.Where(cond)
+	q.deleter = q.deleter.Where(cond)
 	return q
 }
 
@@ -334,6 +306,26 @@ func (q CitiesQ) OrderByAlphabetical(asc bool) CitiesQ {
 	orderExpr := fmt.Sprintf("name %s", dir)
 	q.selector = q.selector.OrderBy(orderExpr)
 	q.counter = q.counter.OrderBy(orderExpr)
+	return q
+}
+
+func (q CitiesQ) OrderByNearest(point orb.Point, asc bool) CitiesQ {
+	dir := "DESC"
+	if asc {
+		dir = "ASC"
+	}
+
+	q.selector = q.selector.SuffixExpr(
+		sq.Expr(
+			fmt.Sprintf("ORDER BY point <-> ST_SetSRID(ST_MakePoint(?, ?), 4326)::geography %s", dir),
+			point[0], point[1],
+		),
+	)
+	return q
+}
+
+func (q CitiesQ) Page(limit, offset uint64) CitiesQ {
+	q.selector = q.selector.Limit(limit).Offset(offset)
 	return q
 }
 
@@ -352,33 +344,4 @@ func (q CitiesQ) Count(ctx context.Context) (uint64, error) {
 		return 0, fmt.Errorf("scan count %s: %w", citiesTable, err)
 	}
 	return n, nil
-}
-
-func (q CitiesQ) Page(limit, offset uint64) CitiesQ {
-	q.selector = q.selector.Limit(limit).Offset(offset)
-	return q
-}
-
-func (q CitiesQ) Transaction(fn func(ctx context.Context) error) error {
-	ctx := context.Background()
-
-	tx, err := q.db.BeginTx(ctx, nil)
-	if err != nil {
-		return fmt.Errorf("failed to start transaction: %w", err)
-	}
-
-	ctxWithTx := context.WithValue(ctx, TxKey, tx)
-
-	if err := fn(ctxWithTx); err != nil {
-		if rbErr := tx.Rollback(); rbErr != nil {
-			return fmt.Errorf("transaction failed: %v, rollback error: %v", err, rbErr)
-		}
-		return fmt.Errorf("transaction failed: %w", err)
-	}
-
-	if err := tx.Commit(); err != nil {
-		return fmt.Errorf("failed to commit transaction: %w", err)
-	}
-
-	return nil
 }

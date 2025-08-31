@@ -126,20 +126,22 @@ func (q CountryQ) Select(ctx context.Context) ([]Country, error) {
 	return models, rows.Err()
 }
 
-func (q CountryQ) Update(ctx context.Context, input map[string]any) error {
-	updates := map[string]interface{}{}
+type UpdateCountryParams struct {
+	Name      *string
+	Status    *string
+	UpdatedAt time.Time
+}
 
-	if name, ok := input["name"]; ok {
-		updates["name"] = name
+func (q CountryQ) Update(ctx context.Context, params UpdateCountryParams) error {
+	updates := map[string]any{}
+
+	if params.Name != nil {
+		updates["name"] = *params.Name
 	}
-	if status, ok := input["status"]; ok {
-		updates["status"] = status
+	if params.Status != nil {
+		updates["status"] = *params.Status
 	}
-	if updatedAt, ok := input["updated_at"]; ok {
-		updates["updated_at"] = updatedAt
-	} else {
-		updates["updated_at"] = time.Now().UTC()
-	}
+	updates["updated_at"] = params.UpdatedAt
 
 	query, args, err := q.updater.SetMap(updates).ToSql()
 	if err != nil {
@@ -194,6 +196,25 @@ func (q CountryQ) FilterStatus(status ...string) CountryQ {
 	q.deleter = q.deleter.Where(sq.Eq{"status": status})
 	q.updater = q.updater.Where(sq.Eq{"status": status})
 
+	return q
+}
+
+func (q CountryQ) FilterNameLike(name string) CountryQ {
+	likePattern := fmt.Sprintf("%%%s%%", name)
+	q.selector = q.selector.Where(sq.ILike{"name": likePattern})
+	q.counter = q.counter.Where(sq.ILike{"name": likePattern})
+	q.deleter = q.deleter.Where(sq.ILike{"name": likePattern})
+	q.updater = q.updater.Where(sq.ILike{"name": likePattern})
+
+	return q
+}
+
+func (q CountryQ) OrderAlphabetical(asc bool) CountryQ {
+	if asc {
+		q.selector = q.selector.OrderBy("name ASC")
+	} else {
+		q.selector = q.selector.OrderBy("name DESC")
+	}
 	return q
 }
 

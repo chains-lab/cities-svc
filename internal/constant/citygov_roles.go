@@ -1,35 +1,38 @@
-package enum
+package constant
 
 import (
 	"fmt"
 )
 
 const (
-	CityGovRoleAdmin     = "admin"
-	CityGovRoleModerator = "moderator"
+	CityGovRoleMayor      = "mayor"
+	CityGovRoleGovernment = "government"
+	CityGovRoleModerator  = "moderator"
 )
 
 var citiesAdminsRoles = []string{
-	CityGovRoleAdmin,
+	CityGovRoleMayor,
+	CityGovRoleGovernment,
 	CityGovRoleModerator,
 }
 
 var ErrorInvalidCityGovRole = fmt.Errorf("invalid city government role mus be one of: %s", GetAllCitiesAdminsRoles())
 
-func ParseCityGovRole(role string) (string, error) {
+func ParseCityGovRole(role string) error {
 	for _, r := range citiesAdminsRoles {
 		if r == role {
-			return r, nil
+			return nil
 		}
 	}
 
-	return "", fmt.Errorf("'%s', %w", role, ErrorInvalidCityGovRole)
+	return fmt.Errorf("'%s', %w", role, ErrorInvalidCityGovRole)
 }
 
 func CompareCityGovRole(role1, role2 string) int {
 	power := map[string]uint8{
-		CityGovRoleAdmin:     2,
-		CityGovRoleModerator: 1,
+		CityGovRoleMayor:      3,
+		CityGovRoleGovernment: 2,
+		CityGovRoleModerator:  1,
 	}
 
 	if power[role1] > power[role2] {

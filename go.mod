@@ -5,9 +5,10 @@ go 1.24.5
 require (
 	github.com/Masterminds/squirrel v1.5.4
 	github.com/alecthomas/kingpin v2.2.6+incompatible
-	github.com/chains-lab/cities-proto v0.4.9
-	github.com/chains-lab/gatekit v0.2.0
-	github.com/chains-lab/pagi v0.1.0
+	github.com/chains-lab/cities-proto v0.5.1
+	github.com/chains-lab/gatekit v0.2.2
+	github.com/chains-lab/logium v0.1.1
+	github.com/chains-lab/pagi v0.1.4
 	github.com/chains-lab/svc-errors v0.2.2
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.7.5
@@ -20,18 +21,21 @@ require (
 	golang.org/x/sync v0.14.0
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250528174236-200df99c418a
 	google.golang.org/grpc v1.74.2
+	google.golang.org/protobuf v1.36.6
 )
 
 require (
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751 // indirect
 	github.com/alecthomas/units v0.0.0-20240927000941-0f3dac36c52b // indirect
+	github.com/chains-lab/ape v0.4.11 // indirect
 	github.com/fsnotify/fsnotify v1.8.0 // indirect
+	github.com/go-chi/chi/v5 v5.2.2 // indirect
 	github.com/go-gorp/gorp/v3 v3.1.0 // indirect
 	github.com/go-viper/mapstructure/v2 v2.2.1 // indirect
 	github.com/golang-jwt/jwt/v5 v5.2.2 // indirect
+	github.com/google/jsonapi v1.0.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
-	github.com/jackc/puddle/v2 v2.2.2 // indirect
 	github.com/lann/builder v0.0.0-20180802200727-47ae307949d0 // indirect
 	github.com/lann/ps v0.0.0-20150810152359-62de8c46ede0 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.3 // indirect
@@ -48,6 +52,5 @@ require (
 	golang.org/x/net v0.40.0 // indirect
 	golang.org/x/sys v0.33.0 // indirect
 	golang.org/x/text v0.25.0 // indirect
-	google.golang.org/protobuf v1.36.6 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
