@@ -3,4 +3,4 @@ required:
   - data
 properties:
   data:
-    $ref: './GovDataData.yaml'
+    $ref: './GovData.yaml'

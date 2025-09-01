@@ -80,17 +80,48 @@ func (g Gov) CreateGov(ctx context.Context, params CreateGovParams) (models.Gov,
 
 // GetByID methods for citygov
 
-func (g Gov) Get(ctx context.Context, ID uuid.UUID) (models.Gov, error) {
-	gov, err := g.govQ.New().FilterID(ID).Get(ctx)
+type GetGovFilters struct {
+	ID     *uuid.UUID
+	UserID *uuid.UUID
+	CityID *uuid.UUID
+	Role   *string
+	Active *bool
+}
+
+func (g Gov) Get(ctx context.Context, filters GetGovFilters) (models.Gov, error) {
+	query := g.govQ.New()
+	if filters.ID != nil {
+		query = query.FilterID(*filters.ID)
+	}
+	if filters.UserID != nil {
+		query = query.FilterUserID(*filters.UserID)
+	}
+	if filters.CityID != nil {
+		query = query.FilterCityID(*filters.CityID)
+	}
+	if filters.Role != nil {
+		err := constant.ParseCityGovRole(*filters.Role)
+		if err != nil {
+			return models.Gov{}, errx.ErrorInvalidCityGovRole.Raise(
+				fmt.Errorf("invalid city gov role, cause: %w", err),
+			)
+		}
+		query = query.FilterRole(*filters.Role)
+	}
+	if filters.Active != nil {
+		query = query.FilterActive(*filters.Active)
+	}
+
+	gov, err := g.govQ.Get(ctx)
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
 			return models.Gov{}, errx.ErrorCityGovNotFound.Raise(
-				fmt.Errorf("city gov not found by id: %s, cause: %w", ID, err),
+				fmt.Errorf("city gov not found, cause: %w", err),
 			)
 		default:
 			return models.Gov{}, errx.ErrorInternal.Raise(
-				fmt.Errorf("failed to get city gov by id: %s, cause: %w", ID, err),
+				fmt.Errorf("failed to get city gov, cause: %w", err),
 			)
 		}
 	}
@@ -98,47 +129,7 @@ func (g Gov) Get(ctx context.Context, ID uuid.UUID) (models.Gov, error) {
 	return govFromDb(gov), nil
 }
 
-func (g Gov) GetActiveForUser(ctx context.Context, userID uuid.UUID) (models.Gov, error) {
-	gov, err := g.govQ.New().FilterUserID(userID).FilterActive(true).Get(ctx)
-	if err != nil {
-		switch {
-		case errors.Is(err, sql.ErrNoRows):
-			return models.Gov{}, errx.ErrorCityGovNotFound.Raise(
-				fmt.Errorf("active city gov not found by user_id: %s, cause: %w", userID, err),
-			)
-		default:
-			return models.Gov{}, errx.ErrorInternal.Raise(
-				fmt.Errorf("failed to get active city gov by user_id: %s, cause: %w", userID, err),
-			)
-		}
-	}
-
-	return govFromDb(gov), nil
-}
-
-func (g Gov) GetActiveMayorForCity(ctx context.Context, cityID uuid.UUID) (models.Gov, error) {
-	mayor, err := g.govQ.New().
-		FilterCityID(cityID).
-		FilterRole(constant.CityGovRoleMayor).
-		FilterActive(true).
-		Get(ctx)
-	if err != nil {
-		switch {
-		case errors.Is(err, sql.ErrNoRows):
-			return models.Gov{}, errx.ErrorCityGovNotFound.Raise(
-				fmt.Errorf("city mayor not found by city_id: %s, cause: %w", cityID, err),
-			)
-		default:
-			return models.Gov{}, errx.ErrorInternal.Raise(
-				fmt.Errorf("failed to get city mayor by city_id: %s, cause: %w", cityID, err),
-			)
-		}
-	}
-
-	return govFromDb(mayor), nil
-}
-
-type SelectGovsParams struct {
+type SelectGovsFilters struct {
 	UserID *uuid.UUID
 	CityID *uuid.UUID
 	Role   []string
@@ -148,7 +139,7 @@ type SelectGovsParams struct {
 
 func (g Gov) SelectGovs(
 	ctx context.Context,
-	params SelectGovsParams,
+	filters SelectGovsFilters,
 	pag pagi.Request,
 	sort []pagi.SortField,
 ) ([]models.Gov, pagi.Response, error) {
@@ -167,20 +158,20 @@ func (g Gov) SelectGovs(
 
 	query := g.govQ.New()
 
-	if params.UserID != nil {
-		query = query.FilterUserID(*params.UserID)
+	if filters.UserID != nil {
+		query = query.FilterUserID(*filters.UserID)
 	}
-	if params.CityID != nil {
-		query = query.FilterCityID(*params.CityID)
+	if filters.CityID != nil {
+		query = query.FilterCityID(*filters.CityID)
 	}
-	if params.Label != nil {
-		query = query.FilterLabelLike(*params.Label)
+	if filters.Label != nil {
+		query = query.FilterLabelLike(*filters.Label)
 	}
-	if params.Active != nil {
-		query = query.FilterActive(*params.Active)
+	if filters.Active != nil {
+		query = query.FilterActive(*filters.Active)
 	}
-	if params.Role != nil && len(params.Role) > 0 {
-		for _, r := range params.Role {
+	if filters.Role != nil && len(filters.Role) > 0 {
+		for _, r := range filters.Role {
 			err := constant.ParseCityGovRole(r)
 			if err != nil {
 				return nil, pagi.Response{}, errx.ErrorInvalidCityGovRole.Raise(
@@ -188,7 +179,7 @@ func (g Gov) SelectGovs(
 				)
 			}
 		}
-		query = query.FilterRole(params.Role...)
+		query = query.FilterRole(filters.Role...)
 	}
 
 	for _, s := range sort {

@@ -206,7 +206,7 @@ func (c City) GetBySlug(ctx context.Context, slug string) (models.City, error) {
 	return cityFromDb(city), nil
 }
 
-type SelectCityParams struct {
+type SelectCityFilters struct {
 	Name      *string
 	Status    []string
 	CountryID *uuid.UUID
@@ -215,7 +215,7 @@ type SelectCityParams struct {
 
 func (c City) SelectCities(
 	ctx context.Context,
-	params SelectCityParams,
+	filters SelectCityFilters,
 	pag pagi.Request,
 	sort []pagi.SortField,
 ) ([]models.City, pagi.Response, error) {
@@ -234,11 +234,11 @@ func (c City) SelectCities(
 
 	query := c.citiesQ.New()
 
-	if params.Name != nil {
-		query = query.FilterNameLike(*params.Name)
+	if filters.Name != nil {
+		query = query.FilterNameLike(*filters.Name)
 	}
 
-	for _, s := range params.Status {
+	for _, s := range filters.Status {
 		err := constant.CheckCityStatus(s)
 		if err != nil {
 			return nil, pagi.Response{}, errx.ErrorInvalidCityStatus.Raise(
@@ -246,11 +246,11 @@ func (c City) SelectCities(
 			)
 		}
 	}
-	if len(params.Status) > 0 {
-		query = query.FilterStatus(params.Status...)
+	if len(filters.Status) > 0 {
+		query = query.FilterStatus(filters.Status...)
 	}
-	if params.CountryID != nil {
-		query = query.FilterCountryID(*params.CountryID)
+	if filters.CountryID != nil {
+		query = query.FilterCountryID(*filters.CountryID)
 	}
 
 	for _, s := range sort {
@@ -258,8 +258,8 @@ func (c City) SelectCities(
 		case "name":
 			query = query.OrderByAlphabetical(s.Ascend)
 		case "distance":
-			if params.Point != nil {
-				query = query.OrderByNearest(*params.Point, s.Ascend)
+			if filters.Point != nil {
+				query = query.OrderByNearest(*filters.Point, s.Ascend)
 			}
 		}
 	}

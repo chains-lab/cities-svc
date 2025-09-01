@@ -42,7 +42,7 @@ func (a App) SearchSupportedCitiesInCountry(
 	pag pagi.Request,
 	sort []pagi.SortField,
 ) ([]models.City, pagi.Response, error) {
-	paramToEntity := entities.SelectCityParams{
+	paramToEntity := entities.SelectCityFilters{
 		Name:      &Name,
 		CountryID: &CountryID,
 		Status:    []string{constant.CityStatusCommunity, constant.CityStatusOfficial},
@@ -55,7 +55,7 @@ func (a App) SearchSupportedCitiesInCountry(
 	return res, pagination, nil
 }
 
-type SelectCityParams struct {
+type SelectCityFilters struct {
 	Name      *string
 	Status    []string
 	CountryID *uuid.UUID
@@ -66,22 +66,22 @@ type SelectCityParams struct {
 // This method for sysadmin
 func (a App) SelectCities(
 	ctx context.Context,
-	params SelectCityParams,
+	filters SelectCityFilters,
 	pag pagi.Request,
 	sort []pagi.SortField,
 ) ([]models.City, pagi.Response, error) {
-	paramsToEntity := entities.SelectCityParams{}
-	if params.Name != nil {
-		paramsToEntity.Name = params.Name
+	paramsToEntity := entities.SelectCityFilters{}
+	if filters.Name != nil {
+		paramsToEntity.Name = filters.Name
 	}
-	if params.Status != nil {
-		paramsToEntity.Status = params.Status
+	if filters.Status != nil {
+		paramsToEntity.Status = filters.Status
 	}
-	if params.CountryID != nil {
-		paramsToEntity.CountryID = params.CountryID
+	if filters.CountryID != nil {
+		paramsToEntity.CountryID = filters.CountryID
 	}
-	if params.Point != nil {
-		paramsToEntity.Point = params.Point
+	if filters.Point != nil {
+		paramsToEntity.Point = filters.Point
 	}
 
 	return a.cities.SelectCities(ctx, paramsToEntity, pag, sort)

@@ -13,6 +13,25 @@ import (
 	"github.com/google/uuid"
 )
 
+func (a App) GetInitiator(ctx context.Context, cityID, userID uuid.UUID) (models.Gov, error) {
+	initiator, err := a.gov.Get(ctx, entities.GetGovFilters{
+		CityID: &cityID,
+		UserID: &userID,
+		Active: func(b bool) *bool { return &b }(true),
+	})
+	if err != nil {
+		switch {
+		case errors.Is(err, errx.ErrorCityGovNotFound):
+			return models.Gov{}, errx.ErrorNotActiveCityGovInitiator.Raise(
+				fmt.Errorf("no active gov found for user %s in city %s", userID, cityID),
+			)
+		default:
+			return models.Gov{}, fmt.Errorf("get initiator gov: %w", err)
+		}
+	}
+	return initiator, nil
+}
+
 func (a App) CreateGovMayor(ctx context.Context, cityID, userID uuid.UUID) (models.Gov, error) {
 	_, err := a.gov.GetActiveForUser(ctx, userID)
 	if err != nil && !errors.Is(err, errx.ErrorCityGovNotFound) {
@@ -57,7 +76,7 @@ func (a App) CreateGovAdvisor(ctx context.Context, cityID, userID uuid.UUID, lab
 		)
 	}
 
-	_, pagination, err := a.gov.SelectGovs(ctx, entities.SelectGovsParams{
+	_, pagination, err := a.gov.SelectGovs(ctx, entities.SelectGovsFilters{
 		CityID: &cityID,
 		Role:   []string{constant.CityGovRoleAdvisor},
 		Active: func(b bool) *bool { return &b }(true),
@@ -158,6 +177,14 @@ func (a App) GetGov(ctx context.Context, govID uuid.UUID) (models.Gov, error) {
 	return gov, nil
 }
 
+func (a App) GetActiveGovForUserInCity(ctx context.Context, cityID, userID uuid.UUID) (models.Gov, error) {
+	gov, err := a.gov.GetActiveForUserInCity(ctx, cityID, userID)
+	if err != nil {
+		return models.Gov{}, err
+	}
+	return gov, nil
+}
+
 func (a App) TransferGovMayor(ctx context.Context, cityID, newMayorUserID uuid.UUID) error {
 	_, err := a.gov.GetActiveForUser(ctx, newMayorUserID)
 	if err != nil && !errors.Is(err, errx.ErrorCityGovNotFound) {
@@ -203,7 +230,7 @@ func (a App) TransferGovMayor(ctx context.Context, cityID, newMayorUserID uuid.U
 
 func (a App) SelectGovs(
 	ctx context.Context,
-	params entities.SelectGovsParams,
+	params entities.SelectGovsFilters,
 	pagiReq pagi.Request,
 	sort []pagi.SortField) ([]models.Gov, pagi.Response, error) {
 	return a.gov.SelectGovs(ctx, params, pagiReq, sort)

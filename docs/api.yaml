@@ -17,6 +17,12 @@ paths:
 components:
   schemas:
     #requests
+    CreateCountry:
+      $ref: './spec/components/schemas/CreateCountry.yaml'
+    CreateCity:
+      $ref: './spec/components/schemas/CreateCity.yaml'
+    CreateGov:
+      $ref: './spec/components/schemas/CreateGov.yaml'
 
     #responses
     Country:
@@ -50,3 +56,5 @@ components:
       $ref: './spec/components/schemas/Errors.yaml'
     PaginationData:
       $ref: './spec/components/schemas/PaginationData.yaml'
+    Point:
+      $ref: './spec/components/schemas/Point.yaml'

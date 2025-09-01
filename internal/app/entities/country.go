@@ -96,14 +96,14 @@ func (c Country) GetByName(ctx context.Context, name string) (models.Country, er
 	return countryFromDb(country), nil
 }
 
-type SelectCountriesParams struct {
+type SelectCountriesFilters struct {
 	Name     string
 	Statuses []string
 }
 
 func (c Country) Select(
 	ctx context.Context,
-	params SelectCountriesParams,
+	filters SelectCountriesFilters,
 	pag pagi.Request,
 	sort []pagi.SortField,
 ) ([]models.Country, pagi.Response, error) {
@@ -122,8 +122,8 @@ func (c Country) Select(
 
 	query := c.countryQ.New()
 
-	if params.Statuses != nil {
-		for _, s := range params.Statuses {
+	if filters.Statuses != nil {
+		for _, s := range filters.Statuses {
 			if err := constant.CheckCountryStatus(s); err != nil {
 				return nil, pagi.Response{}, errx.ErrorInvalidCountryStatus.Raise(
 					fmt.Errorf("failed to parse country status, cause: %w", err),
@@ -131,11 +131,11 @@ func (c Country) Select(
 			}
 		}
 
-		query = query.FilterStatus(params.Statuses...)
+		query = query.FilterStatus(filters.Statuses...)
 	}
 
-	if params.Name != "" {
-		query = query.FilterNameLike(params.Name)
+	if filters.Name != "" {
+		query = query.FilterNameLike(filters.Name)
 	}
 
 	for _, sort := range sort {

@@ -1,0 +1,396 @@
+openapi: 3.1.0
+info:
+  title: cities-svc API
+  description: API documentation for cities-svc
+  version: 0.1.0
+paths:
+  /test:
+    post:
+      tags:
+        - Test
+      description: Test
+      responses:
+        '201':
+          description: successfully
+components:
+  schemas:
+    CreateCountry:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: object
+          required:
+            - type
+            - attributes
+          properties:
+            type:
+              type: string
+              enum:
+                - create_country
+            attributes:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  description: city name
+    CreateCity:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: object
+          required:
+            - type
+            - attributes
+          properties:
+            type:
+              type: string
+              enum:
+                - create_city
+            attributes:
+              type: object
+              required:
+                - country_id
+                - name
+                - point
+                - timezone
+              properties:
+                country_id: null
+                type: string
+                format: uuid
+                description: country id
+                name:
+                  type: string
+                  description: city name
+                point:
+                  ref: ./Point.yaml
+                timezone:
+                  type: string
+                  description: city timezone
+                  example: Europe/Berlin
+    CreateGov:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: object
+          required:
+            - type
+            - attributes
+          properties:
+            type:
+              type: string
+              enum:
+                - create_gov
+            attributes:
+              type: object
+              required:
+                - city_id
+                - user_id
+                - role
+            properties:
+              city_id:
+                type: string
+                format: uuid
+                description: city id
+              user_id:
+                type: string
+                format: uuid
+                description: user id
+              role:
+                type: string
+                description: role of the user in this city
+                example: admin
+              label:
+                type: string
+                description: label for the user in this city
+                example: City Department of Transportation
+    Country:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          $ref: '#/components/schemas/CountryData'
+    CountryData:
+      type: object
+      required:
+        - id
+        - type
+        - attributes
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: country id
+        type:
+          type: string
+          enum:
+            - country
+        attributes:
+          $ref: '#/components/schemas/CountryAttributes'
+    CountryAttributes:
+      type: object
+      required:
+        - name
+        - status
+        - created_at
+        - updated_at
+      properties:
+        name:
+          type: string
+          description: country name
+        status:
+          type: string
+          enum:
+            - active
+            - inactive
+          description: country status
+        created_at:
+          type: string
+          format: date-time
+          description: creation date
+        updated_at:
+          type: string
+          format: date-time
+          description: last update date
+    CountriesCollection:
+      type: object
+      required:
+        - data
+        - links
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/CountryData'
+        links:
+          $ref: '#/components/schemas/PaginationData'
+    City:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          $ref: '#/components/schemas/CityData'
+    CityData:
+      type: object
+      required:
+        - id
+        - type
+        - attributes
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: city id
+        type:
+          type: string
+          enum:
+            - city
+        attributes:
+          $ref: '#/components/schemas/CityAttributes'
+    CityAttributes:
+      type: object
+      required:
+        - country_id
+        - point
+        - status
+        - name
+        - timezone
+        - created_at
+        - updated_at
+      properties:
+        country_id:
+          type: string
+          format: uuid
+          description: country id
+        point:
+          $ref: '#/components/schemas/Point'
+        status:
+          type: string
+          enum:
+            - active
+            - inactive
+          description: city status
+        name:
+          type: string
+          description: city name
+        icon:
+          type: string
+          format: uri
+          description: city icon uri
+        slug:
+          type: string
+          description: city slug
+        timezone:
+          type: string
+          description: city timezone
+        created_at:
+          type: string
+          format: date-time
+          description: creation date
+        updated_at:
+          type: string
+          format: date-time
+          description: last update date
+    CitiesCollection:
+      type: object
+      required:
+        - data
+        - links
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/CityData'
+        links:
+          $ref: '#/components/schemas/PaginationData'
+    Gov:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          $ref: '#/components/schemas/GovData'
+    GovData:
+      type: object
+      required:
+        - id
+        - type
+        - attributes
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: gov id
+        type:
+          type: string
+          enum:
+            - gov
+        attributes:
+          $ref: '#/components/schemas/GovData'
+    GovAttributes:
+      type: object
+      required:
+        - user_id
+        - city_id
+        - active
+        - role
+        - created_at
+        - updated_at
+      properties:
+        user_id:
+          type: string
+          format: uuid
+          description: user id
+        city_id:
+          type: string
+          format: uuid
+          description: city id
+        active:
+          type: boolean
+          description: is the user active in this city
+        role:
+          type: string
+          description: role of the user in this city
+        label:
+          type: string
+          description: optional label for the user in this city
+        created_at:
+          type: string
+          format: date-time
+          description: record creation date
+        updated_at:
+          type: string
+          format: date-time
+          description: last update date
+    GovsCollection:
+      type: object
+      required:
+        - data
+        - links
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/GovData'
+        links:
+          $ref: '#/components/schemas/PaginationData'
+    Errors:
+      description: 'Standard JSON:API error'
+      type: object
+      required:
+        - errors
+      properties:
+        errors:
+          type: array
+          description: Non empty array of errors occurred during request processing
+          items:
+            type: object
+            required:
+              - title
+              - status
+            properties:
+              title:
+                type: string
+                description: 'Title is a short, human-readable summary of the problem'
+                example: Bad Request
+              detail:
+                type: string
+                description: Detail is a human-readable explanation specific to this occurrence of the problem
+                example: Request body was expected
+              status:
+                type: integer
+                description: Status is the HTTP status code applicable to this problem
+                example: 400
+                enum:
+                  - 400
+                  - 401
+                  - 403
+                  - 404
+                  - 409
+                  - 500
+    PaginationData:
+      type: object
+      required:
+        - page_number
+        - page_size
+        - total_items
+      properties:
+        page_number:
+          type: integer
+          format: int64
+          description: The current page number.
+          example: 1
+        page_size:
+          type: integer
+          format: int64
+          description: The number of items per page.
+          example: 10
+        total_items:
+          type: integer
+          format: int64
+          description: The total number of items available.
+          example: 100
+    Point:
+      type: object
+      description: city location
+      required:
+        - latitude
+        - longitude
+      properties: null
+      latitude:
+        type: number
+        format: float
+        description: latitude
+      longitude:
+        type: number
+        format: float
+        description: longitude

@@ -18,7 +18,7 @@ var citiesAdminsRoles = []string{
 	CityGovRoleModerator,
 }
 
-var ErrorInvalidCityGovRole = fmt.Errorf("invalid city government role mus be one of: %s", GetAllCitiesAdminsRoles())
+var ErrorInvalidCityGovRole = fmt.Errorf("invalid city government role mus be one of: %s", GetAllCityGovsRoles())
 
 func ParseCityGovRole(role string) error {
 	for _, r := range citiesAdminsRoles {
@@ -30,6 +30,6 @@ func ParseCityGovRole(role string) error {
 	return fmt.Errorf("'%s', %w", role, ErrorInvalidCityGovRole)
 }
 
-func GetAllCitiesAdminsRoles() []string {
+func GetAllCityGovsRoles() []string {
 	return citiesAdminsRoles
 }

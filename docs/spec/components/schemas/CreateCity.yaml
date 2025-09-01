@@ -1,0 +1,34 @@
+type: object
+required:
+  - data
+properties:
+  data:
+    type: object
+    required:
+        - type
+        - attributes
+    properties:
+      type:
+        type: string
+        enum: [ create_city ]
+      attributes:
+        type: object
+        required:
+          - country_id
+          - name
+          - point
+          - timezone
+        properties:
+          country_id:
+          type: string
+          format: uuid
+          description: "country id"
+          name:
+            type: string
+            description: "city name"
+          point:
+            ref: './Point.yaml'
+          timezone:
+            type: string
+            description: "city timezone"
+            example: "Europe/Berlin"

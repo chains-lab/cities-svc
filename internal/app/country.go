@@ -45,20 +45,20 @@ func (a App) GetCountryByName(ctx context.Context, name string) (models.Country,
 	return country, nil
 }
 
-type SearchCountriesParams struct {
+type SearchCountriesFilters struct {
 	Name     string
 	Statuses []string
 }
 
 func (a App) SearchCountries(
 	ctx context.Context,
-	params SearchCountriesParams,
+	filters SearchCountriesFilters,
 	pagination pagi.Request,
 	sort []pagi.SortField,
 ) ([]models.Country, pagi.Response, error) {
-	return a.country.Select(ctx, entities.SelectCountriesParams{
-		Name:     params.Name,
-		Statuses: params.Statuses,
+	return a.country.Select(ctx, entities.SelectCountriesFilters{
+		Name:     filters.Name,
+		Statuses: filters.Statuses,
 	}, pagination, sort)
 }
 
