@@ -153,52 +153,90 @@ func (a App) UpdateCity(ctx context.Context, cityID uuid.UUID, params UpdateCity
 	return a.cities.GetByID(ctx, cityID)
 }
 
-func (a App) UpdateCityStatus(ctx context.Context, cityID uuid.UUID, status string) (models.City, error) {
+func (a App) SetCityStatusCommunity(ctx context.Context, cityID uuid.UUID) (models.City, error) {
 	_, err := a.cities.GetByID(ctx, cityID)
 	if err != nil {
 		return models.City{}, err
 	}
 
-	err = constant.CheckCityStatus(status)
-	if err != nil {
-		return models.City{}, errx.ErrorInvalidCityStatus.Raise(
-			errors.New("invalid city status"),
-		)
-	}
+	status := constant.CityStatusCommunity
 
-	switch status {
-	case constant.CityStatusOfficial:
+	txErr := a.transaction(func(ctx context.Context) error {
 		err = a.cities.UpdateOne(ctx, cityID, entities.UpdateCityParams{
 			Status:    &status,
 			UpdatedAt: time.Now().UTC(),
 		})
 		if err != nil {
-			return models.City{}, err
+			return err
 		}
-	case constant.CityStatusCommunity, constant.CityStatusArchived, constant.CityStatusDeprecated:
-		txErr := a.transaction(func(ctx context.Context) error {
-			err = a.cities.UpdateOne(ctx, cityID, entities.UpdateCityParams{
-				Status:    &status,
-				UpdatedAt: time.Now().UTC(),
-			})
-			if err != nil {
-				return err
-			}
 
-			err = a.gov.UpdateMany(ctx, entities.UpdateGovsFilters{
-				CityID: &cityID,
-			}, entities.UpdateGovsParams{
-				Active: func(b bool) *bool { return &b }(false),
-			})
-			if err != nil {
-				return err
-			}
-
-			return nil
+		err = a.gov.UpdateMany(ctx, entities.UpdateGovsFilters{
+			CityID: &cityID,
+		}, entities.UpdateGovsParams{
+			Active: func(b bool) *bool { return &b }(false),
 		})
-		if txErr != nil {
-			return models.City{}, txErr
+		if err != nil {
+			return err
 		}
+
+		return nil
+	})
+	if txErr != nil {
+		return models.City{}, txErr
+	}
+
+	return a.GetCityByID(ctx, cityID)
+}
+
+func (a App) SetCityStatusOfficial(ctx context.Context, cityID uuid.UUID) (models.City, error) {
+	_, err := a.cities.GetByID(ctx, cityID)
+	if err != nil {
+		return models.City{}, err
+	}
+
+	status := constant.CityStatusOfficial
+
+	err = a.cities.UpdateOne(ctx, cityID, entities.UpdateCityParams{
+		Status:    &status,
+		UpdatedAt: time.Now().UTC(),
+	})
+	if err != nil {
+		return models.City{}, err
+	}
+
+	return a.GetCityByID(ctx, cityID)
+}
+
+func (a App) SetCityStatusDeprecated(ctx context.Context, cityID uuid.UUID) (models.City, error) {
+	_, err := a.cities.GetByID(ctx, cityID)
+	if err != nil {
+		return models.City{}, err
+	}
+
+	status := constant.CityStatusDeprecated
+
+	txErr := a.transaction(func(ctx context.Context) error {
+		err = a.cities.UpdateOne(ctx, cityID, entities.UpdateCityParams{
+			Status:    &status,
+			UpdatedAt: time.Now().UTC(),
+		})
+		if err != nil {
+			return err
+		}
+
+		err = a.gov.UpdateMany(ctx, entities.UpdateGovsFilters{
+			CityID: &cityID,
+		}, entities.UpdateGovsParams{
+			Active: func(b bool) *bool { return &b }(false),
+		})
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+	if txErr != nil {
+		return models.City{}, txErr
 	}
 
 	return a.GetCityByID(ctx, cityID)

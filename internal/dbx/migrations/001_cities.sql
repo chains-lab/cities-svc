@@ -4,7 +4,7 @@ CREATE EXTENSION IF NOT EXISTS postgis;
 
 CREATE TYPE country_statuses AS ENUM (
     'supported',
-    'archived',
+    'deprecated',
     'unsupported',
 );
 
@@ -19,7 +19,6 @@ CREATE TABLE countries (
 CREATE TYPE city_statuses AS ENUM (
     'official',
     'community',
-    'archived',
     'deprecated'
 );
 

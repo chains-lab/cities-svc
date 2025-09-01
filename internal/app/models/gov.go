@@ -6,7 +6,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type CityGov struct {
+type Gov struct {
 	ID        uuid.UUID
 	UserID    uuid.UUID
 	CityID    uuid.UUID

@@ -5,14 +5,12 @@ import "fmt"
 const (
 	CityStatusOfficial   = "official"
 	CityStatusCommunity  = "community"
-	CityStatusArchived   = "archived"
 	CityStatusDeprecated = "deprecated"
 )
 
 var cityStatuses = []string{
 	CityStatusOfficial,
 	CityStatusCommunity,
-	CityStatusArchived,
 	CityStatusDeprecated,
 }
 

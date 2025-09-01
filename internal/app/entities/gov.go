@@ -32,10 +32,10 @@ type CreateGovParams struct {
 	Label  *string
 }
 
-func (g Gov) CreateGov(ctx context.Context, params CreateGovParams) (models.CityGov, error) {
+func (g Gov) CreateGov(ctx context.Context, params CreateGovParams) (models.Gov, error) {
 	err := constant.ParseCityGovRole(params.Role)
 	if err != nil {
-		return models.CityGov{}, errx.ErrorInvalidCityGovRole.Raise(
+		return models.Gov{}, errx.ErrorInvalidCityGovRole.Raise(
 			fmt.Errorf("invalid city gov role, cause: %w", err),
 		)
 	}
@@ -53,7 +53,7 @@ func (g Gov) CreateGov(ctx context.Context, params CreateGovParams) (models.City
 		CreatedAt: now,
 	}
 
-	resp := models.CityGov{
+	resp := models.Gov{
 		ID:        ID,
 		UserID:    params.UserID,
 		CityID:    params.CityID,
@@ -70,7 +70,7 @@ func (g Gov) CreateGov(ctx context.Context, params CreateGovParams) (models.City
 
 	err = g.govQ.New().Insert(ctx, stmt)
 	if err != nil {
-		return models.CityGov{}, errx.ErrorInternal.Raise(
+		return models.Gov{}, errx.ErrorInternal.Raise(
 			fmt.Errorf("failed to creating city gov: %w", err),
 		)
 	}
@@ -80,34 +80,16 @@ func (g Gov) CreateGov(ctx context.Context, params CreateGovParams) (models.City
 
 // GetByID methods for citygov
 
-func (g Gov) GetForUserAndCity(ctx context.Context, cityID, userID uuid.UUID) (models.CityGov, error) {
-	gov, err := g.govQ.New().FilterCityID(cityID).FilterUserID(userID).Get(ctx)
-	if err != nil {
-		switch {
-		case errors.Is(err, sql.ErrNoRows):
-			return models.CityGov{}, errx.ErrorCityGovNotFound.Raise(
-				fmt.Errorf("city gov not found by city_id: %s, user_id: %s, cause: %w", cityID, userID, err),
-			)
-		default:
-			return models.CityGov{}, errx.ErrorInternal.Raise(
-				fmt.Errorf("failed to get city gov by city_id: %s, user_id: %s, cause: %w", cityID, userID, err),
-			)
-		}
-	}
-
-	return govFromDb(gov), nil
-}
-
-func (g Gov) Get(ctx context.Context, ID uuid.UUID) (models.CityGov, error) {
+func (g Gov) Get(ctx context.Context, ID uuid.UUID) (models.Gov, error) {
 	gov, err := g.govQ.New().FilterID(ID).Get(ctx)
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
-			return models.CityGov{}, errx.ErrorCityGovNotFound.Raise(
+			return models.Gov{}, errx.ErrorCityGovNotFound.Raise(
 				fmt.Errorf("city gov not found by id: %s, cause: %w", ID, err),
 			)
 		default:
-			return models.CityGov{}, errx.ErrorInternal.Raise(
+			return models.Gov{}, errx.ErrorInternal.Raise(
 				fmt.Errorf("failed to get city gov by id: %s, cause: %w", ID, err),
 			)
 		}
@@ -116,40 +98,44 @@ func (g Gov) Get(ctx context.Context, ID uuid.UUID) (models.CityGov, error) {
 	return govFromDb(gov), nil
 }
 
-func (g Gov) GetInitiatorForCity(ctx context.Context, cityID, initiatorID uuid.UUID) (models.CityGov, error) {
-	initiator, err := g.govQ.New().FilterUserID(initiatorID).FilterCityID(cityID).Get(ctx)
+func (g Gov) GetActiveForUser(ctx context.Context, userID uuid.UUID) (models.Gov, error) {
+	gov, err := g.govQ.New().FilterUserID(userID).FilterActive(true).Get(ctx)
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
-			return models.CityGov{}, errx.ErrorInitiatorIsNotCityGov.Raise(
-				fmt.Errorf("user_id: %s, not city gov for city: %s, cause: %w", initiatorID, cityID, err),
+			return models.Gov{}, errx.ErrorCityGovNotFound.Raise(
+				fmt.Errorf("active city gov not found by user_id: %s, cause: %w", userID, err),
 			)
 		default:
-			return models.CityGov{}, errx.ErrorInternal.Raise(
-				fmt.Errorf("failed to get city gov for user_id %s city_id %s, cause: %w", initiatorID, cityID, err),
+			return models.Gov{}, errx.ErrorInternal.Raise(
+				fmt.Errorf("failed to get active city gov by user_id: %s, cause: %w", userID, err),
 			)
 		}
 	}
 
-	return govFromDb(initiator), nil
+	return govFromDb(gov), nil
 }
 
-func (g Gov) GetInitiator(ctx context.Context, initiatorID uuid.UUID) (models.CityGov, error) {
-	initiator, err := g.govQ.New().FilterID(initiatorID).Get(ctx)
+func (g Gov) GetActiveMayorForCity(ctx context.Context, cityID uuid.UUID) (models.Gov, error) {
+	mayor, err := g.govQ.New().
+		FilterCityID(cityID).
+		FilterRole(constant.CityGovRoleMayor).
+		FilterActive(true).
+		Get(ctx)
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
-			return models.CityGov{}, errx.ErrorInitiatorIsNotCityGov.Raise(
-				fmt.Errorf("id: %s, not city gov, cause: %w", initiatorID, err),
+			return models.Gov{}, errx.ErrorCityGovNotFound.Raise(
+				fmt.Errorf("city mayor not found by city_id: %s, cause: %w", cityID, err),
 			)
 		default:
-			return models.CityGov{}, errx.ErrorInternal.Raise(
-				fmt.Errorf("failed to get city gov for id: %s, cause: %w", initiatorID, err),
+			return models.Gov{}, errx.ErrorInternal.Raise(
+				fmt.Errorf("failed to get city mayor by city_id: %s, cause: %w", cityID, err),
 			)
 		}
 	}
 
-	return govFromDb(initiator), nil
+	return govFromDb(mayor), nil
 }
 
 type SelectGovsParams struct {
@@ -165,7 +151,7 @@ func (g Gov) SelectGovs(
 	params SelectGovsParams,
 	pag pagi.Request,
 	sort []pagi.SortField,
-) ([]models.CityGov, pagi.Response, error) {
+) ([]models.Gov, pagi.Response, error) {
 	if pag.Page == 0 {
 		pag.Page = 1
 	}
@@ -228,7 +214,11 @@ func (g Gov) SelectGovs(
 		)
 	}
 
-	res := make([]models.CityGov, 0, len(rows))
+	if len(rows) == int(limit) {
+		rows = rows[:pag.Size]
+	}
+
+	res := make([]models.Gov, 0, len(rows))
 	for _, cg := range rows {
 		res = append(res, govFromDb(cg))
 	}
@@ -265,6 +255,7 @@ func (g Gov) UpdateOne(ctx context.Context, ID uuid.UUID, params UpdateGovParams
 				fmt.Errorf("invalid city gov role, cause: %w", err),
 			)
 		}
+		stmt.Role = params.Role
 	}
 	if params.Label != nil {
 		if *params.Label == "" {
@@ -356,8 +347,8 @@ func (g Gov) UpdateMany(ctx context.Context, filters UpdateGovsFilters, params U
 	return nil
 }
 
-func govFromDb(g dbx.CityGov) models.CityGov {
-	res := models.CityGov{
+func govFromDb(g dbx.CityGov) models.Gov {
+	res := models.Gov{
 		ID:        g.ID,
 		UserID:    g.UserID,
 		CityID:    g.CityID,

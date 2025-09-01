@@ -10,6 +10,10 @@ var ErrorCityGovNotFound = ape.DeclareError("CITY_GOV_NOT_FOUND")
 
 var ErrorInitiatorIsNotCityGov = ape.DeclareError("INITIATOR_IS_NOT_CITY_GOV")
 
-var ErrorUserIsAlreadyCityGov = ape.DeclareError("USER_IS_ALREADY_CITY_GOV")
+var ErrorGovAlreadyExists = ape.DeclareError("CITY_GOV_ALREADY_EXISTS")
+
+var ErrorCannotDeleteMayor = ape.DeclareError("CANNOT_DELETE_MAYOR")
+
+var ErrorAdvisorMaxNumberReached = ape.DeclareError("ADVISOR_MAX_NUMBER_REACHED")
 
 var ErrorCannotDeleteCityAdmin = ape.DeclareError("CANNOT_DELETE_CITY_ADMIN")

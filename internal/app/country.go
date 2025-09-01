@@ -89,15 +89,15 @@ func (a App) SetCountryStatusSupported(ctx context.Context, countryID uuid.UUID)
 	}, nil
 }
 
-func (a App) SetCountryStatusArchived(ctx context.Context, countryID uuid.UUID) (models.Country, error) {
+func (a App) SetCountryStatusDeprecated(ctx context.Context, countryID uuid.UUID) (models.Country, error) {
 	country, err := a.country.GetByID(ctx, countryID)
 	if err != nil {
 		return models.Country{}, err
 	}
 
 	updatedAt := time.Now().UTC()
-	countryStatus := constant.CountryStatusArchived
-	cityStatus := constant.CityStatusArchived
+	countryStatus := constant.CountryStatusDeprecated
+	cityStatus := constant.CountryStatusDeprecated
 
 	txErr := a.transaction(func(ctx context.Context) error {
 		if err = a.country.Update(ctx, country.ID, entities.UpdateCountryParams{

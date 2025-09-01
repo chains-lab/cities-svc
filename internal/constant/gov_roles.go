@@ -5,14 +5,16 @@ import (
 )
 
 const (
-	CityGovRoleMayor      = "mayor"
-	CityGovRoleGovernment = "government"
-	CityGovRoleModerator  = "moderator"
+	CityGovRoleMayor     = "mayor"
+	CityGovRoleAdvisor   = "advisor"
+	CityGovRoleMember    = "member"
+	CityGovRoleModerator = "moderator"
 )
 
 var citiesAdminsRoles = []string{
 	CityGovRoleMayor,
-	CityGovRoleGovernment,
+	CityGovRoleAdvisor,
+	CityGovRoleMember,
 	CityGovRoleModerator,
 }
 
@@ -26,22 +28,6 @@ func ParseCityGovRole(role string) error {
 	}
 
 	return fmt.Errorf("'%s', %w", role, ErrorInvalidCityGovRole)
-}
-
-func CompareCityGovRole(role1, role2 string) int {
-	power := map[string]uint8{
-		CityGovRoleMayor:      3,
-		CityGovRoleGovernment: 2,
-		CityGovRoleModerator:  1,
-	}
-
-	if power[role1] > power[role2] {
-		return 1
-	} else if power[role1] < power[role2] {
-		return -1
-	}
-
-	return 0
 }
 
 func GetAllCitiesAdminsRoles() []string {

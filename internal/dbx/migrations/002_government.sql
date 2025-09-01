@@ -3,7 +3,8 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TYPE city_gov_roles AS ENUM (
     'mayor',
-    'government',
+    'advisors',
+    'member',
     'moderator'
 );
 
