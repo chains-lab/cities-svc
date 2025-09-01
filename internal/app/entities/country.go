@@ -19,6 +19,12 @@ type Country struct {
 	countryQ dbx.CountryQ
 }
 
+func NewCountry(db *sql.DB) Country {
+	return Country{
+		countryQ: dbx.NewCountryQ(db),
+	}
+}
+
 func (c Country) Create(ctx context.Context, name string, status string) (models.Country, error) {
 	now := time.Now().UTC()
 	ID := uuid.New()
@@ -54,13 +60,13 @@ func (c Country) Create(ctx context.Context, name string, status string) (models
 
 // Read methods for countries
 
-func (c Country) Get(ctx context.Context, ID uuid.UUID) (models.Country, error) {
+func (c Country) GetByID(ctx context.Context, ID uuid.UUID) (models.Country, error) {
 	country, err := c.countryQ.New().FilterID(ID).Get(ctx)
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
 			return models.Country{}, errx.ErrorCountryNotFound.Raise(
-				fmt.Errorf("failed to country not found, cause: %w", err),
+				fmt.Errorf("country not found, cause: %w", err),
 			)
 		default:
 			return models.Country{}, errx.ErrorInternal.Raise(
@@ -72,9 +78,27 @@ func (c Country) Get(ctx context.Context, ID uuid.UUID) (models.Country, error) 
 	return countryFromDb(country), nil
 }
 
+func (c Country) GetByName(ctx context.Context, name string) (models.Country, error) {
+	country, err := c.countryQ.New().FilterName(name).Get(ctx)
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return models.Country{}, errx.ErrorCountryNotFound.Raise(
+				fmt.Errorf("country not found, cause: %w", err),
+			)
+		default:
+			return models.Country{}, errx.ErrorInternal.Raise(
+				fmt.Errorf("failed to get country by name, cause: %w", err),
+			)
+		}
+	}
+
+	return countryFromDb(country), nil
+}
+
 type SelectCountriesParams struct {
-	Name   string
-	Status []string
+	Name     string
+	Statuses []string
 }
 
 func (c Country) Select(
@@ -98,8 +122,8 @@ func (c Country) Select(
 
 	query := c.countryQ.New()
 
-	if params.Status != nil {
-		for _, s := range params.Status {
+	if params.Statuses != nil {
+		for _, s := range params.Statuses {
 			if err := constant.CheckCountryStatus(s); err != nil {
 				return nil, pagi.Response{}, errx.ErrorInvalidCountryStatus.Raise(
 					fmt.Errorf("failed to parse country status, cause: %w", err),
@@ -107,7 +131,7 @@ func (c Country) Select(
 			}
 		}
 
-		query = query.FilterStatus(params.Status...)
+		query = query.FilterStatus(params.Statuses...)
 	}
 
 	if params.Name != "" {
@@ -159,15 +183,21 @@ func (c Country) Select(
 	}, nil
 }
 
-// Update methods for countries
+// UpdateOne methods for countries
 
 type UpdateCountryParams struct {
-	Name   *string
-	Status *string
+	Name      *string
+	Status    *string
+	UpdatedAt time.Time
 }
 
 func (c Country) Update(ctx context.Context, ID uuid.UUID, params UpdateCountryParams) error {
 	stmt := dbx.UpdateCountryParams{}
+
+	if params.Name == nil && params.Status == nil {
+		return nil
+	}
+
 	if params.Name != nil {
 		stmt.Name = params.Name
 	}
@@ -179,7 +209,7 @@ func (c Country) Update(ctx context.Context, ID uuid.UUID, params UpdateCountryP
 			)
 		}
 	}
-	stmt.UpdatedAt = time.Now().UTC()
+	stmt.UpdatedAt = params.UpdatedAt
 
 	err := c.countryQ.New().FilterID(ID).Update(ctx, stmt)
 	if err != nil {

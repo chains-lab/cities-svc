@@ -4,11 +4,13 @@ import "fmt"
 
 const (
 	CountryStatusSupported   = "supported"
+	CountryStatusArchived    = "archived"
 	CountryStatusUnsupported = "unsupported"
 )
 
 var countryStatuses = []string{
 	CountryStatusSupported,
+	CountryStatusArchived,
 	CountryStatusUnsupported,
 }
 

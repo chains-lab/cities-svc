@@ -19,18 +19,20 @@ type Gov struct {
 	govQ dbx.CityGovQ
 }
 
-func CreateCityGovEntity(db *sql.DB) Gov {
+func NewGov(db *sql.DB) Gov {
 	return Gov{
 		govQ: dbx.NewCityGovQ(db),
 	}
 }
 
 type CreateGovParams struct {
-	Role  string
-	Label *string
+	UserID uuid.UUID
+	CityID uuid.UUID
+	Role   string
+	Label  *string
 }
 
-func (g Gov) CreateGov(ctx context.Context, userID, cityID uuid.UUID, params CreateGovParams) (models.CityGov, error) {
+func (g Gov) CreateGov(ctx context.Context, params CreateGovParams) (models.CityGov, error) {
 	err := constant.ParseCityGovRole(params.Role)
 	if err != nil {
 		return models.CityGov{}, errx.ErrorInvalidCityGovRole.Raise(
@@ -39,18 +41,23 @@ func (g Gov) CreateGov(ctx context.Context, userID, cityID uuid.UUID, params Cre
 	}
 
 	now := time.Now().UTC()
+	ID := uuid.New()
 
 	stmt := dbx.CityGov{
-		UserID:    userID,
-		CityID:    cityID,
+		ID:        ID,
+		UserID:    params.UserID,
+		CityID:    params.CityID,
+		Active:    true,
 		Role:      params.Role,
 		UpdatedAt: now,
 		CreatedAt: now,
 	}
 
 	resp := models.CityGov{
-		UserID:    userID,
-		CityID:    cityID,
+		ID:        ID,
+		UserID:    params.UserID,
+		CityID:    params.CityID,
+		Active:    true,
 		Role:      params.Role,
 		UpdatedAt: now,
 		CreatedAt: now,
@@ -71,10 +78,10 @@ func (g Gov) CreateGov(ctx context.Context, userID, cityID uuid.UUID, params Cre
 	return resp, nil
 }
 
-// Get methods for citygov
+// GetByID methods for citygov
 
-func (g Gov) GetForCity(ctx context.Context, cityID, userID uuid.UUID) (models.CityGov, error) {
-	cityGov, err := g.govQ.New().FilterCityID(cityID).FilterUserID(userID).Get(ctx)
+func (g Gov) GetForUserAndCity(ctx context.Context, cityID, userID uuid.UUID) (models.CityGov, error) {
+	gov, err := g.govQ.New().FilterCityID(cityID).FilterUserID(userID).Get(ctx)
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
@@ -88,37 +95,25 @@ func (g Gov) GetForCity(ctx context.Context, cityID, userID uuid.UUID) (models.C
 		}
 	}
 
-	return models.CityGov{
-		UserID:    cityGov.UserID,
-		CityID:    cityGov.CityID,
-		Role:      cityGov.Role,
-		CreatedAt: cityGov.CreatedAt,
-		UpdatedAt: cityGov.UpdatedAt,
-	}, nil
+	return govFromDb(gov), nil
 }
 
-func (g Gov) Get(ctx context.Context, userID uuid.UUID) (models.CityGov, error) {
-	cityGov, err := g.govQ.New().FilterUserID(userID).Get(ctx)
+func (g Gov) Get(ctx context.Context, ID uuid.UUID) (models.CityGov, error) {
+	gov, err := g.govQ.New().FilterID(ID).Get(ctx)
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
 			return models.CityGov{}, errx.ErrorCityGovNotFound.Raise(
-				fmt.Errorf("city gov not found user_id: %s, cause: %w", userID, err),
+				fmt.Errorf("city gov not found by id: %s, cause: %w", ID, err),
 			)
 		default:
 			return models.CityGov{}, errx.ErrorInternal.Raise(
-				fmt.Errorf("failed to get city gov user_id: %s, cause: %w", userID, err),
+				fmt.Errorf("failed to get city gov by id: %s, cause: %w", ID, err),
 			)
 		}
 	}
 
-	return models.CityGov{
-		UserID:    cityGov.UserID,
-		CityID:    cityGov.CityID,
-		Role:      cityGov.Role,
-		CreatedAt: cityGov.CreatedAt,
-		UpdatedAt: cityGov.UpdatedAt,
-	}, nil
+	return govFromDb(gov), nil
 }
 
 func (g Gov) GetInitiatorForCity(ctx context.Context, cityID, initiatorID uuid.UUID) (models.CityGov, error) {
@@ -136,43 +131,33 @@ func (g Gov) GetInitiatorForCity(ctx context.Context, cityID, initiatorID uuid.U
 		}
 	}
 
-	return models.CityGov{
-		UserID:    initiator.UserID,
-		CityID:    initiator.CityID,
-		Role:      initiator.Role,
-		CreatedAt: initiator.CreatedAt,
-		UpdatedAt: initiator.UpdatedAt,
-	}, nil
+	return govFromDb(initiator), nil
 }
 
 func (g Gov) GetInitiator(ctx context.Context, initiatorID uuid.UUID) (models.CityGov, error) {
-	initiator, err := g.govQ.New().FilterUserID(initiatorID).Get(ctx)
+	initiator, err := g.govQ.New().FilterID(initiatorID).Get(ctx)
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
 			return models.CityGov{}, errx.ErrorInitiatorIsNotCityGov.Raise(
-				fmt.Errorf("user_id: %s, not city gov, cause: %w", initiatorID, err),
+				fmt.Errorf("id: %s, not city gov, cause: %w", initiatorID, err),
 			)
 		default:
 			return models.CityGov{}, errx.ErrorInternal.Raise(
-				fmt.Errorf("failed to get city gov for user_id %s, cause: %w", initiatorID, err),
+				fmt.Errorf("failed to get city gov for id: %s, cause: %w", initiatorID, err),
 			)
 		}
 	}
 
-	return models.CityGov{
-		UserID:    initiator.UserID,
-		CityID:    initiator.CityID,
-		Role:      initiator.Role,
-		CreatedAt: initiator.CreatedAt,
-		UpdatedAt: initiator.UpdatedAt,
-	}, nil
+	return govFromDb(initiator), nil
 }
 
 type SelectGovsParams struct {
+	UserID *uuid.UUID
 	CityID *uuid.UUID
 	Role   []string
 	Label  *string
+	Active *bool
 }
 
 func (g Gov) SelectGovs(
@@ -196,6 +181,18 @@ func (g Gov) SelectGovs(
 
 	query := g.govQ.New()
 
+	if params.UserID != nil {
+		query = query.FilterUserID(*params.UserID)
+	}
+	if params.CityID != nil {
+		query = query.FilterCityID(*params.CityID)
+	}
+	if params.Label != nil {
+		query = query.FilterLabelLike(*params.Label)
+	}
+	if params.Active != nil {
+		query = query.FilterActive(*params.Active)
+	}
 	if params.Role != nil && len(params.Role) > 0 {
 		for _, r := range params.Role {
 			err := constant.ParseCityGovRole(r)
@@ -206,14 +203,6 @@ func (g Gov) SelectGovs(
 			}
 		}
 		query = query.FilterRole(params.Role...)
-	}
-
-	if params.CityID != nil {
-		query = query.FilterCityID(*params.CityID)
-	}
-
-	if params.Label != nil {
-		query = query.FilterLabelLike(*params.Label)
 	}
 
 	for _, s := range sort {
@@ -241,13 +230,7 @@ func (g Gov) SelectGovs(
 
 	res := make([]models.CityGov, 0, len(rows))
 	for _, cg := range rows {
-		res = append(res, models.CityGov{
-			UserID:    cg.UserID,
-			CityID:    cg.CityID,
-			Role:      cg.Role,
-			CreatedAt: cg.CreatedAt,
-			UpdatedAt: cg.UpdatedAt,
-		})
+		res = append(res, govFromDb(cg))
 	}
 
 	return res, pagi.Response{
@@ -259,13 +242,133 @@ func (g Gov) SelectGovs(
 
 // Delete methods for citygov
 
-func (g Gov) DeleteCityGov(ctx context.Context, cityID, userID uuid.UUID) error {
-	err := g.govQ.New().FilterUserID(userID).FilterCityID(cityID).Delete(ctx)
+type UpdateGovParams struct {
+	Active    *bool
+	Role      *string
+	Label     *string
+	UpdatedAt time.Time
+}
+
+func (g Gov) UpdateOne(ctx context.Context, ID uuid.UUID, params UpdateGovParams) error {
+	if (params.Active == nil) && (params.Role == nil) && (params.Label == nil) {
+		return nil
+	}
+
+	stmt := dbx.UpdateCityGovParams{}
+	if params.Active != nil {
+		stmt.Active = params.Active
+	}
+	if params.Role != nil {
+		err := constant.ParseCityGovRole(*params.Role)
+		if err != nil {
+			return errx.ErrorInvalidCityGovRole.Raise(
+				fmt.Errorf("invalid city gov role, cause: %w", err),
+			)
+		}
+	}
+	if params.Label != nil {
+		if *params.Label == "" {
+			stmt.Label = &sql.NullString{Valid: false}
+		} else {
+			stmt.Label = &sql.NullString{String: *params.Label, Valid: true}
+		}
+	}
+	stmt.UpdatedAt = &params.UpdatedAt
+
+	err := g.govQ.New().FilterID(ID).Update(ctx, stmt)
 	if err != nil {
 		return errx.ErrorInternal.Raise(
-			fmt.Errorf("failed to delete city gov by cityID: %s, userID: %s, cause: %w", cityID, userID, err),
+			fmt.Errorf("failed to update city gov, cause: %w", err),
 		)
 	}
 
 	return nil
+}
+
+type UpdateGovsFilters struct {
+	CityID    *uuid.UUID
+	UserID    *uuid.UUID
+	CountryID *uuid.UUID
+	Role      *string
+	Active    *bool
+}
+
+type UpdateGovsParams struct {
+	Role   *string
+	Active *bool
+}
+
+func (g Gov) UpdateMany(ctx context.Context, filters UpdateGovsFilters, params UpdateGovsParams) error {
+	if (params.Active == nil) && (params.Role == nil) {
+		return nil
+	}
+
+	stmt := dbx.UpdateCityGovParams{}
+	if params.Active != nil {
+		stmt.Active = params.Active
+	}
+
+	if params.Role != nil {
+		err := constant.ParseCityGovRole(*params.Role)
+		if err != nil {
+			return errx.ErrorInvalidCityGovRole.Raise(
+				fmt.Errorf("invalid city gov role, cause: %w", err),
+			)
+		}
+
+		stmt.Role = params.Role
+	}
+
+	now := time.Now().UTC()
+	stmt.UpdatedAt = &now
+
+	query := g.govQ.New()
+
+	if filters.CityID != nil {
+		query = query.FilterCityID(*filters.CityID)
+	}
+	if filters.UserID != nil {
+		query = query.FilterUserID(*filters.UserID)
+	}
+	if filters.CountryID != nil {
+		query = query.FilterCountryID(*filters.CountryID)
+	}
+	if filters.Active != nil {
+		query = query.FilterActive(*filters.Active)
+	}
+	if filters.Role != nil {
+		err := constant.ParseCityGovRole(*filters.Role)
+		if err != nil {
+			return errx.ErrorInvalidCityGovRole.Raise(
+				fmt.Errorf("invalid city gov role, cause: %w", err),
+			)
+		}
+		query = query.FilterRole(*filters.Role)
+	}
+
+	err := query.Update(ctx, stmt)
+	if err != nil {
+		return errx.ErrorInternal.Raise(
+			fmt.Errorf("failed to update city govs, cause: %w", err),
+		)
+	}
+
+	return nil
+}
+
+func govFromDb(g dbx.CityGov) models.CityGov {
+	res := models.CityGov{
+		ID:        g.ID,
+		UserID:    g.UserID,
+		CityID:    g.CityID,
+		Active:    g.Active,
+		Role:      g.Role,
+		CreatedAt: g.CreatedAt,
+		UpdatedAt: g.UpdatedAt,
+	}
+	if g.Label.Valid {
+		res.Label = &g.Label.String
+	}
+
+	return res
 }

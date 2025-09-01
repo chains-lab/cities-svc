@@ -7,10 +7,12 @@ import (
 )
 
 type CityGov struct {
+	ID        uuid.UUID
 	UserID    uuid.UUID
 	CityID    uuid.UUID
-	Label     *string
+	Active    bool
 	Role      string
-	UpdatedAt time.Time
+	Label     *string
 	CreatedAt time.Time
+	UpdatedAt time.Time
 }

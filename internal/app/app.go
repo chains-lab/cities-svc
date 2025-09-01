@@ -5,14 +5,15 @@ import (
 	"database/sql"
 	"fmt"
 
+	"github.com/chains-lab/cities-svc/internal/app/entities"
 	"github.com/chains-lab/cities-svc/internal/config"
 	"github.com/chains-lab/cities-svc/internal/dbx"
 )
 
 type App struct {
-	countryQ dbx.CountryQ
-	citiesQ  dbx.CitiesQ
-	govQ     dbx.CityGovQ
+	country entities.Country
+	cities  entities.City
+	gov     entities.Gov
 
 	db *sql.DB
 }
@@ -24,15 +25,15 @@ func NewApp(cfg config.Config) (App, error) {
 	}
 
 	return App{
-		countryQ: dbx.NewCountryQ(pg),
-		citiesQ:  dbx.NewCitiesQ(pg),
-		govQ:     dbx.NewCityGovQ(pg),
+		country: entities.NewCountry(pg),
+		cities:  entities.NewCity(pg),
+		gov:     entities.NewGov(pg),
 
 		db: pg,
 	}, nil
 }
 
-func (a App) Transaction(fn func(ctx context.Context) error) error {
+func (a App) transaction(fn func(ctx context.Context) error) error {
 	ctx := context.Background()
 
 	tx, err := a.db.BeginTx(ctx, nil)

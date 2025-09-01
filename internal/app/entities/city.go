@@ -14,7 +14,6 @@ import (
 	"github.com/chains-lab/cities-svc/internal/errx"
 	"github.com/chains-lab/pagi"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
 	"github.com/paulmach/orb"
 )
 
@@ -25,7 +24,7 @@ type City struct {
 	nameRegexp *regexp.Regexp
 }
 
-func CreateCityEntity(db *sql.DB) City {
+func NewCity(db *sql.DB) City {
 	return City{
 		citiesQ:    dbx.NewCitiesQ(db),
 		slugRegexp: regexp.MustCompile(`^[a-z]+(-[a-z]+)*$`),
@@ -94,23 +93,13 @@ func (c City) validateName(name string) error {
 
 type CreateCityParams struct {
 	CountryID uuid.UUID
-	Status    string
 	Name      string
-	Icon      *string
-	Slug      *string
 	Timezone  string
 	Point     orb.Point
 }
 
 func (c City) Create(ctx context.Context, params CreateCityParams) (models.City, error) {
-	err := constant.CheckCityStatus(params.Status)
-	if err != nil {
-		return models.City{}, errx.ErrorInvalidCityStatus.Raise(
-			fmt.Errorf("failed to invalid city status, cause: %w", err),
-		)
-	}
-
-	err = c.validateTimezone(params.Timezone)
+	err := c.validateTimezone(params.Timezone)
 	if err != nil {
 		return models.City{}, err
 	}
@@ -131,7 +120,7 @@ func (c City) Create(ctx context.Context, params CreateCityParams) (models.City,
 	resp := models.City{
 		ID:        cityID,
 		CountryID: params.CountryID,
-		Status:    params.Status,
+		Status:    constant.CityStatusCommunity,
 		Timezone:  params.Timezone,
 		CreatedAt: now,
 		UpdatedAt: now,
@@ -141,28 +130,11 @@ func (c City) Create(ctx context.Context, params CreateCityParams) (models.City,
 		ID:        cityID,
 		CountryID: params.CountryID,
 		Point:     params.Point,
-		Status:    params.Status,
+		Status:    constant.CityStatusCommunity,
 		Name:      params.Name,
 		Timezone:  params.Timezone,
 		CreatedAt: now,
 		UpdatedAt: now,
-	}
-
-	if params.Slug != nil {
-		_, err = c.citiesQ.New().FilterSlug(*params.Slug).Get(ctx)
-		if err == nil {
-			return models.City{}, errx.ErrorCityAlreadyExists.Raise(
-				fmt.Errorf("failed to city already exists with slug: %v", params.Slug),
-			)
-		}
-
-		stmt.Slug = sql.NullString{String: *params.Slug, Valid: true}
-		resp.Slug = params.Slug
-	}
-
-	if params.Icon != nil {
-		stmt.Icon = sql.NullString{String: *params.Icon, Valid: true}
-		resp.Icon = params.Icon
 	}
 
 	err = c.citiesQ.Insert(ctx, stmt)
@@ -181,9 +153,9 @@ func (c City) GetByID(ctx context.Context, cityID uuid.UUID) (models.City, error
 	city, err := c.citiesQ.New().FilterID(cityID).Get(ctx)
 	if err != nil {
 		switch {
-		case errors.Is(err, pgx.ErrNoRows):
+		case errors.Is(err, sql.ErrNoRows):
 			return models.City{}, errx.ErrorCityNotFound.Raise(
-				fmt.Errorf("ity not found by id: %s, cause: %w", cityID, err),
+				fmt.Errorf("сity not found by id: %s, cause: %w", cityID, err),
 			)
 		default:
 			return models.City{}, errx.ErrorInternal.Raise(
@@ -234,16 +206,16 @@ func (c City) GetBySlug(ctx context.Context, slug string) (models.City, error) {
 	return cityFromDb(city), nil
 }
 
-type CitySearchParams struct {
-	Name    *string
-	Status  []string
-	Country *uuid.UUID
-	Point   *orb.Point
+type SelectCityParams struct {
+	Name      *string
+	Status    []string
+	CountryID *uuid.UUID
+	Point     *orb.Point
 }
 
-func (c City) SearchCities(
+func (c City) SelectCities(
 	ctx context.Context,
-	params CitySearchParams,
+	params SelectCityParams,
 	pag pagi.Request,
 	sort []pagi.SortField,
 ) ([]models.City, pagi.Response, error) {
@@ -277,8 +249,8 @@ func (c City) SearchCities(
 	if len(params.Status) > 0 {
 		query = query.FilterStatus(params.Status...)
 	}
-	if params.Country != nil {
-		query = query.FilterCountryID(*params.Country)
+	if params.CountryID != nil {
+		query = query.FilterCountryID(*params.CountryID)
 	}
 
 	for _, s := range sort {
@@ -322,7 +294,7 @@ func (c City) SearchCities(
 	}, nil
 }
 
-type UpdateCityStatusParams struct {
+type UpdateCityParams struct {
 	CountryID *uuid.UUID
 	Point     *orb.Point
 	Status    *string
@@ -331,14 +303,18 @@ type UpdateCityStatusParams struct {
 	Slug      *string
 	Timezone  *string
 
-	CreatedAt time.Time
 	UpdatedAt time.Time
 }
 
-func (c City) Update(ctx context.Context, cityID uuid.UUID, params UpdateCityStatusParams) (models.City, error) {
-	city, err := c.GetByID(ctx, cityID)
+func (c City) UpdateOne(ctx context.Context, cityID uuid.UUID, params UpdateCityParams) error {
+	_, err := c.GetByID(ctx, cityID)
 	if err != nil {
-		return models.City{}, err
+		return err
+	}
+
+	if params.CountryID == nil && params.Point == nil && params.Status == nil &&
+		params.Name == nil && params.Icon == nil && params.Slug == nil && params.Timezone == nil {
+		return nil
 	}
 
 	stmt := dbx.UpdateCityParams{}
@@ -348,14 +324,14 @@ func (c City) Update(ctx context.Context, cityID uuid.UUID, params UpdateCitySta
 	if params.Point != nil {
 		err = c.validatePoint(*params.Point)
 		if err != nil {
-			return models.City{}, err
+			return err
 		}
 		stmt.Point = params.Point
 	}
 	if params.Status != nil {
 		err = constant.CheckCityStatus(*params.Status)
 		if err != nil {
-			return models.City{}, errx.ErrorInvalidCityStatus.Raise(
+			return errx.ErrorInvalidCityStatus.Raise(
 				fmt.Errorf("failed to invalid city status, cause: %s", err),
 			)
 		}
@@ -364,46 +340,109 @@ func (c City) Update(ctx context.Context, cityID uuid.UUID, params UpdateCitySta
 	if params.Name != nil {
 		err = c.validateName(*params.Name)
 		if err != nil {
-			return models.City{}, err
+			return err
 		}
 		stmt.Name = params.Name
 	}
-	if params.Icon != nil {
+	if params.Icon != nil && *params.Icon != "" {
 		stmt.Icon = &sql.NullString{String: *params.Icon, Valid: true}
-	} else if *city.Icon == "" {
+	} else if params.Icon != nil && *params.Icon == "" {
 		stmt.Icon = &sql.NullString{String: "", Valid: false}
 	}
-	if params.Slug != nil {
+	if params.Slug != nil && *params.Slug != "" {
 		err = c.validateSlug(*params.Slug)
 		if err != nil {
-			return models.City{}, err
-		}
-
-		if city.Slug == nil || *city.Slug != *params.Slug {
-			_, err = c.citiesQ.New().FilterSlug(*params.Slug).Get(ctx)
-			if err == nil {
-				return models.City{}, errx.ErrorCityAlreadyExists.Raise(
-					fmt.Errorf("failed to city already exists with slug: %v", params.Slug),
-				)
-			}
+			return err
 		}
 
 		stmt.Slug = &sql.NullString{String: *params.Slug, Valid: true}
-	} else if *city.Slug == "" {
-		// if slug is empty string, we set it to NULL in DB
+	} else if params.Slug != nil && *params.Slug == "" {
 		stmt.Slug = &sql.NullString{String: "", Valid: false}
 	}
 	if params.Timezone != nil {
 		err = c.validateTimezone(*params.Timezone)
 		if err != nil {
-			return models.City{}, err
+			return err
 		}
 		stmt.Timezone = params.Timezone
 	}
 
-	stmt.UpdatedAt = time.Now().UTC()
+	stmt.UpdatedAt = params.UpdatedAt
 
-	return c.GetByID(ctx, cityID)
+	err = c.citiesQ.New().FilterID(cityID).Update(ctx, stmt)
+	if err != nil {
+		return errx.ErrorInternal.Raise(
+			fmt.Errorf("failed to update city, cause: %w", err),
+		)
+	}
+
+	return nil
+}
+
+type UpdateCitiesFilters struct {
+	CountryID *uuid.UUID
+	Status    []string
+}
+
+type UpdateCitiesParams struct {
+	Status   *string
+	Timezone *string
+
+	UpdatedAt time.Time
+}
+
+func (c City) UpdateMany(ctx context.Context, filters UpdateCitiesFilters, params UpdateCitiesParams) error {
+	query := c.citiesQ.New()
+	if filters.CountryID != nil {
+		query = query.FilterCountryID(*filters.CountryID)
+	}
+	if filters.Status != nil {
+		for _, s := range filters.Status {
+			err := constant.CheckCityStatus(s)
+			if err != nil {
+				return errx.ErrorInvalidCityStatus.Raise(
+					fmt.Errorf("failed to invalid city status: %s, cause: %w", s, err),
+				)
+			}
+		}
+		query = query.FilterStatus(filters.Status...)
+	}
+
+	if params.Status == nil && params.Timezone == nil {
+		return errx.ErrorInternal.Raise(
+			fmt.Errorf("0 filters provided for update cities"),
+		)
+	}
+
+	stmt := dbx.UpdateCityParams{
+		UpdatedAt: params.UpdatedAt,
+	}
+
+	if params.Status != nil {
+		err := constant.CheckCityStatus(*params.Status)
+		if err != nil {
+			return errx.ErrorInvalidCityStatus.Raise(
+				fmt.Errorf("failed to invalid city status: %s, cause: %w", *params.Status, err),
+			)
+		}
+		stmt.Status = params.Status
+	}
+	if params.Timezone != nil {
+		err := c.validateTimezone(*params.Timezone)
+		if err != nil {
+			return err
+		}
+		stmt.Timezone = params.Timezone
+	}
+
+	err := query.Update(ctx, stmt)
+	if err != nil {
+		return errx.ErrorInternal.Raise(
+			fmt.Errorf("failed to update cities by country_id, cause: %w", err),
+		)
+	}
+
+	return nil
 }
 
 func cityFromDb(c dbx.City) models.City {

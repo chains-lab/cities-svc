@@ -3,15 +3,17 @@ package constant
 import "fmt"
 
 const (
-	CityStatusOfficial  = "official"
-	CityStatusCommunity = "community"
-	CityStatusArchived  = "archived"
+	CityStatusOfficial   = "official"
+	CityStatusCommunity  = "community"
+	CityStatusArchived   = "archived"
+	CityStatusDeprecated = "deprecated"
 )
 
 var cityStatuses = []string{
 	CityStatusOfficial,
 	CityStatusCommunity,
 	CityStatusArchived,
+	CityStatusDeprecated,
 }
 
 var ErrorCityStatusNotSupported = fmt.Errorf("invalid city status must be one of: %v", GetAllCitiesStatuses())
