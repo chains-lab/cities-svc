@@ -2,6 +2,7 @@ package rest
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/chains-lab/cities-svc/internal/api/rest/handlers"
@@ -51,7 +52,48 @@ func (a *Rest) Run(ctx context.Context) {
 	a.router.Route("/cities-svc/", func(r chi.Router) {
 		//r.Use(svcAuth)
 		r.Route("/v1", func(r chi.Router) {
+			r.Route("/countries", func(r chi.Router) {
+				r.Get("/", a.handlers.SearchCountries)
+				r.Post("/", a.handlers.CreateCountry)
 
+				r.Route("/{country_id}", func(r chi.Router) {
+					r.Get("/", a.handlers.GetCountry)
+					r.Put("/", a.handlers.UpdateCountry)
+					r.Route("/status", func(r chi.Router) {
+						r.Use(userAuth, adminGrant)
+						r.Put("/{status}", a.handlers.ChangeCountryStatus)
+					})
+				})
+			})
+
+			r.Route("/cities", func(r chi.Router) {
+				r.Get("/", a.handlers.SearchCities)
+				r.Get("/nearby", a.handlers.GetNearbyCities)
+
+				r.Post("/", a.handlers.CreateCity)
+
+				r.Route("/{city_id}", func(r chi.Router) {
+					r.Get("/", a.handlers.GetCity)
+					r.Put("/", a.handlers.UpdateCity)
+
+					r.Route("/status", func(r chi.Router) {
+						r.Use(userAuth, adminGrant)
+						r.Put("/{status}", a.handlers.ChangeCityStatus)
+					})
+
+					r.Route("/govs", func(r chi.Router) {
+						r.Get("/", a.handlers.SearchGovs)
+						r.Post("/", a.handlers.CreateGov)
+
+						r.Route("/{gov_id}", func(r chi.Router) {
+							r.Get("/", a.handlers.GetGov)
+							r.Put("/", a.handlers.UpdateGov)
+						})
+					})
+				})
+			})
+
+			r.Get("/{slug}", a.handlers.GetCityBySlug)
 		})
 	})
 

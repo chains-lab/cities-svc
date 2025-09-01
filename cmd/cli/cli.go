@@ -12,12 +12,13 @@ import (
 	"github.com/chains-lab/cities-svc/internal/app"
 	"github.com/chains-lab/cities-svc/internal/config"
 	"github.com/chains-lab/cities-svc/internal/dbx"
+	"github.com/chains-lab/logium"
 )
 
 func Run(args []string) bool {
 	cfg := config.LoadConfig()
 
-	log := logger.NewLogger(cfg)
+	log := logium.NewLogger(cfg.Server.Log.Level, cfg.Server.Log.Format)
 	log.Info("Starting server...")
 
 	var (
@@ -49,7 +50,7 @@ func Run(args []string) bool {
 
 	switch cmd {
 	case serviceCmd.FullCommand():
-		err = api.Start(ctx, cfg, log, &application)
+		api.Start(ctx, cfg, log, &wg, &application)
 	case migrateUpCmd.FullCommand():
 		err = dbx.MigrateUp(cfg)
 	case migrateDownCmd.FullCommand():

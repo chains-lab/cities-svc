@@ -1,0 +1,15 @@
+type: object
+required:
+  - id
+  - type
+  - attributes
+properties:
+  id:
+    type: string
+    format: uuid
+    description: "country id"
+  type:
+    type: string
+    enum: [ country ]
+  attributes:
+    $ref: './CountryAttributes.yaml'

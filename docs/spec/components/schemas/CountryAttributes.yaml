@@ -1,0 +1,22 @@
+type: object
+required:
+  - name
+  - status
+  - created_at
+  - updated_at
+properties:
+  name:
+    type: string
+    description: "country name"
+  status:
+    type: string
+    enum: [ active, inactive ]
+    description: "country status"
+  created_at:
+    type: string
+    format: date-time
+    description: "creation date"
+  updated_at:
+    type: string
+    format: date-time
+    description: "last update date"

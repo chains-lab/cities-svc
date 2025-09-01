@@ -1,0 +1,52 @@
+openapi: 3.1.0
+info:
+  title: cities-svc API
+  description: API documentation for cities-svc
+  version: 0.1.0
+
+paths:
+  /test:
+    post:
+      tags:
+        - Test
+      description: Test
+      responses:
+        '201':
+          description: successfully
+
+components:
+  schemas:
+    #requests
+
+    #responses
+    Country:
+      $ref: './spec/components/schemas/Country.yaml'
+    CountryData:
+      $ref: './spec/components/schemas/CountryData.yaml'
+    CountryAttributes:
+      $ref: './spec/components/schemas/CountryAttributes.yaml'
+    CountriesCollection:
+      $ref: './spec/components/schemas/CountriesCollection.yaml'
+
+    City:
+      $ref: './spec/components/schemas/City.yaml'
+    CityData:
+      $ref: './spec/components/schemas/CityData.yaml'
+    CityAttributes:
+      $ref: './spec/components/schemas/CityAttributes.yaml'
+    CitiesCollection:
+      $ref: './spec/components/schemas/CitiesCollection.yaml'
+
+    Gov:
+      $ref: './spec/components/schemas/Gov.yaml'
+    GovData:
+      $ref: './spec/components/schemas/GovData.yaml'
+    GovAttributes:
+      $ref: './spec/components/schemas/GovAttributes.yaml'
+    GovsCollection:
+      $ref: './spec/components/schemas/GovsCollection.yaml'
+
+    Errors:
+      $ref: './spec/components/schemas/Errors.yaml'
+    PaginationData:
+      $ref: './spec/components/schemas/PaginationData.yaml'

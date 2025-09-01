@@ -1,0 +1,34 @@
+type: object
+required:
+  - user_id
+  - city_id
+  - active
+  - role
+  - created_at
+  - updated_at
+properties:
+    user_id:
+        type: string
+        format: uuid
+        description: "user id"
+    city_id:
+        type: string
+        format: uuid
+        description: "city id"
+    active:
+        type: boolean
+        description: "is the user active in this city"
+    role:
+        type: string
+        description: "role of the user in this city"
+    label:
+        type: string
+        description: "optional label for the user in this city"
+    created_at:
+        type: string
+        format: date-time
+        description: "record creation date"
+    updated_at:
+        type: string
+        format: date-time
+        description: "last update date"

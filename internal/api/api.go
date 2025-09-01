@@ -2,17 +2,23 @@ package api
 
 import (
 	"context"
+	"sync"
 
+	"github.com/chains-lab/cities-svc/internal/api/rest"
 	"github.com/chains-lab/cities-svc/internal/app"
 	"github.com/chains-lab/cities-svc/internal/config"
-	"github.com/sirupsen/logrus"
-	"golang.org/x/sync/errgroup"
+	"github.com/chains-lab/logium"
 )
 
-func Start(ctx context.Context, cfg config.Config, log *logrus.Logger, app *app.App) error {
-	eg, ctx := errgroup.WithContext(ctx)
+func Start(ctx context.Context, cfg config.Config, log logium.Logger, wg *sync.WaitGroup, app *app.App) {
+	run := func(f func()) {
+		wg.Add(1)
+		go func() {
+			f()
+			wg.Done()
+		}()
+	}
 
-	eg.Go(func() error { return grpc.Run(ctx, cfg, log, app) })
-
-	return eg.Wait()
+	restApi := rest.NewRest(cfg, log, app)
+	run(func() { restApi.Run(ctx) })
 }
