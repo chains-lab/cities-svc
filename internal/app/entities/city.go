@@ -216,7 +216,7 @@ type SelectCityFilters struct {
 	Radius    *uint // in meters
 }
 
-func (c City) SelectCities(
+func (c City) Select(
 	ctx context.Context,
 	filters SelectCityFilters,
 	pag pagi.Request,

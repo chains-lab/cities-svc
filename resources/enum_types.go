@@ -13,10 +13,11 @@ const (
 	UpdateCityType       = "update_city"
 	UpdateCityStatusType = "update_city_status"
 
-	CreateGovType = "create_government"
-	UpdateGovType = "update_government"
+	CreateInviteType   = "create_invite"
+	AnswerToInviteType = "answer_to_invite"
+	InviteType         = "invite"
 
-	CreateMayorType        = "create_mayor"
-	TransferMayorRoleType  = "transfer_mayor_role"
-	UpdateOwnActiveGovType = "update_own_active_government"
+	CreateMayorType       = "create_mayor"
+	TransferMayorRoleType = "transfer_mayor_role"
+	UpdateOwnGovType      = "update_own_gov"
 )

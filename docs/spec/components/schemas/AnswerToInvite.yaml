@@ -1,0 +1,27 @@
+type: object
+required:
+  - data
+properties:
+    data:
+      type: object
+      required:
+          - id
+          - type
+          - attributes
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: "invite id"
+        type:
+          type: string
+          enum: [ answer_to_invite ]
+        attributes:
+          type: object
+          required:
+            - answer
+          properties:
+            answer:
+              type: string
+              description: "answer to the invite"
+              enum: [ accepted, declined ]

@@ -1,0 +1,15 @@
+type: object
+required:
+  - id
+  - type
+  - attributes
+properties:
+  id:
+    type: string
+    format: uuid
+    description: "invite id"
+  type:
+    type: string
+    enum: [ invite ]
+  attributes:
+    $ref: './InviteAttributes.yaml'

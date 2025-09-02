@@ -6,13 +6,13 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Id** | **string** | government id | 
 **Type** | **string** |  | 
-**Attributes** | [**UpdateGovDataAttributes**](UpdateGovDataAttributes.md) |  | 
+**Attributes** | [**UpdateOwnActiveGovDataAttributes**](UpdateOwnActiveGovDataAttributes.md) |  | 
 
 ## Methods
 
 ### NewUpdateGovData
 
-`func NewUpdateGovData(id string, type_ string, attributes UpdateGovDataAttributes, ) *UpdateGovData`
+`func NewUpdateGovData(id string, type_ string, attributes UpdateOwnActiveGovDataAttributes, ) *UpdateGovData`
 
 NewUpdateGovData instantiates a new UpdateGovData object
 This constructor will assign default values to properties that have it defined,
@@ -69,20 +69,20 @@ SetType sets Type field to given value.
 
 ### GetAttributes
 
-`func (o *UpdateGovData) GetAttributes() UpdateGovDataAttributes`
+`func (o *UpdateGovData) GetAttributes() UpdateOwnActiveGovDataAttributes`
 
 GetAttributes returns the Attributes field if non-nil, zero value otherwise.
 
 ### GetAttributesOk
 
-`func (o *UpdateGovData) GetAttributesOk() (*UpdateGovDataAttributes, bool)`
+`func (o *UpdateGovData) GetAttributesOk() (*UpdateOwnActiveGovDataAttributes, bool)`
 
 GetAttributesOk returns a tuple with the Attributes field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetAttributes
 
-`func (o *UpdateGovData) SetAttributes(v UpdateGovDataAttributes)`
+`func (o *UpdateGovData) SetAttributes(v UpdateOwnActiveGovDataAttributes)`
 
 SetAttributes sets Attributes field to given value.
 

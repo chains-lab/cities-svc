@@ -1,34 +1,21 @@
 type: object
 required:
-  - user_id
   - city_id
-  - status
   - role
   - label
   - created_at
   - updated_at
 properties:
-  user_id:
-    type: string
-    format: uuid
-    description: "user id"
   city_id:
     type: string
     format: uuid
     description: "city id"
-  status:
-    type: string
-    description: "status of the user in this city"
   role:
     type: string
     description: "role of the user in this city"
   label:
     type: string
     description: "optional label for the user in this city"
-  deactivated_at:
-    type: string
-    format: date-time
-    description: "record deactivation date"
   created_at:
     type: string
     format: date-time

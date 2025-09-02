@@ -1,0 +1,31 @@
+type: object
+required:
+  - data
+properties:
+  data:
+    type: object
+    required:
+      - id
+      - type
+      - attributes
+    properties:
+      id:
+        type: string
+        format: uuid
+        description: "invite id"
+      type:
+        type: string
+        enum: [ sent_invite ]
+      attributes:
+        type: object
+        required:
+          - city_id
+          - role
+        properties:
+          city_id:
+            type: string
+            format: uuid
+            description: "ID of the city the invite is for"
+          role:
+            type: string
+            description: "Role assigned to the invited user"

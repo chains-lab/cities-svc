@@ -1,0 +1,39 @@
+type: object
+required:
+  - status
+  - role
+  - city_id
+  - initiator_id
+  - expires_at
+  - created_at
+properties:
+  status:
+    type: string
+    description: "status of the invite"
+  role:
+    type: string
+    description: "role of the user in this city"
+  city_id:
+    type: string
+    format: uuid
+    description: "city id"
+  initiator_id:
+    type: string
+    format: uuid
+    description: "user id of the person who sent the invite"
+  user_id:
+    type: string
+    format: uuid
+    description: "user id of the person who received the invite"
+  answered_at:
+    type: string
+    format: date-time
+    description: "timestamp when the invite was answered"
+  expires_at:
+    type: string
+    format: date-time
+    description: "timestamp when the invite will expire"
+  created_at:
+    type: string
+    format: date-time
+    description: "timestamp when the invite was created"

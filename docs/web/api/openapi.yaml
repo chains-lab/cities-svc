@@ -64,16 +64,28 @@ components:
           $ref: '#/components/schemas/CreateMayor_data'
       required:
       - data
-    CreateGov:
+    AnswerToInvite:
       properties:
         data:
-          $ref: '#/components/schemas/CreateGov_data'
+          $ref: '#/components/schemas/AnswerToInvite_data'
       required:
       - data
-    UpdateGov:
+    SentInvite:
       properties:
         data:
-          $ref: '#/components/schemas/UpdateGov_data'
+          $ref: '#/components/schemas/SentInvite_data'
+      required:
+      - data
+    TransferMayor:
+      properties:
+        data:
+          $ref: '#/components/schemas/TransferMayor_data'
+      required:
+      - data
+    CreateInvite:
+      properties:
+        data:
+          $ref: '#/components/schemas/CreateInvite_data'
       required:
       - data
     Country:
@@ -233,26 +245,15 @@ components:
       - type
     GovAttributes:
       properties:
-        user_id:
-          description: user id
-          format: uuid
-          type: string
         city_id:
           description: city id
           format: uuid
-          type: string
-        status:
-          description: status of the user in this city
           type: string
         role:
           description: role of the user in this city
           type: string
         label:
           description: optional label for the user in this city
-          type: string
-        deactivated_at:
-          description: record deactivation date
-          format: date-time
           type: string
         created_at:
           description: record creation date
@@ -267,9 +268,7 @@ components:
       - created_at
       - label
       - role
-      - status
       - updated_at
-      - user_id
     GovsCollection:
       properties:
         data:
@@ -281,6 +280,12 @@ components:
       required:
       - data
       - links
+    Invite:
+      properties:
+        data:
+          $ref: '#/components/schemas/Invite_data'
+      required:
+      - data
     Errors:
       description: Standard JSON:API error
       properties:
@@ -494,7 +499,7 @@ components:
           type: string
         type:
           enum:
-          - update_own_active_gov
+          - update_own_gov
           type: string
         attributes:
           $ref: '#/components/schemas/UpdateOwnActiveGov_data_attributes'
@@ -531,12 +536,86 @@ components:
       required:
       - attributes
       - type
-    CreateGov_data_attributes:
+    AnswerToInvite_data_attributes:
       properties:
-        city_id:
-          description: city id
+        answer:
+          description: answer to the invite
+          enum:
+          - accepted
+          - declined
+          type: string
+      required:
+      - answer
+    AnswerToInvite_data:
+      properties:
+        id:
+          description: invite id
           format: uuid
           type: string
+        type:
+          enum:
+          - answer_to_invite
+          type: string
+        attributes:
+          $ref: '#/components/schemas/AnswerToInvite_data_attributes'
+      required:
+      - attributes
+      - id
+      - type
+    SentInvite_data_attributes:
+      properties:
+        city_id:
+          description: ID of the city the invite is for
+          format: uuid
+          type: string
+        role:
+          description: Role assigned to the invited user
+          type: string
+      required:
+      - city_id
+      - role
+    SentInvite_data:
+      properties:
+        id:
+          description: invite id
+          format: uuid
+          type: string
+        type:
+          enum:
+          - sent_invite
+          type: string
+        attributes:
+          $ref: '#/components/schemas/SentInvite_data_attributes'
+      required:
+      - attributes
+      - id
+      - type
+    TransferMayor_data_attributes:
+      properties:
+        user_id:
+          description: ID of the user to be assigned as the new mayor
+          format: uuid
+          type: string
+      required:
+      - user_id
+    TransferMayor_data:
+      properties:
+        id:
+          description: invite id
+          format: uuid
+          type: string
+        type:
+          enum:
+          - transfer_mayor
+          type: string
+        attributes:
+          $ref: '#/components/schemas/TransferMayor_data_attributes'
+      required:
+      - attributes
+      - id
+      - type
+    CreateInvite_data_attributes:
+      properties:
         user_id:
           description: user id
           format: uuid
@@ -550,41 +629,71 @@ components:
           example: City Department of Transportation
           type: string
       required:
-      - city_id
       - label
       - role
       - user_id
-    CreateGov_data:
+    CreateInvite_data:
       properties:
         type:
           enum:
           - create_gov
           type: string
         attributes:
-          $ref: '#/components/schemas/CreateGov_data_attributes'
+          $ref: '#/components/schemas/CreateInvite_data_attributes'
       required:
       - attributes
       - type
-    UpdateGov_data_attributes:
+    Invite_data_attributes:
       properties:
-        active:
-          description: is the user active in this city
-          type: boolean
-        label:
-          description: optional label for the user in this city
+        status:
+          description: status of the invite
           type: string
-    UpdateGov_data:
+        role:
+          description: role of the user in this city
+          type: string
+        city_id:
+          description: city id
+          format: uuid
+          type: string
+        initiator_id:
+          description: user id of the person who sent the invite
+          format: uuid
+          type: string
+        user_id:
+          description: user id of the person who received the invite
+          format: uuid
+          type: string
+        answered_at:
+          description: timestamp when the invite was answered
+          format: date-time
+          type: string
+        expires_at:
+          description: timestamp when the invite will expire
+          format: date-time
+          type: string
+        created_at:
+          description: timestamp when the invite was created
+          format: date-time
+          type: string
+      required:
+      - city_id
+      - created_at
+      - expires_at
+      - initiator_id
+      - role
+      - status
+    Invite_data:
       properties:
         id:
-          description: government id
+          description: invite id
           format: uuid
           type: string
         type:
           enum:
-          - update_gov
+          - invite
           type: string
         attributes:
-          $ref: '#/components/schemas/UpdateGov_data_attributes'
+          $ref: '#/components/schemas/Invite_data_attributes'
       required:
       - attributes
       - id

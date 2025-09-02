@@ -65,40 +65,11 @@ func (a App) SearchCities(
 		paramsToEntity.Point = filters.Point
 		paramsToEntity.Radius = filters.Radius
 	}
-	return a.cities.SelectCities(ctx, paramsToEntity, pag, sort)
-}
-
-func (a App) GetNearbyCity(ctx context.Context, point orb.Point) (models.City, error) {
-	return a.cities.GetByRadius(ctx, point, 15000) // 15 km
+	return a.cities.Select(ctx, paramsToEntity, pag, sort)
 }
 
 func (a App) GetCityBySlug(ctx context.Context, slug string) (models.City, error) {
 	return a.cities.GetBySlug(ctx, slug)
-}
-
-func (a App) UpdateCitySlug(ctx context.Context, cityID uuid.UUID, slug string) (models.City, error) {
-	c, err := a.cities.GetBySlug(ctx, slug)
-	switch {
-	case err == nil && c.ID != cityID:
-		return models.City{}, errx.ErrorCityAlreadyExistsWithThisSlug.Raise(fmt.Errorf("city with slug: %s already exists", slug))
-	case err != nil && !errors.Is(err, errx.ErrorCityNotFound):
-		return models.City{}, err
-	}
-
-	_, err = a.cities.GetBySlug(ctx, slug)
-	if !errors.Is(err, errx.ErrorCityNotFound) && err != nil {
-		return models.City{}, err
-	}
-
-	err = a.cities.UpdateOne(ctx, cityID, entities.UpdateCityParams{
-		Slug:      &slug,
-		UpdatedAt: time.Now().UTC(),
-	})
-	if err != nil {
-		return models.City{}, err
-	}
-
-	return a.cities.GetByID(ctx, cityID)
 }
 
 type UpdateCityParams struct {
@@ -194,10 +165,8 @@ func (a App) SetCityStatusCommunity(ctx context.Context, cityID uuid.UUID) (mode
 			return err
 		}
 
-		err = a.gov.UpdateMany(ctx, entities.UpdateGovsFilters{
+		err = a.gov.DeleteMany(ctx, entities.DeleteGovsFilters{
 			CityID: &cityID,
-		}, entities.UpdateGovsParams{
-			Active: func(b bool) *bool { return &b }(false),
 		})
 		if err != nil {
 			return err
@@ -248,10 +217,8 @@ func (a App) SetCityStatusDeprecated(ctx context.Context, cityID uuid.UUID) (mod
 			return err
 		}
 
-		err = a.gov.UpdateMany(ctx, entities.UpdateGovsFilters{
+		err = a.gov.DeleteMany(ctx, entities.DeleteGovsFilters{
 			CityID: &cityID,
-		}, entities.UpdateGovsParams{
-			Active: func(b bool) *bool { return &b }(false),
 		})
 		if err != nil {
 			return err

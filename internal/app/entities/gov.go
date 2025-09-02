@@ -28,40 +28,31 @@ func NewGov(db *sql.DB) Gov {
 type CreateGovParams struct {
 	UserID uuid.UUID
 	CityID uuid.UUID
-
-	Role  string
-	Label string
+	Role   string
 }
 
 func (g Gov) CreateGov(ctx context.Context, params CreateGovParams) (models.Gov, error) {
 	err := constant.CheckCityGovRole(params.Role)
 	if err != nil {
-		return models.Gov{}, errx.ErrorInvalidCityGovRole.Raise(
+		return models.Gov{}, errx.ErrorInvalidGovRole.Raise(
 			fmt.Errorf("invalid city gov role, cause: %w", err),
 		)
 	}
 
 	now := time.Now().UTC()
-	ID := uuid.New()
 
 	stmt := dbx.Gov{
-		ID:        ID,
 		UserID:    params.UserID,
 		CityID:    params.CityID,
-		Status:    constant.GovStatusActive,
 		Role:      params.Role,
-		Label:     params.Label,
 		UpdatedAt: now,
 		CreatedAt: now,
 	}
 
 	resp := models.Gov{
-		ID:        ID,
 		UserID:    params.UserID,
 		CityID:    params.CityID,
-		Status:    constant.GovStatusActive,
 		Role:      params.Role,
-		Label:     params.Label,
 		UpdatedAt: now,
 		CreatedAt: now,
 	}
@@ -77,18 +68,14 @@ func (g Gov) CreateGov(ctx context.Context, params CreateGovParams) (models.Gov,
 }
 
 type GetGovFilters struct {
-	ID     *uuid.UUID
 	UserID *uuid.UUID
 	CityID *uuid.UUID
-	Status *string
 	Role   *string
 }
 
 func (g Gov) Get(ctx context.Context, filters GetGovFilters) (models.Gov, error) {
 	query := g.govQ.New()
-	if filters.ID != nil {
-		query = query.FilterID(*filters.ID)
-	}
+
 	if filters.UserID != nil {
 		query = query.FilterUserID(*filters.UserID)
 	}
@@ -98,20 +85,11 @@ func (g Gov) Get(ctx context.Context, filters GetGovFilters) (models.Gov, error)
 	if filters.Role != nil {
 		err := constant.CheckCityGovRole(*filters.Role)
 		if err != nil {
-			return models.Gov{}, errx.ErrorInvalidCityGovRole.Raise(
+			return models.Gov{}, errx.ErrorInvalidGovRole.Raise(
 				fmt.Errorf("invalid city gov role, cause: %w", err),
 			)
 		}
 		query = query.FilterRole(*filters.Role)
-	}
-	if filters.Status != nil {
-		err := constant.CheckGovStatus(*filters.Status)
-		if err != nil {
-			return models.Gov{}, errx.ErrorInvalidGovStatus.Raise(
-				fmt.Errorf("invalid city gov status, cause: %w", err),
-			)
-		}
-		query = query.FilterStatus(*filters.Status)
 	}
 
 	gov, err := query.Get(ctx)
@@ -132,9 +110,7 @@ func (g Gov) Get(ctx context.Context, filters GetGovFilters) (models.Gov, error)
 }
 
 type SelectGovsFilters struct {
-	UserID *uuid.UUID
 	CityID *uuid.UUID
-	Status []string
 	Role   []string
 }
 
@@ -159,29 +135,14 @@ func (g Gov) SelectGovs(
 
 	query := g.govQ.New()
 
-	if filters.UserID != nil {
-		query = query.FilterUserID(*filters.UserID)
-	}
 	if filters.CityID != nil {
 		query = query.FilterCityID(*filters.CityID)
-	}
-	if filters.Status != nil && len(filters.Status) > 0 {
-		for _, s := range filters.Status {
-			err := constant.CheckGovStatus(s)
-			if err != nil {
-				return nil, pagi.Response{}, errx.ErrorInvalidGovStatus.Raise(
-					fmt.Errorf("invalid city gov status, cause: %w", err),
-				)
-			}
-		}
-
-		query = query.FilterStatus(filters.Status...)
 	}
 	if filters.Role != nil && len(filters.Role) > 0 {
 		for _, r := range filters.Role {
 			err := constant.CheckCityGovRole(r)
 			if err != nil {
-				return nil, pagi.Response{}, errx.ErrorInvalidCityGovRole.Raise(
+				return nil, pagi.Response{}, errx.ErrorInvalidGovRole.Raise(
 					fmt.Errorf("invalid city gov role, cause: %w", err),
 				)
 			}
@@ -229,33 +190,22 @@ func (g Gov) SelectGovs(
 }
 
 type UpdateGovParams struct {
-	Status    *string
 	Role      *string
 	Label     *string
 	UpdatedAt time.Time
 }
 
-func (g Gov) UpdateOne(ctx context.Context, ID uuid.UUID, params UpdateGovParams) error {
-	if (params.Role == nil) && (params.Label == nil) && (params.Status == nil) {
-		return nil
+func (g Gov) UpdateOne(ctx context.Context, userID uuid.UUID, params UpdateGovParams) (models.Gov, error) {
+	if (params.Role == nil) && (params.Label == nil) {
+		return models.Gov{}, nil
 	}
 
 	stmt := dbx.UpdateCityGovParams{}
 
-	if params.Status != nil {
-		err := constant.CheckGovStatus(*params.Status)
-		if err != nil {
-			return errx.ErrorInvalidGovStatus.Raise(
-				fmt.Errorf("invalid city gov status, cause: %w", err),
-			)
-		}
-		stmt.Status = params.Status
-	}
-
 	if params.Role != nil {
 		err := constant.CheckCityGovRole(*params.Role)
 		if err != nil {
-			return errx.ErrorInvalidCityGovRole.Raise(
+			return models.Gov{}, errx.ErrorInvalidGovRole.Raise(
 				fmt.Errorf("invalid city gov role, cause: %w", err),
 			)
 		}
@@ -263,102 +213,69 @@ func (g Gov) UpdateOne(ctx context.Context, ID uuid.UUID, params UpdateGovParams
 	}
 
 	if params.Label != nil {
-		stmt.Label = params.Label
-	}
-
-	if params.Status != nil && *params.Status == constant.GovStatusInactive {
-		now := sql.NullTime{Time: time.Now().UTC(), Valid: true}
-		stmt.DeactivatedAt = &now
+		if *params.Label != "" {
+			stmt.Label.String = *params.Label
+		} else {
+			stmt.Label.Valid = false
+		}
 	}
 
 	stmt.UpdatedAt = &params.UpdatedAt
 
-	err := g.govQ.New().FilterID(ID).Update(ctx, stmt)
+	err := g.govQ.New().FilterUserID(userID).Update(ctx, stmt)
+	if err != nil {
+		return models.Gov{}, errx.ErrorInternal.Raise(
+			fmt.Errorf("failed to update city gov, cause: %w", err),
+		)
+	}
+
+	return g.Get(ctx, GetGovFilters{UserID: &userID})
+}
+
+func (g Gov) DeleteOne(ctx context.Context, userID uuid.UUID) error {
+	err := g.govQ.New().FilterUserID(userID).Delete(ctx)
 	if err != nil {
 		return errx.ErrorInternal.Raise(
-			fmt.Errorf("failed to update city gov, cause: %w", err),
+			fmt.Errorf("failed to delete city gov, cause: %w", err),
 		)
 	}
 
 	return nil
 }
 
-type UpdateGovsFilters struct {
-	CityID    *uuid.UUID
+type DeleteGovsFilters struct {
 	UserID    *uuid.UUID
+	CityID    *uuid.UUID
 	CountryID *uuid.UUID
-	Status    *string
 	Role      *string
 }
 
-type UpdateGovsParams struct {
-	Status *string
-	Role   *string
-}
-
-func (g Gov) UpdateMany(ctx context.Context, filters UpdateGovsFilters, params UpdateGovsParams) error {
-	if (params.Status == nil) && (params.Role == nil) {
-		return nil
-	}
-
-	stmt := dbx.UpdateCityGovParams{}
-	if params.Status != nil {
-		err := constant.CheckGovStatus(*params.Status)
-		if err != nil {
-			return errx.ErrorInvalidGovStatus.Raise(
-				fmt.Errorf("invalid city gov status, cause: %w", err),
-			)
-		}
-
-		stmt.Status = params.Status
-		if *params.Status == constant.GovStatusInactive {
-			now := sql.NullTime{Time: time.Now().UTC(), Valid: true}
-			stmt.DeactivatedAt = &now
-		}
-	}
-
-	if params.Role != nil {
-		err := constant.CheckCityGovRole(*params.Role)
-		if err != nil {
-			return errx.ErrorInvalidCityGovRole.Raise(
-				fmt.Errorf("invalid city gov role, cause: %w", err),
-			)
-		}
-
-		stmt.Role = params.Role
-	}
-
-	now := time.Now().UTC()
-	stmt.UpdatedAt = &now
-
+func (g Gov) DeleteMany(ctx context.Context, filters DeleteGovsFilters) error {
 	query := g.govQ.New()
 
-	if filters.CityID != nil {
-		query = query.FilterCityID(*filters.CityID)
-	}
 	if filters.UserID != nil {
 		query = query.FilterUserID(*filters.UserID)
+	}
+	if filters.CityID != nil {
+		query = query.FilterCityID(*filters.CityID)
 	}
 	if filters.CountryID != nil {
 		query = query.FilterCountryID(*filters.CountryID)
 	}
-	if filters.Status != nil {
-		query = query.FilterStatus(*filters.Status)
-	}
 	if filters.Role != nil {
 		err := constant.CheckCityGovRole(*filters.Role)
 		if err != nil {
-			return errx.ErrorInvalidCityGovRole.Raise(
+			return errx.ErrorInvalidGovRole.Raise(
 				fmt.Errorf("invalid city gov role, cause: %w", err),
 			)
 		}
 		query = query.FilterRole(*filters.Role)
 	}
 
-	err := query.Update(ctx, stmt)
+	err := query.Delete(ctx)
 	if err != nil {
 		return errx.ErrorInternal.Raise(
-			fmt.Errorf("failed to update city govs, cause: %w", err),
+			fmt.Errorf("failed to delete city govs, cause: %w", err),
 		)
 	}
 
@@ -367,17 +284,14 @@ func (g Gov) UpdateMany(ctx context.Context, filters UpdateGovsFilters, params U
 
 func govFromDb(g dbx.Gov) models.Gov {
 	res := models.Gov{
-		ID:        g.ID,
 		UserID:    g.UserID,
 		CityID:    g.CityID,
-		Status:    g.Status,
 		Role:      g.Role,
-		Label:     g.Label,
 		CreatedAt: g.CreatedAt,
 		UpdatedAt: g.UpdatedAt,
 	}
-	if g.DeactivatedAt.Valid {
-		res.DeactivatedAt = &g.DeactivatedAt.Time
+	if g.Label.Valid {
+		res.Label = &g.Label.String
 	}
 
 	return res

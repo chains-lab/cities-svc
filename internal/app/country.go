@@ -128,10 +128,8 @@ func (a App) SetCountryStatusDeprecated(ctx context.Context, countryID uuid.UUID
 			return err
 		}
 
-		err = a.gov.UpdateMany(ctx, entities.UpdateGovsFilters{
+		err = a.gov.DeleteMany(ctx, entities.DeleteGovsFilters{
 			CountryID: &country.ID,
-		}, entities.UpdateGovsParams{
-			Status: func(s string) *string { return &s }(constant.GovStatusInactive),
 		})
 		if err != nil {
 			return err

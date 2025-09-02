@@ -11,7 +11,6 @@ import (
 	"github.com/chains-lab/cities-svc/internal/app"
 	"github.com/chains-lab/cities-svc/internal/config"
 	"github.com/chains-lab/cities-svc/internal/dbx"
-	"github.com/chains-lab/cities-svc/internal/services"
 	"github.com/chains-lab/logium"
 )
 
@@ -50,7 +49,7 @@ func Run(args []string) bool {
 
 	switch cmd {
 	case serviceCmd.FullCommand():
-		services.StartServices(ctx, cfg, log, &wg, &application)
+		StartServices(ctx, cfg, log, &wg, &application)
 	case migrateUpCmd.FullCommand():
 		err = dbx.MigrateUp(cfg)
 	case migrateDownCmd.FullCommand():
@@ -75,7 +74,7 @@ func Run(args []string) bool {
 		log.Printf("Interrupt signal received: %v", ctx.Err())
 		<-wgch
 	case <-wgch:
-		log.Print("All services stopped")
+		log.Print("All api stopped")
 	}
 
 	return true

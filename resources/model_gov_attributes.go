@@ -22,18 +22,12 @@ var _ MappedNullable = &GovAttributes{}
 
 // GovAttributes struct for GovAttributes
 type GovAttributes struct {
-	// user id
-	UserId string `json:"user_id"`
 	// city id
 	CityId string `json:"city_id"`
-	// status of the user in this city
-	Status string `json:"status"`
 	// role of the user in this city
 	Role string `json:"role"`
 	// optional label for the user in this city
 	Label string `json:"label"`
-	// record deactivation date
-	DeactivatedAt *time.Time `json:"deactivated_at,omitempty"`
 	// record creation date
 	CreatedAt time.Time `json:"created_at"`
 	// last update date
@@ -46,11 +40,9 @@ type _GovAttributes GovAttributes
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewGovAttributes(userId string, cityId string, status string, role string, label string, createdAt time.Time, updatedAt time.Time) *GovAttributes {
+func NewGovAttributes(cityId string, role string, label string, createdAt time.Time, updatedAt time.Time) *GovAttributes {
 	this := GovAttributes{}
-	this.UserId = userId
 	this.CityId = cityId
-	this.Status = status
 	this.Role = role
 	this.Label = label
 	this.CreatedAt = createdAt
@@ -64,30 +56,6 @@ func NewGovAttributes(userId string, cityId string, status string, role string, 
 func NewGovAttributesWithDefaults() *GovAttributes {
 	this := GovAttributes{}
 	return &this
-}
-
-// GetUserId returns the UserId field value
-func (o *GovAttributes) GetUserId() string {
-	if o == nil {
-		var ret string
-		return ret
-	}
-
-	return o.UserId
-}
-
-// GetUserIdOk returns a tuple with the UserId field value
-// and a boolean to check if the value has been set.
-func (o *GovAttributes) GetUserIdOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.UserId, true
-}
-
-// SetUserId sets field value
-func (o *GovAttributes) SetUserId(v string) {
-	o.UserId = v
 }
 
 // GetCityId returns the CityId field value
@@ -112,30 +80,6 @@ func (o *GovAttributes) GetCityIdOk() (*string, bool) {
 // SetCityId sets field value
 func (o *GovAttributes) SetCityId(v string) {
 	o.CityId = v
-}
-
-// GetStatus returns the Status field value
-func (o *GovAttributes) GetStatus() string {
-	if o == nil {
-		var ret string
-		return ret
-	}
-
-	return o.Status
-}
-
-// GetStatusOk returns a tuple with the Status field value
-// and a boolean to check if the value has been set.
-func (o *GovAttributes) GetStatusOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.Status, true
-}
-
-// SetStatus sets field value
-func (o *GovAttributes) SetStatus(v string) {
-	o.Status = v
 }
 
 // GetRole returns the Role field value
@@ -184,38 +128,6 @@ func (o *GovAttributes) GetLabelOk() (*string, bool) {
 // SetLabel sets field value
 func (o *GovAttributes) SetLabel(v string) {
 	o.Label = v
-}
-
-// GetDeactivatedAt returns the DeactivatedAt field value if set, zero value otherwise.
-func (o *GovAttributes) GetDeactivatedAt() time.Time {
-	if o == nil || IsNil(o.DeactivatedAt) {
-		var ret time.Time
-		return ret
-	}
-	return *o.DeactivatedAt
-}
-
-// GetDeactivatedAtOk returns a tuple with the DeactivatedAt field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *GovAttributes) GetDeactivatedAtOk() (*time.Time, bool) {
-	if o == nil || IsNil(o.DeactivatedAt) {
-		return nil, false
-	}
-	return o.DeactivatedAt, true
-}
-
-// HasDeactivatedAt returns a boolean if a field has been set.
-func (o *GovAttributes) HasDeactivatedAt() bool {
-	if o != nil && !IsNil(o.DeactivatedAt) {
-		return true
-	}
-
-	return false
-}
-
-// SetDeactivatedAt gets a reference to the given time.Time and assigns it to the DeactivatedAt field.
-func (o *GovAttributes) SetDeactivatedAt(v time.Time) {
-	o.DeactivatedAt = &v
 }
 
 // GetCreatedAt returns the CreatedAt field value
@@ -276,14 +188,9 @@ func (o GovAttributes) MarshalJSON() ([]byte, error) {
 
 func (o GovAttributes) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	toSerialize["user_id"] = o.UserId
 	toSerialize["city_id"] = o.CityId
-	toSerialize["status"] = o.Status
 	toSerialize["role"] = o.Role
 	toSerialize["label"] = o.Label
-	if !IsNil(o.DeactivatedAt) {
-		toSerialize["deactivated_at"] = o.DeactivatedAt
-	}
 	toSerialize["created_at"] = o.CreatedAt
 	toSerialize["updated_at"] = o.UpdatedAt
 	return toSerialize, nil
@@ -294,9 +201,7 @@ func (o *GovAttributes) UnmarshalJSON(data []byte) (err error) {
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
-		"user_id",
 		"city_id",
-		"status",
 		"role",
 		"label",
 		"created_at",

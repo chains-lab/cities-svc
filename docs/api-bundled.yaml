@@ -218,7 +218,7 @@ components:
             type:
               type: string
               enum:
-                - update_own_active_gov
+                - update_own_gov
             attributes:
               type: object
               properties:
@@ -259,7 +259,100 @@ components:
                   type: string
                   description: label for the user in this city
                   example: City Department of Transportation
-    CreateGov:
+    AnswerToInvite:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: object
+          required:
+            - id
+            - type
+            - attributes
+          properties:
+            id:
+              type: string
+              format: uuid
+              description: invite id
+            type:
+              type: string
+              enum:
+                - answer_to_invite
+            attributes:
+              type: object
+              required:
+                - answer
+              properties:
+                answer:
+                  type: string
+                  description: answer to the invite
+                  enum:
+                    - accepted
+                    - declined
+    SentInvite:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: object
+          required:
+            - id
+            - type
+            - attributes
+          properties:
+            id:
+              type: string
+              format: uuid
+              description: invite id
+            type:
+              type: string
+              enum:
+                - sent_invite
+            attributes:
+              type: object
+              required:
+                - city_id
+                - role
+              properties:
+                city_id:
+                  type: string
+                  format: uuid
+                  description: ID of the city the invite is for
+                role:
+                  type: string
+                  description: Role assigned to the invited user
+    TransferMayor:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: object
+          required:
+            - id
+            - type
+            - attributes
+          properties:
+            id:
+              type: string
+              format: uuid
+              description: invite id
+            type:
+              type: string
+              enum:
+                - transfer_mayor
+            attributes:
+              type: object
+              required:
+                - user_id
+              properties:
+                user_id:
+                  type: string
+                  format: uuid
+                  description: ID of the user to be assigned as the new mayor
+    CreateInvite:
       type: object
       required:
         - data
@@ -277,15 +370,10 @@ components:
             attributes:
               type: object
               required:
-                - city_id
                 - user_id
                 - role
                 - label
               properties:
-                city_id:
-                  type: string
-                  format: uuid
-                  description: city id
                 user_id:
                   type: string
                   format: uuid
@@ -298,35 +386,6 @@ components:
                   type: string
                   description: label for the user in this city
                   example: City Department of Transportation
-    UpdateGov:
-      type: object
-      required:
-        - data
-      properties:
-        data:
-          type: object
-          required:
-            - id
-            - type
-            - attributes
-          properties:
-            id:
-              type: string
-              format: uuid
-              description: government id
-            type:
-              type: string
-              enum:
-                - update_gov
-            attributes:
-              type: object
-              properties:
-                active:
-                  type: boolean
-                  description: is the user active in this city
-                label:
-                  type: string
-                  description: optional label for the user in this city
     Country:
       type: object
       required:
@@ -495,35 +554,22 @@ components:
     GovAttributes:
       type: object
       required:
-        - user_id
         - city_id
-        - status
         - role
         - label
         - created_at
         - updated_at
       properties:
-        user_id:
-          type: string
-          format: uuid
-          description: user id
         city_id:
           type: string
           format: uuid
           description: city id
-        status:
-          type: string
-          description: status of the user in this city
         role:
           type: string
           description: role of the user in this city
         label:
           type: string
           description: optional label for the user in this city
-        deactivated_at:
-          type: string
-          format: date-time
-          description: record deactivation date
         created_at:
           type: string
           format: date-time
@@ -544,6 +590,66 @@ components:
             $ref: '#/components/schemas/GovData'
         links:
           $ref: '#/components/schemas/PaginationData'
+    Invite:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: object
+          required:
+            - id
+            - type
+            - attributes
+          properties:
+            id:
+              type: string
+              format: uuid
+              description: invite id
+            type:
+              type: string
+              enum:
+                - invite
+            attributes:
+              type: object
+              required:
+                - status
+                - role
+                - city_id
+                - initiator_id
+                - expires_at
+                - created_at
+              properties:
+                status:
+                  type: string
+                  description: status of the invite
+                role:
+                  type: string
+                  description: role of the user in this city
+                city_id:
+                  type: string
+                  format: uuid
+                  description: city id
+                initiator_id:
+                  type: string
+                  format: uuid
+                  description: user id of the person who sent the invite
+                user_id:
+                  type: string
+                  format: uuid
+                  description: user id of the person who received the invite
+                answered_at:
+                  type: string
+                  format: date-time
+                  description: timestamp when the invite was answered
+                expires_at:
+                  type: string
+                  format: date-time
+                  description: timestamp when the invite will expire
+                created_at:
+                  type: string
+                  format: date-time
+                  description: timestamp when the invite was created
     Errors:
       description: 'Standard JSON:API error'
       type: object

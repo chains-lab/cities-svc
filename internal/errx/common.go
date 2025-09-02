@@ -6,4 +6,4 @@ import (
 
 var ErrorInternal = ape.DeclareError("INTERNAL_ERROR")
 
-var ErrorEnoughRights = ape.DeclareError("NOT_ENOUGH_RIGHTS")
+var ErrorNotEnoughRights = ape.DeclareError("NOT_ENOUGH_RIGHTS")

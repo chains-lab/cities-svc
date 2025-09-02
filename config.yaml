@@ -31,6 +31,8 @@ jwt:
       token_lifetime: 604800
   service:
     secret_key: "servicesuperkey"
+  invite:
+    secret_key: "invitesuperkey"
 
 kafka:
   brokers:

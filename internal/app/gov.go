@@ -13,34 +13,10 @@ import (
 	"github.com/google/uuid"
 )
 
-func (a App) CheckNoActiveForUser(ctx context.Context, userID uuid.UUID) (models.Gov, error) {
-	st := constant.GovStatusActive
-	gov, err := a.gov.Get(ctx, entities.GetGovFilters{
-		UserID: &userID,
-		Status: &st,
-	})
-	if err != nil && !errors.Is(err, errx.ErrorCityGovNotFound) {
-		return models.Gov{}, err
-	}
-	if err == nil {
-		return models.Gov{}, errx.ErrorGovAlreadyExists.Raise(
-			fmt.Errorf("active gov already exists for user %s", userID),
-		)
-	}
-
-	return gov, nil
-}
-
 func (a App) CreateGovMayor(ctx context.Context, cityID, userID uuid.UUID) (models.Gov, error) {
-	_, err := a.CheckNoActiveForUser(ctx, userID)
-	if err != nil {
-		return models.Gov{}, err
-	}
-
-	_, err = a.gov.Get(ctx, entities.GetGovFilters{
+	_, err := a.gov.Get(ctx, entities.GetGovFilters{
 		CityID: &cityID,
 		Role:   func(s string) *string { return &s }(constant.CityGovRoleMayor),
-		Status: func(s string) *string { return &s }(constant.GovStatusActive),
 	})
 	if err != nil && !errors.Is(err, errx.ErrorCityGovNotFound) {
 		return models.Gov{}, err
@@ -63,357 +39,172 @@ func (a App) CreateGovMayor(ctx context.Context, cityID, userID uuid.UUID) (mode
 	return newGov, nil
 }
 
-type CreateGovParams struct {
-	CityID uuid.UUID
-	UserID uuid.UUID
-	Label  string
-	Role   string
-}
-
-func (a App) CreateGov(ctx context.Context, initiatorID uuid.UUID, param CreateGovParams) (models.Gov, error) {
-	_, err := a.CheckNoActiveForUser(ctx, param.UserID)
-	if err != nil {
-		return models.Gov{}, err
-	}
-
-	err = constant.CheckCityGovRole(param.Role)
-	if err != nil {
-		return models.Gov{}, errx.ErrorInvalidCityGovRole.Raise(
-			fmt.Errorf("failed to parse city gov role: %w", err),
-		)
-	}
-
-	var newGov models.Gov
-	var pagination pagi.Response
-
-	switch param.Role {
-	case constant.CityGovRoleMayor:
-		_, err = a.gov.Get(ctx, entities.GetGovFilters{
-			CityID: &param.CityID,
-			Role:   func(s string) *string { return &s }(constant.CityGovRoleMayor),
-			Status: func(s string) *string { return &s }(constant.GovStatusActive),
-		})
-		if err != nil && !errors.Is(err, errx.ErrorCityGovNotFound) {
-			return models.Gov{}, err
-		}
-		if err == nil {
-			return models.Gov{}, errx.ErrorGovAlreadyExists.Raise(
-				fmt.Errorf("active mayor already exists in city %s", param.CityID),
-			)
-		}
-
-		newGov, err = a.gov.CreateGov(ctx, entities.CreateGovParams{
-			CityID: param.CityID,
-			UserID: param.UserID,
-			Role:   constant.CityGovRoleMayor,
-		})
-	case constant.CityGovRoleAdvisor:
-		_, pagination, err = a.gov.SelectGovs(ctx, entities.SelectGovsFilters{
-			CityID: &param.CityID,
-			Role:   []string{constant.CityGovRoleAdvisor},
-			Status: []string{constant.GovStatusActive},
-		}, pagi.Request{
-			Page: 1,
-			Size: 1,
-		}, nil)
-		if err != nil {
-			return models.Gov{}, err
-		}
-		if pagination.Total >= 10 {
-			return models.Gov{}, errx.ErrorAdvisorMaxNumberReached.Raise(
-				fmt.Errorf("city %s already has maximum number of advisors", param.CityID),
-			)
-		}
-
-		newGov, err = a.gov.CreateGov(ctx, entities.CreateGovParams{
-			CityID: param.CityID,
-			UserID: param.UserID,
-			Role:   constant.CityGovRoleAdvisor,
-			Label:  param.Label,
-		})
-		if err != nil {
-			return models.Gov{}, fmt.Errorf("create advisor gov: %w", err)
-		}
-	case constant.CityGovRoleMember, constant.CityGovRoleModerator:
-		newGov, err = a.gov.CreateGov(ctx, entities.CreateGovParams{
-			CityID: param.CityID,
-			UserID: param.UserID,
-			Role:   param.Role,
-			Label:  param.Label,
-		})
-	}
-
-	return newGov, nil
-}
-
-func (a App) GetGov(ctx context.Context, govID uuid.UUID) (models.Gov, error) {
-	gov, err := a.gov.Get(ctx, entities.GetGovFilters{
-		ID: &govID,
-	})
-	if err != nil {
-		switch {
-		case errors.Is(err, errx.ErrorCityGovNotFound):
-			return models.Gov{}, err
-		default:
-			return models.Gov{}, fmt.Errorf("get gov: %w", err)
-		}
-	}
-	return gov, nil
-}
-
-func (a App) GetActiveGovForUserInCity(ctx context.Context, cityID, userID uuid.UUID) (models.Gov, error) {
-	gov, err := a.gov.Get(ctx, entities.GetGovFilters{
-		CityID: &cityID,
-		UserID: &userID,
-		Status: func(s string) *string { return &s }(constant.GovStatusActive),
-	})
-	if err != nil {
-		return models.Gov{}, err
-	}
-	return gov, nil
-}
-
-func (a App) SelectGovs(
-	ctx context.Context,
-	params entities.SelectGovsFilters,
-	pagiReq pagi.Request,
-	sort []pagi.SortField) ([]models.Gov, pagi.Response, error) {
-	return a.gov.SelectGovs(ctx, params, pagiReq, sort)
-}
-
-type UpdateGovParams struct {
-	Label  *string
-	Active *bool
-}
-
-func (a App) UpdateGov(ctx context.Context, initiatorUserID, govID uuid.UUID, params UpdateGovParams) (models.Gov, error) {
-	gov, err := a.gov.Get(ctx, entities.GetGovFilters{
-		ID: &govID,
-	})
-	if err != nil {
-		return models.Gov{}, err
-	}
-	if gov.Active == false {
-		return models.Gov{}, errx.ErrorCannotUpdateInactiveGov.Raise(
-			fmt.Errorf("cannot update inactive gov %s", govID),
-		)
-	}
-	if gov.UserID == initiatorUserID {
-		return models.Gov{}, errx.ErrorCannotUpdateSelfGov.Raise(
-			fmt.Errorf("cannot update self gov %s", govID),
-		)
-	}
-
-	initiator, err := a.gov.Get(ctx, entities.GetGovFilters{
-		CityID: &gov.CityID,
-		UserID: &initiatorUserID,
-		Active: func(b bool) *bool { return &b }(true),
-	})
+func (a App) GetInitiatorGov(ctx context.Context, initiatorID uuid.UUID) (models.Gov, error) {
+	initiator, err := a.Get(ctx, initiatorID)
 	if err != nil {
 		switch {
 		case errors.Is(err, errx.ErrorCityGovNotFound):
 			return models.Gov{}, errx.ErrorNotActiveCityGovInitiator.Raise(
-				fmt.Errorf("no active gov found for user %s in city %s", initiatorUserID, gov.CityID),
+				fmt.Errorf("initiator %s is not an active city gov", initiatorID),
 			)
 		default:
-			return models.Gov{}, fmt.Errorf("get initiator gov: %w", err)
+			return models.Gov{}, err
 		}
 	}
 
-	if constant.CityGovRoleMayor == gov.Role {
-		return models.Gov{}, errx.ErrorCannotUpdateMayorGovByOther.Raise(
-			fmt.Errorf("cannot update mayor gov %s by other", govID),
+	return initiator, nil
+}
+
+func (a App) Get(ctx context.Context, userID uuid.UUID) (models.Gov, error) {
+	return a.gov.Get(ctx, entities.GetGovFilters{
+		UserID: &userID,
+	})
+
+}
+
+func (a App) GetForCity(ctx context.Context, cityID, userID uuid.UUID) (models.Gov, error) {
+	return a.gov.Get(ctx, entities.GetGovFilters{
+		CityID: &cityID,
+		UserID: &userID,
+	})
+}
+
+func (a App) GetForCityAndRole(ctx context.Context, userID, cityID uuid.UUID, role string) (models.Gov, error) {
+	return a.gov.Get(ctx, entities.GetGovFilters{
+		UserID: &userID,
+		CityID: &cityID,
+		Role:   &role,
+	})
+}
+
+type SearchGovsFilters struct {
+	CityID *uuid.UUID
+	Roles  []string
+}
+
+func (a App) SearchGovs(
+	ctx context.Context,
+	filters SearchGovsFilters,
+	pag pagi.Request,
+	sort []pagi.SortField,
+) ([]models.Gov, pagi.Response, error) {
+	input := entities.SelectGovsFilters{}
+	if filters.CityID != nil {
+		input.CityID = filters.CityID
+	}
+	if len(filters.Roles) > 0 && filters.Roles != nil {
+		input.Role = filters.Roles
+	}
+
+	return a.gov.SelectGovs(ctx, input, pag, sort)
+}
+
+type UpdateOwnGovParams struct {
+	Label *string
+}
+
+func (a App) UpdateOwnActiveGov(ctx context.Context, userID uuid.UUID, params UpdateOwnGovParams) (models.Gov, error) {
+	gov, err := a.GetInitiatorGov(ctx, userID)
+	if err != nil {
+		return models.Gov{}, err
+	}
+
+	entitiesParams := entities.UpdateGovParams{}
+	if params.Label != nil {
+		entitiesParams.Label = params.Label
+	}
+	res, err := a.gov.UpdateOne(ctx, gov.UserID, entitiesParams)
+	if err != nil {
+		return models.Gov{}, err
+	}
+
+	return res, nil
+}
+
+func (a App) RefuseOwnGov(ctx context.Context, userID uuid.UUID) error {
+	gov, err := a.GetInitiatorGov(ctx, userID)
+	if err != nil {
+		return err
+	}
+
+	if gov.Role == constant.CityGovRoleMayor {
+		return errx.ErrorCannotRefuseMayor.Raise(
+			fmt.Errorf("mayor %s cannot refuse self gov", userID),
 		)
 	}
+
+	err = a.gov.DeleteOne(ctx, gov.UserID)
+	if err != nil {
+		return fmt.Errorf("refuse own gov: %w", err)
+	}
+
+	return nil
+}
+
+func (a App) DeleteGov(ctx context.Context, initiatorID, userID uuid.UUID) (models.Gov, error) {
+	initiator, err := a.GetInitiatorGov(ctx, initiatorID)
+	if err != nil {
+		return models.Gov{}, err
+	}
+
+	gov, err := a.gov.Get(ctx, entities.GetGovFilters{
+		UserID: &userID,
+	})
+	if err != nil {
+		return models.Gov{}, err
+	}
+
 	access, err := constant.CompareCityGovRoles(initiator.Role, gov.Role)
 	if err != nil {
-		return models.Gov{}, errx.ErrorInvalidCityGovRole.Raise(err)
+		return models.Gov{}, errx.ErrorInvalidGovRole.Raise(
+			fmt.Errorf("invalid city gov role, cause: %w", err),
+		)
 	}
 	if access != 1 {
-		return models.Gov{}, errx.ErrorEnoughRights.Raise(
-			fmt.Errorf("initiator gov %s with role %s does not have enough rights to update gov %s with role %s",
-				initiator.ID, initiator.Role, gov.ID, gov.Role),
+		return models.Gov{}, errx.ErrorNotEnoughRights.Raise(
+			fmt.Errorf("no access to delete gov %s by initiator %s", userID, initiatorID),
 		)
 	}
 
-	if params.Role != nil {
-		access, err = constant.CompareCityGovRoles(initiator.Role, *params.Role)
-		if err != nil {
-			return models.Gov{}, errx.ErrorInvalidCityGovRole.Raise(err)
-		}
-		if access < 0 {
-			return models.Gov{}, errx.ErrorEnoughRights.Raise(
-				fmt.Errorf("initiator gov %s with role %s does not have enough rights to update gov %s to role %s",
-					initiator.ID, initiator.Role, gov.ID, *params.Role),
-			)
-		}
-
-		gov, err = a.UpdateGovRole(ctx, govID, *params.Role)
-		if err != nil {
-			return models.Gov{}, err
-		}
+	if gov.Role == constant.CityGovRoleMayor {
+		return models.Gov{}, errx.ErrorCannotRefuseMayor.Raise(
+			fmt.Errorf("mayor %s cannot refuse self gov", userID),
+		)
 	}
 
-	if params.Label != nil {
-		gov, err = a.UpdateGovLabel(ctx, govID, params.Label)
-		if err != nil {
-			return models.Gov{}, err
-		}
-	}
-
-	if params.Active != nil {
-		gov, err = a.UpdateGovActiveStatus(ctx, govID, *params.Active)
-		if err != nil {
-			return models.Gov{}, err
-		}
+	err = a.gov.DeleteOne(ctx, gov.UserID)
+	if err != nil {
+		return models.Gov{}, fmt.Errorf("refuse own gov: %w", err)
 	}
 
 	return gov, nil
 }
 
-func (a App) UpdateGovLabel(ctx context.Context, govID uuid.UUID, newLabel *string) (models.Gov, error) {
-	err := a.gov.UpdateOne(ctx, govID, entities.UpdateGovParams{
-		Label: newLabel,
-	})
-	if err != nil {
-		return models.Gov{}, fmt.Errorf("update gov label: %w", err)
-	}
-
-	updatedGov, err := a.gov.Get(ctx, entities.GetGovFilters{
-		ID: &govID,
-	})
-	if err != nil {
-		return models.Gov{}, fmt.Errorf("get updated gov: %w", err)
-	}
-
-	return updatedGov, nil
-}
-
-func (a App) UpdateGovRole(ctx context.Context, govID uuid.UUID, newRole string) (models.Gov, error) {
-	err := constant.CheckCityGovRole(newRole)
-	if err != nil {
-		return models.Gov{}, errx.ErrorInvalidCityGovRole.Raise(
-			fmt.Errorf("failed to parse city gov role: %w", err),
-		)
-	}
-
-	gov, err := a.gov.Get(ctx, entities.GetGovFilters{
-		ID: &govID,
-	})
-	if err != nil {
-		return models.Gov{}, err
-	}
-
-	if gov.Role == newRole {
-		return gov, nil
-	}
-
-	if newRole == constant.CityGovRoleMayor {
-		return models.Gov{}, errx.ErrorEnoughRights.Raise(
-			fmt.Errorf("only transfer to new mayor is allowed"),
-		)
-	}
-	if gov.Role == constant.CityGovRoleMayor {
-		return models.Gov{}, errx.ErrorEnoughRights.Raise(
-			fmt.Errorf("cannot update mayor gov %s by other", govID),
-		)
-	}
-
-	err = a.gov.UpdateOne(ctx, govID, entities.UpdateGovParams{
-		Role: &newRole,
-	})
-	if err != nil {
-		return models.Gov{}, fmt.Errorf("update gov role: %w", err)
-	}
-
-	updatedGov, err := a.gov.Get(ctx, entities.GetGovFilters{
-		ID: &govID,
-	})
-	if err != nil {
-		return models.Gov{}, fmt.Errorf("get updated gov: %w", err)
-	}
-
-	return updatedGov, nil
-}
-
-func (a App) UpdateGovActiveStatus(ctx context.Context, govID uuid.UUID, active bool) (models.Gov, error) {
-	gov, err := a.gov.Get(ctx, entities.GetGovFilters{
-		ID: &govID,
-	})
-	if err != nil {
-		return models.Gov{}, err
-	}
-
-	if gov.Active == active {
-		return gov, nil
-	}
-
-	if active {
-		_, err := a.CheckNoActiveForUser(ctx, gov.UserID)
-		if err != nil {
-			return models.Gov{}, err
-		}
-
-		if gov.Role == constant.CityGovRoleMayor {
-			_, err := a.gov.Get(ctx, entities.GetGovFilters{
-				CityID: &gov.CityID,
-				Role:   func(s string) *string { return &s }(constant.CityGovRoleMayor),
-				Active: func(b bool) *bool { return &b }(true),
-			})
-			if err != nil && !errors.Is(err, errx.ErrorCityGovNotFound) {
-				return models.Gov{}, err
-			}
-			if err == nil {
-				return models.Gov{}, errx.ErrorGovAlreadyExists.Raise(
-					fmt.Errorf("active mayor already exists in city %s", gov.CityID),
-				)
-			}
-		}
-	}
-
-	err = a.gov.UpdateOne(ctx, govID, entities.UpdateGovParams{
-		Active: &active,
-	})
-	if err != nil {
-		return models.Gov{}, fmt.Errorf("update gov active status: %w", err)
-	}
-
-	updatedGov, err := a.gov.Get(ctx, entities.GetGovFilters{
-		ID: &govID,
-	})
-	if err != nil {
-		return models.Gov{}, fmt.Errorf("get updated gov: %w", err)
-	}
-
-	return updatedGov, nil
-}
-
-func (a App) TransferGovMayor(ctx context.Context, cityID, newMayorUserID uuid.UUID) error {
-	_, err := a.CheckNoActiveForUser(ctx, newMayorUserID)
+func (a App) TransferGovMayor(ctx context.Context, initiatorID, UserID uuid.UUID) error {
+	initiator, err := a.GetInitiatorGov(ctx, initiatorID)
 	if err != nil {
 		return err
 	}
 
-	currentMayor, err := a.gov.Get(ctx, entities.GetGovFilters{
-		CityID: &cityID,
-		Role:   func(s string) *string { return &s }(constant.CityGovRoleMayor),
-		Active: func(b bool) *bool { return &b }(true),
-	})
-	if err != nil {
+	_, err = a.Get(ctx, UserID)
+	if err != nil && !errors.Is(err, errx.ErrorCityGovNotFound) {
 		return err
+	}
+	if err == nil {
+		return errx.ErrorGovAlreadyExists.Raise(
+			fmt.Errorf("active mayor already exists in city %s", initiator.CityID),
+		)
 	}
 
 	txErr := a.transaction(func(txCtx context.Context) error {
-		err = a.gov.UpdateOne(txCtx, currentMayor.ID, entities.UpdateGovParams{
-			Active: func(b bool) *bool { return &b }(false),
-		})
+		err = a.gov.DeleteOne(txCtx, initiator.CityID)
 		if err != nil {
 			return err
 		}
 
-		_, err := a.gov.CreateGov(txCtx, entities.CreateGovParams{
-			CityID: cityID,
-			UserID: newMayorUserID,
+		_, err = a.gov.CreateGov(txCtx, entities.CreateGovParams{
+			CityID: initiator.CityID,
+			UserID: UserID,
 			Role:   constant.CityGovRoleMayor,
 		})
 		if err != nil {
@@ -422,20 +213,9 @@ func (a App) TransferGovMayor(ctx context.Context, cityID, newMayorUserID uuid.U
 
 		return nil
 	})
-
 	if txErr != nil {
 		return txErr
 	}
 
-	return nil
-}
-
-func (a App) DeactivateGov(ctx context.Context, govID uuid.UUID) error {
-	err := a.gov.UpdateOne(ctx, govID, entities.UpdateGovParams{
-		Status: func(s string) *string { return &s }(constant.GovStatusInactive),
-	})
-	if err != nil {
-		return fmt.Errorf("deactivate gov: %w", err)
-	}
 	return nil
 }

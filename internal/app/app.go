@@ -14,6 +14,7 @@ type App struct {
 	country entities.Country
 	cities  entities.City
 	gov     entities.Gov
+	invite  entities.Invite
 
 	db *sql.DB
 }

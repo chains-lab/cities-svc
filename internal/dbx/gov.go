@@ -10,18 +10,15 @@ import (
 	"github.com/google/uuid"
 )
 
-const cityGovTable = "city_governments"
+const cityGovTable = "city_govs"
 
 type Gov struct {
-	ID            uuid.UUID    `db:"id"`
-	UserID        uuid.UUID    `db:"user_id"`
-	CityID        uuid.UUID    `db:"city_id"`
-	Status        string       `db:"status"`
-	Role          string       `db:"role"`
-	Label         string       `db:"label"`
-	DeactivatedAt sql.NullTime `db:"deactivated_at"`
-	CreatedAt     time.Time    `db:"created_at"`
-	UpdatedAt     time.Time    `db:"updated_at"`
+	UserID    uuid.UUID      `db:"user_id"`
+	CityID    uuid.UUID      `db:"city_id"`
+	Role      string         `db:"role"`
+	Label     sql.NullString `db:"label"`
+	CreatedAt time.Time      `db:"created_at"`
+	UpdatedAt time.Time      `db:"updated_at"`
 }
 
 type GovQ struct {
@@ -37,13 +34,10 @@ func NewCityGovQ(db *sql.DB) GovQ {
 	b := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
 
 	cols := []string{
-		"id",
 		"user_id",
 		"city_id",
-		"status",
 		"role",
 		"label",
-		"deactivated_at",
 		"created_at",
 		"updated_at",
 	}
@@ -64,21 +58,16 @@ func (q GovQ) Insert(ctx context.Context, in Gov) error {
 	values := map[string]interface{}{
 		"user_id": in.UserID,
 		"city_id": in.CityID,
-		"status":  in.Status,
 		"role":    in.Role,
-		"label":   in.Label,
 	}
-	if in.DeactivatedAt.Valid {
-		values["deactivated_at"] = in.DeactivatedAt.Time
+	if in.Label.Valid {
+		values["label"] = in.Label
 	}
 	if !in.CreatedAt.IsZero() {
 		values["created_at"] = in.CreatedAt
 	}
 	if !in.UpdatedAt.IsZero() {
 		values["updated_at"] = in.UpdatedAt
-	}
-	if in.ID != uuid.Nil {
-		values["id"] = in.ID
 	}
 
 	query, args, err := q.inserter.SetMap(values).ToSql()
@@ -108,13 +97,10 @@ func (q GovQ) Get(ctx context.Context) (Gov, error) {
 		row = q.db.QueryRowContext(ctx, query, args...)
 	}
 	err = row.Scan(
-		&m.ID,
 		&m.UserID,
 		&m.CityID,
-		&m.Status,
 		&m.Role,
 		&m.Label,
-		&m.DeactivatedAt,
 		&m.CreatedAt,
 		&m.UpdatedAt,
 	)
@@ -142,13 +128,10 @@ func (q GovQ) Select(ctx context.Context) ([]Gov, error) {
 	for rows.Next() {
 		var m Gov
 		if err := rows.Scan(
-			&m.ID,
 			&m.UserID,
 			&m.CityID,
-			&m.Status,
 			&m.Role,
 			&m.Label,
-			&m.DeactivatedAt,
 			&m.CreatedAt,
 			&m.UpdatedAt,
 		); err != nil {
@@ -160,12 +143,11 @@ func (q GovQ) Select(ctx context.Context) ([]Gov, error) {
 }
 
 type UpdateCityGovParams struct {
-	CityID        *uuid.UUID
-	Status        *string
-	Role          *string
-	Label         *string
-	DeactivatedAt *sql.NullTime
-	UpdatedAt     *time.Time
+	CityID    *uuid.UUID
+	Status    *string
+	Role      *string
+	Label     *sql.NullString
+	UpdatedAt *time.Time
 }
 
 func (q GovQ) Update(ctx context.Context, p UpdateCityGovParams) error {
@@ -177,16 +159,12 @@ func (q GovQ) Update(ctx context.Context, p UpdateCityGovParams) error {
 	if p.Role != nil {
 		updates["role"] = *p.Role
 	}
-	if p.Label != nil {
-		updates["label"] = *p.Label
-	}
-	if p.Status != nil {
-		updates["status"] = *p.Status
-	}
-	if p.DeactivatedAt.Valid {
-		updates["deactivated_at"] = p.DeactivatedAt.Time
-	} else {
-		updates["deactivated_at"] = nil
+	if p.Label.Valid {
+		if p.Label.String == "" {
+			updates["label"] = nil
+		} else {
+			updates["label"] = p.Label
+		}
 	}
 	if p.UpdatedAt != nil {
 		updates["updated_at"] = *p.UpdatedAt
@@ -225,14 +203,6 @@ func (q GovQ) Delete(ctx context.Context) error {
 	return err
 }
 
-func (q GovQ) FilterID(id uuid.UUID) GovQ {
-	q.selector = q.selector.Where(sq.Eq{"id": id})
-	q.deleter = q.deleter.Where(sq.Eq{"id": id})
-	q.updater = q.updater.Where(sq.Eq{"id": id})
-	q.counter = q.counter.Where(sq.Eq{"id": id})
-	return q
-}
-
 func (q GovQ) FilterUserID(userID uuid.UUID) GovQ {
 	q.selector = q.selector.Where(sq.Eq{"user_id": userID})
 	q.deleter = q.deleter.Where(sq.Eq{"user_id": userID})
@@ -254,14 +224,6 @@ func (q GovQ) FilterRole(role ...string) GovQ {
 	q.deleter = q.deleter.Where(sq.Eq{"role": role})
 	q.updater = q.updater.Where(sq.Eq{"role": role})
 	q.counter = q.counter.Where(sq.Eq{"role": role})
-	return q
-}
-
-func (q GovQ) FilterStatus(status ...string) GovQ {
-	q.selector = q.selector.Where(sq.Eq{"status": status})
-	q.deleter = q.deleter.Where(sq.Eq{"status": status})
-	q.updater = q.updater.Where(sq.Eq{"status": status})
-	q.counter = q.counter.Where(sq.Eq{"status": status})
 	return q
 }
 

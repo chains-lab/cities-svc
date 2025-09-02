@@ -63,6 +63,9 @@ type JWTConfig struct {
 	Service struct {
 		SecretKey string `mapstructure:"secret_key"`
 	} `mapstructure:"service"`
+	Invite struct {
+		SecretKey string `mapstructure:"secret_key"`
+	}
 }
 
 type RabbitConfig struct {

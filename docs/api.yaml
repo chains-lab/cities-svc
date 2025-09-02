@@ -24,7 +24,6 @@ components:
     UpdateCountryStatus:
       $ref: './spec/components/schemas/UpdateCountryStatus.yaml'
 
-
     CreateCity:
       $ref: './spec/components/schemas/CreateCity.yaml'
     UpdateCity:
@@ -32,14 +31,20 @@ components:
     UpdateCityStatus:
       $ref: './spec/components/schemas/UpdateCityStatus.yaml'
     UpdateOwnActiveGov:
-        $ref: './spec/components/schemas/UpdateOwnActiveGov.yaml'
+      $ref: './spec/components/schemas/UpdateOwnGov.yaml'
     CreateMayor:
       $ref: './spec/components/schemas/CreateMayor.yaml'
+    AnswerToInvite:
+      $ref: './spec/components/schemas/AnswerToInvite.yaml'
 
-    CreateGov:
-      $ref: './spec/components/schemas/CreateGov.yaml'
-    UpdateGov:
-      $ref: './spec/components/schemas/UpdateGov.yaml'
+    SentInvite:
+      $ref: './spec/components/schemas/SentInvite.yaml'
+
+    TransferMayor:
+      $ref: './spec/components/schemas/TransferMayor.yaml'
+
+    CreateInvite:
+      $ref: './spec/components/schemas/CreateInvite.yaml'
 
     #responses
     Country:
@@ -68,6 +73,9 @@ components:
       $ref: './spec/components/schemas/GovAttributes.yaml'
     GovsCollection:
       $ref: './spec/components/schemas/GovsCollection.yaml'
+
+    Invite:
+      $ref: './spec/components/schemas/Invite.yaml'
 
     Errors:
       $ref: './spec/components/schemas/Errors.yaml'
