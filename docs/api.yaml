@@ -19,10 +19,27 @@ components:
     #requests
     CreateCountry:
       $ref: './spec/components/schemas/CreateCountry.yaml'
+    UpdateCountry:
+      $ref: './spec/components/schemas/UpdateCountry.yaml'
+    UpdateCountryStatus:
+      $ref: './spec/components/schemas/UpdateCountryStatus.yaml'
+
+
     CreateCity:
       $ref: './spec/components/schemas/CreateCity.yaml'
+    UpdateCity:
+      $ref: './spec/components/schemas/UpdateCity.yaml'
+    UpdateCityStatus:
+      $ref: './spec/components/schemas/UpdateCityStatus.yaml'
+    UpdateOwnActiveGov:
+        $ref: './spec/components/schemas/UpdateOwnActiveGov.yaml'
+    CreateMayor:
+      $ref: './spec/components/schemas/CreateMayor.yaml'
+
     CreateGov:
       $ref: './spec/components/schemas/CreateGov.yaml'
+    UpdateGov:
+      $ref: './spec/components/schemas/UpdateGov.yaml'
 
     #responses
     Country:

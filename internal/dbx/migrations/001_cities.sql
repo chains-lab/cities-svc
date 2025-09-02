@@ -12,8 +12,8 @@ CREATE TABLE countries (
     id         UUID             PRIMARY KEY NOT NULL,
     name       VARCHAR(255)     NOT NULL UNIQUE,
     status     country_statuses NOT NULL,
-    created_at TIMESTAMP        NOT NULL DEFAULT now(),
-    updated_at TIMESTAMP        NOT NULL DEFAULT now()
+    created_at TIMESTAMP        NOT NULL DEFAULT (now() AT TIME ZONE 'UTC'),
+    updated_at TIMESTAMP        NOT NULL DEFAULT (now() AT TIME ZONE 'UTC')
 );
 
 CREATE TYPE city_statuses AS ENUM (
@@ -32,8 +32,8 @@ CREATE TABLE city (
     slug       VARCHAR(255)                 UNIQUE,
     timezone   VARCHAR(64)                  NOT NULL, -- IANA tz
 
-    created_at TIMESTAMP                    NOT NULL DEFAULT now(),
-    updated_at TIMESTAMP                    NOT NULL DEFAULT now()
+    created_at TIMESTAMP                    NOT NULL DEFAULT (now() AT TIME ZONE 'UTC'),
+    updated_at TIMESTAMP                    NOT NULL DEFAULT (now() AT TIME ZONE 'UTC')
 );
 
 

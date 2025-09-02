@@ -20,14 +20,14 @@ properties:
           - timezone
         properties:
           country_id:
-          type: string
-          format: uuid
-          description: "country id"
+            type: string
+            format: uuid
+            description: "country id"
           name:
             type: string
             description: "city name"
           point:
-            ref: './Point.yaml'
+            $ref: './Point.yaml'
           timezone:
             type: string
             description: "city timezone"

@@ -4,11 +4,11 @@ required:
   - latitude
   - longitude
 properties:
-latitude:
-  type: number
-  format: float
-  description: "latitude"
-longitude:
-  type: number
-  format: float
-  description: "longitude"
+  latitude:
+    type: number
+    format: double
+    description: "latitude"
+  longitude:
+    type: number
+    format: double
+    description: "longitude"

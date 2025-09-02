@@ -206,11 +206,14 @@ func (c City) GetBySlug(ctx context.Context, slug string) (models.City, error) {
 	return cityFromDb(city), nil
 }
 
+// Select methods for city
+
 type SelectCityFilters struct {
 	Name      *string
 	Status    []string
 	CountryID *uuid.UUID
 	Point     *orb.Point
+	Radius    *uint // in meters
 }
 
 func (c City) SelectCities(
@@ -251,6 +254,9 @@ func (c City) SelectCities(
 	}
 	if filters.CountryID != nil {
 		query = query.FilterCountryID(*filters.CountryID)
+	}
+	if filters.Point != nil && filters.Radius != nil {
+		query = query.FilterWithinRadiusMeters(*filters.Point, uint64(*filters.Radius))
 	}
 
 	for _, s := range sort {
@@ -293,6 +299,8 @@ func (c City) SelectCities(
 		Total: total,
 	}, nil
 }
+
+// Update methods for city
 
 type UpdateCityParams struct {
 	CountryID *uuid.UUID

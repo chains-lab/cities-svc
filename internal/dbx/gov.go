@@ -12,18 +12,19 @@ import (
 
 const cityGovTable = "city_governments"
 
-type CityGov struct {
-	ID        uuid.UUID      `db:"id"`
-	UserID    uuid.UUID      `db:"user_id"`
-	CityID    uuid.UUID      `db:"city_id"`
-	Active    bool           `db:"active"`
-	Role      string         `db:"role"`
-	Label     sql.NullString `db:"label"`
-	CreatedAt time.Time      `db:"created_at"`
-	UpdatedAt time.Time      `db:"updated_at"`
+type Gov struct {
+	ID            uuid.UUID    `db:"id"`
+	UserID        uuid.UUID    `db:"user_id"`
+	CityID        uuid.UUID    `db:"city_id"`
+	Status        string       `db:"status"`
+	Role          string       `db:"role"`
+	Label         string       `db:"label"`
+	DeactivatedAt sql.NullTime `db:"deactivated_at"`
+	CreatedAt     time.Time    `db:"created_at"`
+	UpdatedAt     time.Time    `db:"updated_at"`
 }
 
-type CityGovQ struct {
+type GovQ struct {
 	db       *sql.DB
 	selector sq.SelectBuilder
 	inserter sq.InsertBuilder
@@ -32,22 +33,22 @@ type CityGovQ struct {
 	counter  sq.SelectBuilder
 }
 
-func NewCityGovQ(db *sql.DB) CityGovQ {
+func NewCityGovQ(db *sql.DB) GovQ {
 	b := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
 
-	// Явный список колонок для стабильного Scan-порядка
 	cols := []string{
 		"id",
 		"user_id",
 		"city_id",
-		"active",
+		"status",
 		"role",
 		"label",
+		"deactivated_at",
 		"created_at",
 		"updated_at",
 	}
 
-	return CityGovQ{
+	return GovQ{
 		db:       db,
 		selector: b.Select(cols...).From(cityGovTable),
 		inserter: b.Insert(cityGovTable),
@@ -57,18 +58,24 @@ func NewCityGovQ(db *sql.DB) CityGovQ {
 	}
 }
 
-func (q CityGovQ) New() CityGovQ { return NewCityGovQ(q.db) }
+func (q GovQ) New() GovQ { return NewCityGovQ(q.db) }
 
-// Insert: если ID == uuid.Nil — не ставим его => возьмётся DEFAULT из БД
-func (q CityGovQ) Insert(ctx context.Context, in CityGov) error {
+func (q GovQ) Insert(ctx context.Context, in Gov) error {
 	values := map[string]interface{}{
-		"user_id":    in.UserID,
-		"city_id":    in.CityID,
-		"active":     in.Active, // DEFAULT true в БД, но можно и явно
-		"role":       in.Role,
-		"label":      in.Label,     // NullString корректно передаётся
-		"created_at": in.CreatedAt, // в схеме NOT NULL без DEFAULT — передаём сами
-		"updated_at": in.UpdatedAt,
+		"user_id": in.UserID,
+		"city_id": in.CityID,
+		"status":  in.Status,
+		"role":    in.Role,
+		"label":   in.Label,
+	}
+	if in.DeactivatedAt.Valid {
+		values["deactivated_at"] = in.DeactivatedAt.Time
+	}
+	if !in.CreatedAt.IsZero() {
+		values["created_at"] = in.CreatedAt
+	}
+	if !in.UpdatedAt.IsZero() {
+		values["updated_at"] = in.UpdatedAt
 	}
 	if in.ID != uuid.Nil {
 		values["id"] = in.ID
@@ -87,14 +94,13 @@ func (q CityGovQ) Insert(ctx context.Context, in CityGov) error {
 	return err
 }
 
-// Get: возвращает первый попавшийся по текущим фильтрам
-func (q CityGovQ) Get(ctx context.Context) (CityGov, error) {
+func (q GovQ) Get(ctx context.Context) (Gov, error) {
 	query, args, err := q.selector.Limit(1).ToSql()
 	if err != nil {
-		return CityGov{}, fmt.Errorf("building select query for %s: %w", cityGovTable, err)
+		return Gov{}, fmt.Errorf("building select query for %s: %w", cityGovTable, err)
 	}
 
-	var m CityGov
+	var m Gov
 	var row *sql.Row
 	if tx, ok := ctx.Value(TxKey).(*sql.Tx); ok {
 		row = tx.QueryRowContext(ctx, query, args...)
@@ -105,16 +111,17 @@ func (q CityGovQ) Get(ctx context.Context) (CityGov, error) {
 		&m.ID,
 		&m.UserID,
 		&m.CityID,
-		&m.Active,
+		&m.Status,
 		&m.Role,
 		&m.Label,
+		&m.DeactivatedAt,
 		&m.CreatedAt,
 		&m.UpdatedAt,
 	)
 	return m, err
 }
 
-func (q CityGovQ) Select(ctx context.Context) ([]CityGov, error) {
+func (q GovQ) Select(ctx context.Context) ([]Gov, error) {
 	query, args, err := q.selector.ToSql()
 	if err != nil {
 		return nil, fmt.Errorf("building select query for %s: %w", cityGovTable, err)
@@ -131,16 +138,17 @@ func (q CityGovQ) Select(ctx context.Context) ([]CityGov, error) {
 	}
 	defer rows.Close()
 
-	var out []CityGov
+	var out []Gov
 	for rows.Next() {
-		var m CityGov
+		var m Gov
 		if err := rows.Scan(
 			&m.ID,
 			&m.UserID,
 			&m.CityID,
-			&m.Active,
+			&m.Status,
 			&m.Role,
 			&m.Label,
+			&m.DeactivatedAt,
 			&m.CreatedAt,
 			&m.UpdatedAt,
 		); err != nil {
@@ -152,31 +160,33 @@ func (q CityGovQ) Select(ctx context.Context) ([]CityGov, error) {
 }
 
 type UpdateCityGovParams struct {
-	CityID    *uuid.UUID
-	Active    *bool
-	Role      *string
-	Label     *sql.NullString
-	UpdatedAt *time.Time
+	CityID        *uuid.UUID
+	Status        *string
+	Role          *string
+	Label         *string
+	DeactivatedAt *sql.NullTime
+	UpdatedAt     *time.Time
 }
 
-func (q CityGovQ) Update(ctx context.Context, p UpdateCityGovParams) error {
+func (q GovQ) Update(ctx context.Context, p UpdateCityGovParams) error {
 	updates := map[string]interface{}{}
 
 	if p.CityID != nil {
 		updates["city_id"] = *p.CityID
 	}
-	if p.Active != nil {
-		updates["active"] = *p.Active
-	}
 	if p.Role != nil {
 		updates["role"] = *p.Role
 	}
 	if p.Label != nil {
-		if p.Label.Valid {
-			updates["label"] = p.Label
-		} else {
-			updates["label"] = nil
-		}
+		updates["label"] = *p.Label
+	}
+	if p.Status != nil {
+		updates["status"] = *p.Status
+	}
+	if p.DeactivatedAt.Valid {
+		updates["deactivated_at"] = p.DeactivatedAt.Time
+	} else {
+		updates["deactivated_at"] = nil
 	}
 	if p.UpdatedAt != nil {
 		updates["updated_at"] = *p.UpdatedAt
@@ -201,7 +211,7 @@ func (q CityGovQ) Update(ctx context.Context, p UpdateCityGovParams) error {
 	return err
 }
 
-func (q CityGovQ) Delete(ctx context.Context) error {
+func (q GovQ) Delete(ctx context.Context) error {
 	query, args, err := q.deleter.ToSql()
 	if err != nil {
 		return fmt.Errorf("building delete query for %s: %w", cityGovTable, err)
@@ -215,7 +225,7 @@ func (q CityGovQ) Delete(ctx context.Context) error {
 	return err
 }
 
-func (q CityGovQ) FilterID(id uuid.UUID) CityGovQ {
+func (q GovQ) FilterID(id uuid.UUID) GovQ {
 	q.selector = q.selector.Where(sq.Eq{"id": id})
 	q.deleter = q.deleter.Where(sq.Eq{"id": id})
 	q.updater = q.updater.Where(sq.Eq{"id": id})
@@ -223,7 +233,7 @@ func (q CityGovQ) FilterID(id uuid.UUID) CityGovQ {
 	return q
 }
 
-func (q CityGovQ) FilterUserID(userID uuid.UUID) CityGovQ {
+func (q GovQ) FilterUserID(userID uuid.UUID) GovQ {
 	q.selector = q.selector.Where(sq.Eq{"user_id": userID})
 	q.deleter = q.deleter.Where(sq.Eq{"user_id": userID})
 	q.updater = q.updater.Where(sq.Eq{"user_id": userID})
@@ -231,7 +241,7 @@ func (q CityGovQ) FilterUserID(userID uuid.UUID) CityGovQ {
 	return q
 }
 
-func (q CityGovQ) FilterCityID(cityID uuid.UUID) CityGovQ {
+func (q GovQ) FilterCityID(cityID uuid.UUID) GovQ {
 	q.selector = q.selector.Where(sq.Eq{"city_id": cityID})
 	q.deleter = q.deleter.Where(sq.Eq{"city_id": cityID})
 	q.updater = q.updater.Where(sq.Eq{"city_id": cityID})
@@ -239,7 +249,7 @@ func (q CityGovQ) FilterCityID(cityID uuid.UUID) CityGovQ {
 	return q
 }
 
-func (q CityGovQ) FilterRole(role ...string) CityGovQ {
+func (q GovQ) FilterRole(role ...string) GovQ {
 	q.selector = q.selector.Where(sq.Eq{"role": role})
 	q.deleter = q.deleter.Where(sq.Eq{"role": role})
 	q.updater = q.updater.Where(sq.Eq{"role": role})
@@ -247,33 +257,32 @@ func (q CityGovQ) FilterRole(role ...string) CityGovQ {
 	return q
 }
 
-func (q CityGovQ) FilterActive(active bool) CityGovQ {
-	q.selector = q.selector.Where(sq.Eq{"active": active})
-	q.deleter = q.deleter.Where(sq.Eq{"active": active})
-	q.updater = q.updater.Where(sq.Eq{"active": active})
-	q.counter = q.counter.Where(sq.Eq{"active": active})
+func (q GovQ) FilterStatus(status ...string) GovQ {
+	q.selector = q.selector.Where(sq.Eq{"status": status})
+	q.deleter = q.deleter.Where(sq.Eq{"status": status})
+	q.updater = q.updater.Where(sq.Eq{"status": status})
+	q.counter = q.counter.Where(sq.Eq{"status": status})
 	return q
 }
 
-func (q CityGovQ) FilterCountryID(countryID uuid.UUID) CityGovQ {
-	cond := sq.Expr("city_id IN (SELECT id FROM city WHERE country_id = ?)", countryID)
-	q.selector = q.selector.Where(cond)
-	q.updater = q.updater.Where(cond)
-	q.deleter = q.deleter.Where(cond)
-	q.counter = q.counter.Where(cond)
+func (q GovQ) FilterCountryID(countryID uuid.UUID) GovQ {
+	sub := sq.Select("id").From("city").Where(sq.Eq{"country_id": countryID})
+	q.selector = q.selector.Where("city_id IN (?)", sub)
+	q.updater = q.updater.Where("city_id IN (?)", sub)
+	q.deleter = q.deleter.Where("city_id IN (?)", sub)
+	q.counter = q.counter.Where("city_id IN (?)", sub)
 	return q
 }
 
-func (q CityGovQ) FilterLabelLike(label string) CityGovQ {
-	cond := sq.Expr("label ILIKE ?", fmt.Sprintf("%%%s%%", label))
-	q.selector = q.selector.Where(cond)
-	q.deleter = q.deleter.Where(cond)
-	q.updater = q.updater.Where(cond)
-	q.counter = q.counter.Where(cond)
+func (q GovQ) FilterLabelLike(label string) GovQ {
+	q.selector = q.selector.Where("label ILIKE ?", "%"+label+"%")
+	q.deleter = q.deleter.Where("label ILIKE ?", "%"+label+"%")
+	q.updater = q.updater.Where("label ILIKE ?", "%"+label+"%")
+	q.counter = q.counter.Where("label ILIKE ?", "%"+label+"%")
 	return q
 }
 
-func (q CityGovQ) OrderByRole(asc bool) CityGovQ {
+func (q GovQ) OrderByRole(asc bool) GovQ {
 	dir := "ASC"
 	if !asc {
 		dir = "DESC"
@@ -282,7 +291,7 @@ func (q CityGovQ) OrderByRole(asc bool) CityGovQ {
 	return q
 }
 
-func (q CityGovQ) OrderByCreatedAt(asc bool) CityGovQ {
+func (q GovQ) OrderByCreatedAt(asc bool) GovQ {
 	dir := "ASC"
 	if !asc {
 		dir = "DESC"
@@ -291,7 +300,7 @@ func (q CityGovQ) OrderByCreatedAt(asc bool) CityGovQ {
 	return q
 }
 
-func (q CityGovQ) OrderByUpdatedAt(asc bool) CityGovQ {
+func (q GovQ) OrderByUpdatedAt(asc bool) GovQ {
 	dir := "ASC"
 	if !asc {
 		dir = "DESC"
@@ -300,7 +309,7 @@ func (q CityGovQ) OrderByUpdatedAt(asc bool) CityGovQ {
 	return q
 }
 
-func (q CityGovQ) Count(ctx context.Context) (uint64, error) {
+func (q GovQ) Count(ctx context.Context) (uint64, error) {
 	query, args, err := q.counter.ToSql()
 	if err != nil {
 		return 0, fmt.Errorf("building count query for %s: %w", cityGovTable, err)
@@ -319,7 +328,7 @@ func (q CityGovQ) Count(ctx context.Context) (uint64, error) {
 	return n, nil
 }
 
-func (q CityGovQ) Page(limit, offset uint64) CityGovQ {
+func (q GovQ) Page(limit, offset uint64) GovQ {
 	q.selector = q.selector.Limit(limit).Offset(offset)
 	return q
 }

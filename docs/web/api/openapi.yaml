@@ -16,6 +16,66 @@ paths:
       - Test
 components:
   schemas:
+    CreateCountry:
+      properties:
+        data:
+          $ref: '#/components/schemas/CreateCountry_data'
+      required:
+      - data
+    UpdateCountry:
+      properties:
+        data:
+          $ref: '#/components/schemas/UpdateCountry_data'
+      required:
+      - data
+    UpdateCountryStatus:
+      properties:
+        data:
+          $ref: '#/components/schemas/UpdateCountryStatus_data'
+      required:
+      - data
+    CreateCity:
+      properties:
+        data:
+          $ref: '#/components/schemas/CreateCity_data'
+      required:
+      - data
+    UpdateCity:
+      properties:
+        data:
+          $ref: '#/components/schemas/UpdateCity_data'
+      required:
+      - data
+    UpdateCityStatus:
+      properties:
+        data:
+          $ref: '#/components/schemas/UpdateCityStatus_data'
+      required:
+      - data
+    UpdateOwnActiveGov:
+      properties:
+        data:
+          $ref: '#/components/schemas/UpdateOwnActiveGov_data'
+      required:
+      - data
+    CreateMayor:
+      properties:
+        data:
+          $ref: '#/components/schemas/CreateMayor_data'
+      required:
+      - data
+    CreateGov:
+      properties:
+        data:
+          $ref: '#/components/schemas/CreateGov_data'
+      required:
+      - data
+    UpdateGov:
+      properties:
+        data:
+          $ref: '#/components/schemas/UpdateGov_data'
+      required:
+      - data
     Country:
       properties:
         data:
@@ -102,7 +162,7 @@ components:
           format: uuid
           type: string
         point:
-          $ref: '#/components/schemas/CityAttributes_point'
+          $ref: '#/components/schemas/Point'
         status:
           description: city status
           enum:
@@ -166,7 +226,7 @@ components:
           - gov
           type: string
         attributes:
-          $ref: '#/components/schemas/GovData'
+          $ref: '#/components/schemas/GovAttributes'
       required:
       - attributes
       - id
@@ -181,14 +241,18 @@ components:
           description: city id
           format: uuid
           type: string
-        active:
-          description: is the user active in this city
-          type: boolean
+        status:
+          description: status of the user in this city
+          type: string
         role:
           description: role of the user in this city
           type: string
         label:
           description: optional label for the user in this city
+          type: string
+        deactivated_at:
+          description: record deactivation date
+          format: date-time
           type: string
         created_at:
           description: record creation date
@@ -199,10 +263,11 @@ components:
           format: date-time
           type: string
       required:
-      - active
       - city_id
       - created_at
+      - label
       - role
+      - status
       - updated_at
       - user_id
     GovsCollection:
@@ -247,20 +312,283 @@ components:
       - page_number
       - page_size
       - total_items
-    CityAttributes_point:
+    Point:
       description: city location
       properties:
         latitude:
           description: latitude
-          format: float
+          format: double
           type: number
         longitude:
           description: longitude
-          format: float
+          format: double
           type: number
       required:
       - latitude
       - longitude
+    CreateCountry_data_attributes:
+      properties:
+        name:
+          description: city name
+          type: string
+      required:
+      - name
+    CreateCountry_data:
+      properties:
+        type:
+          enum:
+          - create_country
+          type: string
+        attributes:
+          $ref: '#/components/schemas/CreateCountry_data_attributes'
+      required:
+      - attributes
+      - type
+    UpdateCountry_data_attributes:
+      properties:
+        name:
+          description: city name
+          type: string
+    UpdateCountry_data:
+      properties:
+        id:
+          description: country id
+          format: uuid
+          type: string
+        type:
+          enum:
+          - update_country
+          type: string
+        attributes:
+          $ref: '#/components/schemas/UpdateCountry_data_attributes'
+      required:
+      - attributes
+      - id
+      - type
+    UpdateCountryStatus_data_attributes:
+      properties:
+        status:
+          description: new country status
+          type: string
+      required:
+      - status
+    UpdateCountryStatus_data:
+      properties:
+        id:
+          description: country id
+          format: uuid
+          type: string
+        type:
+          enum:
+          - update_country_status
+          type: string
+        attributes:
+          $ref: '#/components/schemas/UpdateCountryStatus_data_attributes'
+      required:
+      - attributes
+      - id
+      - type
+    CreateCity_data_attributes:
+      properties:
+        country_id:
+          description: country id
+          format: uuid
+          type: string
+        name:
+          description: city name
+          type: string
+        point:
+          $ref: '#/components/schemas/Point'
+        timezone:
+          description: city timezone
+          example: Europe/Berlin
+          type: string
+      required:
+      - country_id
+      - name
+      - point
+      - timezone
+    CreateCity_data:
+      properties:
+        type:
+          enum:
+          - create_city
+          type: string
+        attributes:
+          $ref: '#/components/schemas/CreateCity_data_attributes'
+      required:
+      - attributes
+      - type
+    UpdateCity_data_attributes:
+      properties:
+        point:
+          $ref: '#/components/schemas/Point'
+        status:
+          description: city status
+          enum:
+          - active
+          - inactive
+          type: string
+        name:
+          description: city name
+          type: string
+        icon:
+          description: city icon uri
+          format: uri
+          type: string
+        slug:
+          description: city slug
+          type: string
+        timezone:
+          description: city timezone
+          type: string
+    UpdateCity_data:
+      properties:
+        id:
+          description: city id
+          format: uuid
+          type: string
+        type:
+          enum:
+          - update_city
+          type: string
+        attributes:
+          $ref: '#/components/schemas/UpdateCity_data_attributes'
+      required:
+      - attributes
+      - id
+      - type
+    UpdateCityStatus_data_attributes:
+      properties:
+        status:
+          description: new city status
+          type: string
+      required:
+      - status
+    UpdateCityStatus_data:
+      properties:
+        id:
+          description: city id
+          format: uuid
+          type: string
+        type:
+          enum:
+          - update_city
+          type: string
+        attributes:
+          $ref: '#/components/schemas/UpdateCityStatus_data_attributes'
+      required:
+      - attributes
+      - id
+      - type
+    UpdateOwnActiveGov_data_attributes:
+      properties:
+        label:
+          description: optional label for the user in this city
+          type: string
+    UpdateOwnActiveGov_data:
+      properties:
+        id:
+          description: user id
+          format: uuid
+          type: string
+        type:
+          enum:
+          - update_own_active_gov
+          type: string
+        attributes:
+          $ref: '#/components/schemas/UpdateOwnActiveGov_data_attributes'
+      required:
+      - attributes
+      - id
+      - type
+    CreateMayor_data_attributes:
+      properties:
+        city_id:
+          description: city id
+          format: uuid
+          type: string
+        user_id:
+          description: user id
+          format: uuid
+          type: string
+        label:
+          description: label for the user in this city
+          example: City Department of Transportation
+          type: string
+      required:
+      - city_id
+      - label
+      - user_id
+    CreateMayor_data:
+      properties:
+        type:
+          enum:
+          - create_mayor
+          type: string
+        attributes:
+          $ref: '#/components/schemas/CreateMayor_data_attributes'
+      required:
+      - attributes
+      - type
+    CreateGov_data_attributes:
+      properties:
+        city_id:
+          description: city id
+          format: uuid
+          type: string
+        user_id:
+          description: user id
+          format: uuid
+          type: string
+        role:
+          description: role of the user in this city
+          example: admin
+          type: string
+        label:
+          description: label for the user in this city
+          example: City Department of Transportation
+          type: string
+      required:
+      - city_id
+      - label
+      - role
+      - user_id
+    CreateGov_data:
+      properties:
+        type:
+          enum:
+          - create_gov
+          type: string
+        attributes:
+          $ref: '#/components/schemas/CreateGov_data_attributes'
+      required:
+      - attributes
+      - type
+    UpdateGov_data_attributes:
+      properties:
+        active:
+          description: is the user active in this city
+          type: boolean
+        label:
+          description: optional label for the user in this city
+          type: string
+    UpdateGov_data:
+      properties:
+        id:
+          description: government id
+          format: uuid
+          type: string
+        type:
+          enum:
+          - update_gov
+          type: string
+        attributes:
+          $ref: '#/components/schemas/UpdateGov_data_attributes'
+      required:
+      - attributes
+      - id
+      - type
     Errors_errors_inner:
       properties:
         title:

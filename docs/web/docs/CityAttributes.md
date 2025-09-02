@@ -5,7 +5,7 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **CountryId** | **string** | country id | 
-**Point** | [**CityAttributesPoint**](CityAttributesPoint.md) |  | 
+**Point** | [**Point**](Point.md) |  | 
 **Status** | **string** | city status | 
 **Name** | **string** | city name | 
 **Icon** | Pointer to **string** | city icon uri | [optional] 
@@ -18,7 +18,7 @@ Name | Type | Description | Notes
 
 ### NewCityAttributes
 
-`func NewCityAttributes(countryId string, point CityAttributesPoint, status string, name string, timezone string, createdAt time.Time, updatedAt time.Time, ) *CityAttributes`
+`func NewCityAttributes(countryId string, point Point, status string, name string, timezone string, createdAt time.Time, updatedAt time.Time, ) *CityAttributes`
 
 NewCityAttributes instantiates a new CityAttributes object
 This constructor will assign default values to properties that have it defined,
@@ -55,20 +55,20 @@ SetCountryId sets CountryId field to given value.
 
 ### GetPoint
 
-`func (o *CityAttributes) GetPoint() CityAttributesPoint`
+`func (o *CityAttributes) GetPoint() Point`
 
 GetPoint returns the Point field if non-nil, zero value otherwise.
 
 ### GetPointOk
 
-`func (o *CityAttributes) GetPointOk() (*CityAttributesPoint, bool)`
+`func (o *CityAttributes) GetPointOk() (*Point, bool)`
 
 GetPointOk returns a tuple with the Point field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetPoint
 
-`func (o *CityAttributes) SetPoint(v CityAttributesPoint)`
+`func (o *CityAttributes) SetPoint(v Point)`
 
 SetPoint sets Point field to given value.
 

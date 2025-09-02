@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/chains-lab/cities-svc/internal/services/rest/handlers"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -30,13 +31,8 @@ type Handlers interface {
 	TransferMayorRole(w http.ResponseWriter, r *http.Request)
 }
 
-type Middlewares interface {
-	Govs(govRoles ...string) func(http.Handler) http.Handler
-	SysadminOrGov(govRoles, sysadminRoles map[string]bool) func(http.Handler) http.Handler
-}
-
-func (s *Service) Api(ctx context.Context, m Middlewares, h Handlers) {
-	politics := s.buildPolicies(m)
+func (s *Service) Api(ctx context.Context, h handlers.Adapter) {
+	politics := s.buildPolicies()
 
 	s.router.Route("/cities-svc/", func(r chi.Router) {
 		r.Use(politics.Service)
@@ -51,45 +47,47 @@ func (s *Service) Api(ctx context.Context, m Middlewares, h Handlers) {
 					r.Get("/", h.GetCountry)
 
 					r.With(politics.Sysadmin).Put("/", h.UpdateCountry)
-					r.With(politics.Sysadmin).Route("/status", func(r chi.Router) {
-						r.Put("/{status}", h.ChangeCountryStatus)
-					})
+					r.With(politics.Sysadmin).Put("/status", h.UpdateCountryStatus)
 				})
 			})
 
 			r.Route("/cities", func(r chi.Router) {
 				r.Get("/", h.SearchCities)
-				r.Get("/nearby", h.GetNearbyCity)
 
 				r.With(politics.Sysadmin).Post("/", h.CreateCity)
 
 				r.Route("/{city_id}", func(r chi.Router) {
 					r.Get("/", h.GetCity)
-					r.With(politics.SysadminOrMayor).Put("/", h.UpdateCity)
+					r.Put("/", h.UpdateCity) //TODO
 
-					r.Route("/status", func(r chi.Router) {
-						r.Use(politics.SysadminOrMayor)
-						r.Put("/{status}", h.ChangeCityStatus)
-					})
-
-					r.Route("/govs", func(r chi.Router) {
-						r.Get("/", h.SearchGovs)
-						r.With(politics.ModeratorGovOrHigher).Post("/", h.CreateGov)
-
-						r.Route("/{gov_id}", func(r chi.Router) {
-							r.Get("/", h.GetGov)
-							r.With(politics.ModeratorGovOrHigher).Put("/", h.UpdateGov)
-						})
-
-						r.Route("/mayor", func(r chi.Router) {
-							r.With(politics.Sysadmin).Post("/", h.CreateMayor)
-							r.With(politics.Mayor).Post("/transfer", h.TransferMayorRole)
-						})
-					})
+					r.Put("/status", h.UpdateCityStatus) //TODO
 				})
 			})
 
 			r.Get("slug/{slug}", h.GetCityBySlug)
+
+			r.Route("/govs", func(r chi.Router) {
+				r.Get("/", h.SearchGovs)
+				r.Post("/", h.CreateGov)
+
+				r.Route("/{gov_id}", func(r chi.Router) {
+					r.Get("/", h.GetGov)
+					r.Put("/", h.UpdateGov)
+				})
+
+				r.Route("/mayor", func(r chi.Router) {
+					r.With(politics.Sysadmin).
+						Post("/", h.CreateMayor)
+
+					r.Post("/transfer/{user_id}", h.TransferMayor)
+				})
+
+				r.Route("/me", func(r chi.Router) {
+					r.Get("/", h.GetOwnCurrentGov)
+					r.Put("/", h.UpdateOwnCurrenteGov)
+					r.Delete("/", h.RefuseOwnCurrentGov)
+				})
+			})
 		})
 	})
 

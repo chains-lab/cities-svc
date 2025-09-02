@@ -10,15 +10,15 @@ import (
 )
 
 type Policies struct {
-	Service              func(h http.Handler) http.Handler
-	Sysadmin             func(h http.Handler) http.Handler
-	SysadminOrMayor      func(h http.Handler) http.Handler
-	Mayor                func(h http.Handler) http.Handler
-	ModeratorGovOrHigher func(h http.Handler) http.Handler
-	AnyGov               func(h http.Handler) http.Handler
+	Service  func(h http.Handler) http.Handler
+	Sysadmin func(h http.Handler) http.Handler
+	//SysadminOrMayor      func(h http.Handler) http.Handler
+	//Mayor                func(h http.Handler) http.Handler
+	//ModeratorGovOrHigher func(h http.Handler) http.Handler
+	//AnyGov               func(h http.Handler) http.Handler
 }
 
-func (s *Service) buildPolicies(m Middlewares) Policies {
+func (s *Service) buildPolicies() Policies {
 	return Policies{
 		Service: mdlv.ServiceGrant(constant.ServiceName, s.cfg.JWT.Service.SecretKey),
 

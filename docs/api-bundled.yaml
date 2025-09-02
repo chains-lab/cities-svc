@@ -37,6 +37,60 @@ components:
                 name:
                   type: string
                   description: city name
+    UpdateCountry:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: object
+          required:
+            - id
+            - type
+            - attributes
+          properties:
+            id:
+              type: string
+              format: uuid
+              description: country id
+            type:
+              type: string
+              enum:
+                - update_country
+            attributes:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: city name
+    UpdateCountryStatus:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: object
+          required:
+            - id
+            - type
+            - attributes
+          properties:
+            id:
+              type: string
+              format: uuid
+              description: country id
+            type:
+              type: string
+              enum:
+                - update_country_status
+            attributes:
+              type: object
+              required:
+                - status
+              properties:
+                status:
+                  type: string
+                  description: new country status
     CreateCity:
       type: object
       required:
@@ -60,19 +114,151 @@ components:
                 - point
                 - timezone
               properties:
-                country_id: null
-                type: string
-                format: uuid
-                description: country id
+                country_id:
+                  type: string
+                  format: uuid
+                  description: country id
                 name:
                   type: string
                   description: city name
                 point:
-                  ref: ./Point.yaml
+                  $ref: '#/components/schemas/Point'
                 timezone:
                   type: string
                   description: city timezone
                   example: Europe/Berlin
+    UpdateCity:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: object
+          required:
+            - id
+            - type
+            - attributes
+          properties:
+            id:
+              type: string
+              format: uuid
+              description: city id
+            type:
+              type: string
+              enum:
+                - update_city
+            attributes:
+              type: object
+              properties:
+                point:
+                  $ref: '#/components/schemas/Point'
+                status:
+                  type: string
+                  enum:
+                    - active
+                    - inactive
+                  description: city status
+                name:
+                  type: string
+                  description: city name
+                icon:
+                  type: string
+                  format: uri
+                  description: city icon uri
+                slug:
+                  type: string
+                  description: city slug
+                timezone:
+                  type: string
+                  description: city timezone
+    UpdateCityStatus:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: object
+          required:
+            - id
+            - type
+            - attributes
+          properties:
+            id:
+              type: string
+              format: uuid
+              description: city id
+            type:
+              type: string
+              enum:
+                - update_city
+            attributes:
+              type: object
+              required:
+                - status
+              properties:
+                status:
+                  type: string
+                  description: new city status
+    UpdateOwnActiveGov:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: object
+          required:
+            - id
+            - type
+            - attributes
+          properties:
+            id:
+              type: string
+              format: uuid
+              description: user id
+            type:
+              type: string
+              enum:
+                - update_own_active_gov
+            attributes:
+              type: object
+              properties:
+                label:
+                  type: string
+                  description: optional label for the user in this city
+    CreateMayor:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: object
+          required:
+            - type
+            - attributes
+          properties:
+            type:
+              type: string
+              enum:
+                - create_mayor
+            attributes:
+              type: object
+              required:
+                - city_id
+                - user_id
+                - label
+              properties:
+                city_id:
+                  type: string
+                  format: uuid
+                  description: city id
+                user_id:
+                  type: string
+                  format: uuid
+                  description: user id
+                label:
+                  type: string
+                  description: label for the user in this city
+                  example: City Department of Transportation
     CreateGov:
       type: object
       required:
@@ -94,23 +280,53 @@ components:
                 - city_id
                 - user_id
                 - role
-            properties:
-              city_id:
-                type: string
-                format: uuid
-                description: city id
-              user_id:
-                type: string
-                format: uuid
-                description: user id
-              role:
-                type: string
-                description: role of the user in this city
-                example: admin
-              label:
-                type: string
-                description: label for the user in this city
-                example: City Department of Transportation
+                - label
+              properties:
+                city_id:
+                  type: string
+                  format: uuid
+                  description: city id
+                user_id:
+                  type: string
+                  format: uuid
+                  description: user id
+                role:
+                  type: string
+                  description: role of the user in this city
+                  example: admin
+                label:
+                  type: string
+                  description: label for the user in this city
+                  example: City Department of Transportation
+    UpdateGov:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: object
+          required:
+            - id
+            - type
+            - attributes
+          properties:
+            id:
+              type: string
+              format: uuid
+              description: government id
+            type:
+              type: string
+              enum:
+                - update_gov
+            attributes:
+              type: object
+              properties:
+                active:
+                  type: boolean
+                  description: is the user active in this city
+                label:
+                  type: string
+                  description: optional label for the user in this city
     Country:
       type: object
       required:
@@ -275,14 +491,15 @@ components:
           enum:
             - gov
         attributes:
-          $ref: '#/components/schemas/GovData'
+          $ref: '#/components/schemas/GovAttributes'
     GovAttributes:
       type: object
       required:
         - user_id
         - city_id
-        - active
+        - status
         - role
+        - label
         - created_at
         - updated_at
       properties:
@@ -294,15 +511,19 @@ components:
           type: string
           format: uuid
           description: city id
-        active:
-          type: boolean
-          description: is the user active in this city
+        status:
+          type: string
+          description: status of the user in this city
         role:
           type: string
           description: role of the user in this city
         label:
           type: string
           description: optional label for the user in this city
+        deactivated_at:
+          type: string
+          format: date-time
+          description: record deactivation date
         created_at:
           type: string
           format: date-time
@@ -385,12 +606,12 @@ components:
       required:
         - latitude
         - longitude
-      properties: null
-      latitude:
-        type: number
-        format: float
-        description: latitude
-      longitude:
-        type: number
-        format: float
-        description: longitude
+      properties:
+        latitude:
+          type: number
+          format: double
+          description: latitude
+        longitude:
+          type: number
+          format: double
+          description: longitude

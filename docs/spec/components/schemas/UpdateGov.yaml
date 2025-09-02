@@ -1,0 +1,28 @@
+
+type: object
+required:
+  - data
+properties:
+  data:
+    type: object
+    required:
+      - id
+      - type
+      - attributes
+    properties:
+      id:
+        type: string
+        format: uuid
+        description: "government id"
+      type:
+        type: string
+        enum: [ update_gov ]
+      attributes:
+        type: object
+        properties:
+          active:
+            type: boolean
+            description: "is the user active in this city"
+          label:
+            type: string
+            description: "optional label for the user in this city"

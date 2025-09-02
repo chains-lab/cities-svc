@@ -6,13 +6,13 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Id** | **string** | gov id | 
 **Type** | **string** |  | 
-**Attributes** | [**GovData**](GovData.md) |  | 
+**Attributes** | [**GovAttributes**](GovAttributes.md) |  | 
 
 ## Methods
 
 ### NewGovData
 
-`func NewGovData(id string, type_ string, attributes GovData, ) *GovData`
+`func NewGovData(id string, type_ string, attributes GovAttributes, ) *GovData`
 
 NewGovData instantiates a new GovData object
 This constructor will assign default values to properties that have it defined,
@@ -69,20 +69,20 @@ SetType sets Type field to given value.
 
 ### GetAttributes
 
-`func (o *GovData) GetAttributes() GovData`
+`func (o *GovData) GetAttributes() GovAttributes`
 
 GetAttributes returns the Attributes field if non-nil, zero value otherwise.
 
 ### GetAttributesOk
 
-`func (o *GovData) GetAttributesOk() (*GovData, bool)`
+`func (o *GovData) GetAttributesOk() (*GovAttributes, bool)`
 
 GetAttributesOk returns a tuple with the Attributes field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetAttributes
 
-`func (o *GovData) SetAttributes(v GovData)`
+`func (o *GovData) SetAttributes(v GovAttributes)`
 
 SetAttributes sets Attributes field to given value.
 

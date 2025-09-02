@@ -34,7 +34,7 @@ func (m Adapter) Govs(govRoles ...string) func(http.Handler) http.Handler {
 				return
 			}
 
-			initiator, err := m.app.GetInitiator(ctx, cityID, user.ID)
+			initiator, err := m.app.GetActiveForInitiator(ctx, cityID, user.ID)
 			if err != nil {
 				m.log.WithError(err).Error("failed to get initiator")
 				switch {

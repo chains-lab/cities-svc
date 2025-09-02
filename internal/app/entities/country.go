@@ -96,14 +96,16 @@ func (c Country) GetByName(ctx context.Context, name string) (models.Country, er
 	return countryFromDb(country), nil
 }
 
-type SelectCountriesFilters struct {
+// Select methods for countries
+
+type FilterCountriesFilters struct {
 	Name     string
 	Statuses []string
 }
 
 func (c Country) Select(
 	ctx context.Context,
-	filters SelectCountriesFilters,
+	filters FilterCountriesFilters,
 	pag pagi.Request,
 	sort []pagi.SortField,
 ) ([]models.Country, pagi.Response, error) {

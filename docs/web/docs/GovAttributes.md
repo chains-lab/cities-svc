@@ -6,9 +6,10 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **UserId** | **string** | user id | 
 **CityId** | **string** | city id | 
-**Active** | **bool** | is the user active in this city | 
+**Status** | **string** | status of the user in this city | 
 **Role** | **string** | role of the user in this city | 
-**Label** | Pointer to **string** | optional label for the user in this city | [optional] 
+**Label** | **string** | optional label for the user in this city | 
+**DeactivatedAt** | Pointer to **time.Time** | record deactivation date | [optional] 
 **CreatedAt** | **time.Time** | record creation date | 
 **UpdatedAt** | **time.Time** | last update date | 
 
@@ -16,7 +17,7 @@ Name | Type | Description | Notes
 
 ### NewGovAttributes
 
-`func NewGovAttributes(userId string, cityId string, active bool, role string, createdAt time.Time, updatedAt time.Time, ) *GovAttributes`
+`func NewGovAttributes(userId string, cityId string, status string, role string, label string, createdAt time.Time, updatedAt time.Time, ) *GovAttributes`
 
 NewGovAttributes instantiates a new GovAttributes object
 This constructor will assign default values to properties that have it defined,
@@ -71,24 +72,24 @@ and a boolean to check if the value has been set.
 SetCityId sets CityId field to given value.
 
 
-### GetActive
+### GetStatus
 
-`func (o *GovAttributes) GetActive() bool`
+`func (o *GovAttributes) GetStatus() string`
 
-GetActive returns the Active field if non-nil, zero value otherwise.
+GetStatus returns the Status field if non-nil, zero value otherwise.
 
-### GetActiveOk
+### GetStatusOk
 
-`func (o *GovAttributes) GetActiveOk() (*bool, bool)`
+`func (o *GovAttributes) GetStatusOk() (*string, bool)`
 
-GetActiveOk returns a tuple with the Active field if it's non-nil, zero value otherwise
+GetStatusOk returns a tuple with the Status field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetActive
+### SetStatus
 
-`func (o *GovAttributes) SetActive(v bool)`
+`func (o *GovAttributes) SetStatus(v string)`
 
-SetActive sets Active field to given value.
+SetStatus sets Status field to given value.
 
 
 ### GetRole
@@ -130,11 +131,31 @@ and a boolean to check if the value has been set.
 
 SetLabel sets Label field to given value.
 
-### HasLabel
 
-`func (o *GovAttributes) HasLabel() bool`
+### GetDeactivatedAt
 
-HasLabel returns a boolean if a field has been set.
+`func (o *GovAttributes) GetDeactivatedAt() time.Time`
+
+GetDeactivatedAt returns the DeactivatedAt field if non-nil, zero value otherwise.
+
+### GetDeactivatedAtOk
+
+`func (o *GovAttributes) GetDeactivatedAtOk() (*time.Time, bool)`
+
+GetDeactivatedAtOk returns a tuple with the DeactivatedAt field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetDeactivatedAt
+
+`func (o *GovAttributes) SetDeactivatedAt(v time.Time)`
+
+SetDeactivatedAt sets DeactivatedAt field to given value.
+
+### HasDeactivatedAt
+
+`func (o *GovAttributes) HasDeactivatedAt() bool`
+
+HasDeactivatedAt returns a boolean if a field has been set.
 
 ### GetCreatedAt
 

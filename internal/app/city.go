@@ -35,38 +35,19 @@ func (a App) GetCityByID(ctx context.Context, ID uuid.UUID) (models.City, error)
 	return a.cities.GetByID(ctx, ID)
 }
 
-func (a App) SearchSupportedCitiesInCountry(
-	ctx context.Context,
-	Name string,
-	CountryID uuid.UUID,
-	pag pagi.Request,
-	sort []pagi.SortField,
-) ([]models.City, pagi.Response, error) {
-	paramToEntity := entities.SelectCityFilters{
-		Name:      &Name,
-		CountryID: &CountryID,
-		Status:    []string{constant.CityStatusCommunity, constant.CityStatusOfficial},
-	}
-	res, pagination, err := a.cities.SelectCities(ctx, paramToEntity, pag, sort)
-	if err != nil {
-		return nil, pagi.Response{}, err
-	}
-
-	return res, pagination, nil
-}
-
-type SelectCityFilters struct {
+type SearchCityFilters struct {
 	Name      *string
 	Status    []string
 	CountryID *uuid.UUID
 	Point     *orb.Point
+	Radius    *uint // in meters
 }
 
-// SelectCities searches for cities by name, country ID, and status with pagination and sorting.
+// SearchCities searches for cities by name, country ID, and status with pagination and sorting.
 // This method for sysadmin
-func (a App) SelectCities(
+func (a App) SearchCities(
 	ctx context.Context,
-	filters SelectCityFilters,
+	filters SearchCityFilters,
 	pag pagi.Request,
 	sort []pagi.SortField,
 ) ([]models.City, pagi.Response, error) {
@@ -80,10 +61,10 @@ func (a App) SelectCities(
 	if filters.CountryID != nil {
 		paramsToEntity.CountryID = filters.CountryID
 	}
-	if filters.Point != nil {
+	if filters.Point != nil && filters.Radius != nil {
 		paramsToEntity.Point = filters.Point
+		paramsToEntity.Radius = filters.Radius
 	}
-
 	return a.cities.SelectCities(ctx, paramsToEntity, pag, sort)
 }
 
@@ -91,11 +72,15 @@ func (a App) GetNearbyCity(ctx context.Context, point orb.Point) (models.City, e
 	return a.cities.GetByRadius(ctx, point, 15000) // 15 km
 }
 
+func (a App) GetCityBySlug(ctx context.Context, slug string) (models.City, error) {
+	return a.cities.GetBySlug(ctx, slug)
+}
+
 func (a App) UpdateCitySlug(ctx context.Context, cityID uuid.UUID, slug string) (models.City, error) {
 	c, err := a.cities.GetBySlug(ctx, slug)
 	switch {
 	case err == nil && c.ID != cityID:
-		return models.City{}, errx.ErrorCityAlreadyExists.Raise(fmt.Errorf("city with slug: %s already exists", slug))
+		return models.City{}, errx.ErrorCityAlreadyExistsWithThisSlug.Raise(fmt.Errorf("city with slug: %s already exists", slug))
 	case err != nil && !errors.Is(err, errx.ErrorCityNotFound):
 		return models.City{}, err
 	}
@@ -117,9 +102,11 @@ func (a App) UpdateCitySlug(ctx context.Context, cityID uuid.UUID, slug string) 
 }
 
 type UpdateCityParams struct {
-	Point    *orb.Point
 	Name     *string
+	Status   *string
+	Point    *orb.Point
 	Icon     *string
+	Slug     *string
 	Timezone *string
 }
 
@@ -134,18 +121,55 @@ func (a App) UpdateCity(ctx context.Context, cityID uuid.UUID, params UpdateCity
 		return models.City{}, err
 	}
 
-	var point *orb.Point
+	update := entities.UpdateCityParams{}
+
 	if params.Point != nil {
-		point = params.Point
+		if params.Point[0] < -180 || params.Point[0] > 180 || params.Point[1] < -90 || params.Point[1] > 90 {
+			return models.City{}, errx.ErrorInvalidPoint.Raise(
+				fmt.Errorf("invalid point coordinates: longitude %f, latitude %f", params.Point[0], params.Point[1]),
+			)
+		}
+		update.Point = params.Point
+	}
+	if params.Slug != nil {
+		_, err = a.cities.GetBySlug(ctx, *params.Slug)
+		if err == nil {
+			return models.City{}, errx.ErrorCityAlreadyExistsWithThisSlug.Raise(
+				fmt.Errorf("city with slug: %s already exists", *params.Slug),
+			)
+		} else if !errors.Is(err, errx.ErrorCityNotFound) {
+			return models.City{}, err
+		}
+
+		update.Slug = params.Slug
+	}
+	if params.Name != nil {
+		update.Name = params.Name
+	}
+	if params.Timezone != nil {
+		update.Timezone = params.Timezone
+	}
+	if params.Icon != nil {
+		update.Icon = params.Icon
+	}
+	if params.Status != nil {
+		err = constant.CheckCityStatus(*params.Status)
+		if err != nil {
+			return models.City{}, errx.ErrorInvalidCityStatus.Raise(
+				fmt.Errorf("failed to parse city status: %w", err),
+			)
+		}
+
+		update.Status = params.Status
 	}
 
-	err = a.cities.UpdateOne(ctx, cityID, entities.UpdateCityParams{
-		Point:     point,
-		Name:      params.Name,
-		Icon:      params.Icon,
-		Timezone:  params.Timezone,
-		UpdatedAt: time.Now().UTC(),
-	})
+	if update == (entities.UpdateCityParams{}) {
+		return a.cities.GetByID(ctx, cityID)
+	}
+
+	update.UpdatedAt = time.Now().UTC()
+
+	err = a.cities.UpdateOne(ctx, cityID, update)
 	if err != nil {
 		return models.City{}, err
 	}

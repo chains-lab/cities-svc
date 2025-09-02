@@ -17,20 +17,21 @@ properties:
           - city_id
           - user_id
           - role
-      properties:
-        city_id:
-          type: string
-          format: uuid
-          description: "city id"
-        user_id:
-          type: string
-          format: uuid
-          description: "user id"
-        role:
-          type: string
-          description: "role of the user in this city"
-          example: "admin"
-        label:
-          type: string
-          description: "label for the user in this city"
-          example: "City Department of Transportation"
+          - label
+        properties:
+          city_id:
+            type: string
+            format: uuid
+            description: "city id"
+          user_id:
+            type: string
+            format: uuid
+            description: "user id"
+          role:
+            type: string
+            description: "role of the user in this city"
+            example: "admin"
+          label:
+            type: string
+            description: "label for the user in this city"
+            example: "City Department of Transportation"

@@ -22,6 +22,6 @@ func NewAdapter(cfg config.Config, log logium.Logger, a *app.App) Adapter {
 	}
 }
 
-func (s Adapter) Log(r *http.Request) logium.Logger {
-	return s.log
+func (a Adapter) Log(r *http.Request) logium.Logger {
+	return a.log
 }

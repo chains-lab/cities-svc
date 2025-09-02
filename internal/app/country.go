@@ -16,7 +16,7 @@ import (
 func (a App) CreateCountry(ctx context.Context, name string) (models.Country, error) {
 	_, err := a.country.GetByName(ctx, name)
 	if err == nil {
-		return models.Country{}, errx.ErrorCountryAlreadyExists.Raise(err)
+		return models.Country{}, errx.ErrorCountryAlreadyExistsWithThisName.Raise(err)
 	}
 
 	country, err := a.country.Create(ctx, name, constant.CountryStatusUnsupported)
@@ -56,10 +56,20 @@ func (a App) SearchCountries(
 	pagination pagi.Request,
 	sort []pagi.SortField,
 ) ([]models.Country, pagi.Response, error) {
-	return a.country.Select(ctx, entities.SelectCountriesFilters{
-		Name:     filters.Name,
-		Statuses: filters.Statuses,
-	}, pagination, sort)
+	filterForEntities := entities.FilterCountriesFilters{}
+	if filters.Name != "" {
+		filterForEntities.Name = filters.Name
+	}
+	if len(filters.Statuses) > 0 {
+		for _, status := range filters.Statuses {
+			if err := constant.CheckCountryStatus(status); err != nil {
+				return nil, pagi.Response{}, errx.ErrorInvalidCountryStatus.Raise(
+					err,
+				)
+			}
+		}
+	}
+	return a.country.Select(ctx, filterForEntities, pagination, sort)
 }
 
 func (a App) SetCountryStatusSupported(ctx context.Context, countryID uuid.UUID) (models.Country, error) {
@@ -121,7 +131,7 @@ func (a App) SetCountryStatusDeprecated(ctx context.Context, countryID uuid.UUID
 		err = a.gov.UpdateMany(ctx, entities.UpdateGovsFilters{
 			CountryID: &country.ID,
 		}, entities.UpdateGovsParams{
-			Active: func(b bool) *bool { return &b }(false),
+			Status: func(s string) *string { return &s }(constant.GovStatusInactive),
 		})
 		if err != nil {
 			return err
@@ -163,7 +173,7 @@ func (a App) UpdateCountry(ctx context.Context, countryID uuid.UUID, params Upda
 	if params.Name != nil {
 		_, err = a.country.GetByName(ctx, *params.Name)
 		if err == nil {
-			return models.Country{}, errx.ErrorCountryAlreadyExists.Raise(
+			return models.Country{}, errx.ErrorCountryAlreadyExistsWithThisName.Raise(
 				err,
 			)
 		} else if !errors.Is(err, errx.ErrorCountryNotFound) {

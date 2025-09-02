@@ -1,0 +1,27 @@
+
+type: object
+required:
+  - data
+properties:
+  data:
+    type: object
+    required:
+      - id
+      - type
+      - attributes
+    properties:
+      id:
+        type: string
+        format: uuid
+        description: "country id"
+      type:
+        type: string
+        enum: [ update_country_status ]
+      attributes:
+        type: object
+        required:
+          - status
+        properties:
+          status:
+            type: string
+            description: "new country status"
