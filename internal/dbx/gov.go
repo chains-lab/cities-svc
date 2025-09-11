@@ -80,6 +80,7 @@ func (q GovQ) Insert(ctx context.Context, in Gov) error {
 	} else {
 		_, err = q.db.ExecContext(ctx, query, args...)
 	}
+
 	return err
 }
 
@@ -228,11 +229,21 @@ func (q GovQ) FilterRole(role ...string) GovQ {
 }
 
 func (q GovQ) FilterCountryID(countryID uuid.UUID) GovQ {
-	sub := sq.Select("id").From("city").Where(sq.Eq{"country_id": countryID})
-	q.selector = q.selector.Where("city_id IN (?)", sub)
-	q.updater = q.updater.Where("city_id IN (?)", sub)
-	q.deleter = q.deleter.Where("city_id IN (?)", sub)
-	q.counter = q.counter.Where("city_id IN (?)", sub)
+	join := fmt.Sprintf("LEFT JOIN %s c ON c.id = cg.city_id", citiesTable)
+	q.selector = q.selector.LeftJoin(join).Where(sq.Eq{"c.country_id": countryID})
+	q.counter = q.counter.LeftJoin(join).Where(sq.Eq{"c.country_id": countryID})
+
+	sub := sq.
+		Select("1").
+		From(citiesTable + " c").
+		Where("c.id = city_govs.city_id").
+		Where(sq.Eq{"c.country_id": countryID})
+
+	subSQL, subArgs, _ := sub.ToSql()
+
+	q.updater = q.updater.Where(sq.Expr("EXISTS ("+subSQL+")", subArgs...))
+	q.deleter = q.deleter.Where(sq.Expr("EXISTS ("+subSQL+")", subArgs...))
+
 	return q
 }
 

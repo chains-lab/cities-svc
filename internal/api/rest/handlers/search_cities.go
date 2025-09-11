@@ -21,7 +21,7 @@ func (a Adapter) SearchCities(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	q := r.URL.Query()
 
-	var filters app.SearchCityFilters
+	var filters app.FilterListParams
 
 	// name
 	if name := strings.TrimSpace(q.Get("name")); name != "" {
@@ -84,9 +84,10 @@ func (a Adapter) SearchCities(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		pt := orb.Point{lon, lat} // lon,lat
-		filters.Point = &pt
-		filters.Radius = &radiusM
+		filters.Location = &app.FilterListDistance{
+			Point:   orb.Point{lon, lat},
+			RadiusM: uint64(radiusM),
+		}
 	}
 
 	// пагинация
@@ -128,7 +129,7 @@ func (a Adapter) SearchCities(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// вызов бизнес-логики
-	cities, resp, err := a.app.SearchCities(ctx, filters, pag, sort)
+	cities, resp, err := a.app.ListCities(ctx, filters, pag, sort)
 	if err != nil {
 		a.log.WithError(err).Error("failed to search cities")
 		switch {

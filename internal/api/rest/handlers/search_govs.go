@@ -18,7 +18,7 @@ func (a Adapter) SearchGovs(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	q := r.URL.Query()
 
-	var filters app.SearchGovsFilters
+	var filters app.FiltersListParams
 
 	if cityID, err := uuid.Parse(q.Get("city_id")); err != nil {
 		filters.CityID = &cityID
@@ -69,7 +69,7 @@ func (a Adapter) SearchGovs(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	govs, resp, err := a.app.SearchGovs(ctx, filters, pag, sort)
+	govs, resp, err := a.app.ListGovs(ctx, filters, pag, sort)
 	if err != nil {
 		a.Log(r).WithError(err).Error("failed to search govs")
 

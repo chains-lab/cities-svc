@@ -6,7 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/chains-lab/cities-svc/internal/app/entities"
+	"github.com/chains-lab/cities-svc/internal/app/entities/gov"
+	"github.com/chains-lab/cities-svc/internal/app/entities/invites"
 	"github.com/chains-lab/cities-svc/internal/app/models"
 	"github.com/chains-lab/cities-svc/internal/constant"
 	"github.com/chains-lab/cities-svc/internal/errx"
@@ -26,7 +27,7 @@ func (a App) CreateInvite(ctx context.Context, initiatorID, userID uuid.UUID, ro
 		)
 	}
 
-	_, err = a.gov.Get(ctx, entities.GetGovFilters{
+	_, err = a.gov.Get(ctx, gov.GetGovFilters{
 		CityID: &initiator.CityID,
 		UserID: &userID,
 		Role:   &role,
@@ -52,7 +53,7 @@ func (a App) CreateInvite(ctx context.Context, initiatorID, userID uuid.UUID, ro
 		)
 	}
 
-	newInvite, token, err := a.invite.Create(ctx, entities.CreateInviteParams{
+	newInvite, token, err := a.invite.Create(ctx, invites.CreateInviteParams{
 		InitiatorID: initiatorID,
 		CityID:      initiator.CityID,
 		Role:        role,
@@ -63,34 +64,4 @@ func (a App) CreateInvite(ctx context.Context, initiatorID, userID uuid.UUID, ro
 	}
 
 	return newInvite, token, nil
-}
-
-func (a App) AnswerToInvite(ctx context.Context, initiatorID uuid.UUID, status, token string) (models.Invite, error) {
-	var invite models.Invite
-	var err error
-
-	txErr := a.transaction(func(ctx context.Context) error {
-		invite, err = a.invite.Answered(ctx, initiatorID, token, status)
-		if err != nil {
-			return err
-		}
-
-		if status == constant.InviteStatusAccepted {
-			_, err = a.gov.CreateGov(ctx, entities.CreateGovParams{
-				UserID: invite.ID,
-				CityID: invite.CityID,
-				Role:   invite.Role,
-			})
-			if err != nil {
-				return err
-			}
-		}
-
-		return nil
-	})
-	if txErr != nil {
-		return models.Invite{}, txErr
-	}
-
-	return invite, err
 }

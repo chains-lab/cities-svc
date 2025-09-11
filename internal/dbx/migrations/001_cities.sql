@@ -36,9 +36,7 @@ CREATE TABLE city (
     updated_at TIMESTAMP                    NOT NULL DEFAULT (now() AT TIME ZONE 'UTC')
 );
 
-
 -- +migrate Down
--- удаляем триггер до таблицы
 DROP TABLE IF EXISTS city CASCADE;
 DROP TABLE IF EXISTS countries CASCADE;
 

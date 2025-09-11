@@ -103,7 +103,7 @@ func (q CitiesQ) Insert(ctx context.Context, in City) error {
 	vals := map[string]any{
 		"id":         in.ID,
 		"country_id": in.CountryID,
-		"center":     sq.Expr("ST_SetSRID(ST_MakePoint(?, ?), 4326)::geography", in.Point[0], in.Point[1]),
+		"point":      sq.Expr("ST_SetSRID(ST_MakePoint(?, ?), 4326)::geography", in.Point[0], in.Point[1]),
 		"status":     in.Status,
 		"name":       in.Name,
 		"icon":       icon, // may be NULL

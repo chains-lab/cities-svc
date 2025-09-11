@@ -19,7 +19,7 @@ func (a Adapter) SearchCountries(w http.ResponseWriter, r *http.Request) {
 
 	q := r.URL.Query()
 
-	filters := app.SearchCountriesFilters{
+	filters := app.FilterCountriesListParams{
 		Name:     q.Get("name"),
 		Statuses: q["status"],
 	}
@@ -53,7 +53,7 @@ func (a Adapter) SearchCountries(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	countries, resp, err := a.app.SearchCountries(ctx, filters, pag, sort)
+	countries, resp, err := a.app.ListCountries(ctx, filters, pag, sort)
 	if err != nil {
 		a.log.WithError(err).Error("failed to search countries")
 		switch {
