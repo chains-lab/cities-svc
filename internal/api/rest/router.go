@@ -51,56 +51,62 @@ func (s *Service) Api(ctx context.Context, cfg config.Config, h Handlers) {
 
 		r.Route("/v1", func(r chi.Router) {
 			r.Route("/countries", func(r chi.Router) {
-				r.With(auth).With(sysadmin).Post("/", h.CreateCountry)
+				r.With(auth, sysadmin).Post("/", h.CreateCountry)
 
 				r.Get("/", h.SearchCountries)
 
 				r.Route("/{country_id}", func(r chi.Router) {
 					r.Get("/", h.GetCountry)
 
-					r.With(auth).With(sysadmin).Put("/", h.UpdateCountry)
-					r.With(auth).With(sysadmin).Put("/status", h.UpdateCountryStatus)
+					r.Group(func(r chi.Router) {
+						r.Use(auth, sysadmin)
+						r.Patch("/", h.UpdateCountry) // частичное обновление
+						r.Patch("/status", h.UpdateCountryStatus)
+					})
 				})
 			})
 
 			r.Route("/cities", func(r chi.Router) {
 				r.Get("/", h.SearchCities)
+				r.Get("/slug/{slug}", h.GetCityBySlug)
 
-				r.With(auth).With(sysadmin).Post("/", h.CreateCity)
+				r.With(auth, sysadmin).Post("/", h.CreateCity)
 
 				r.Route("/{city_id}", func(r chi.Router) {
 					r.Get("/", h.GetCity)
-					r.With(auth).Put("/", h.UpdateCity) //TODO
 
-					r.With(auth).Put("/status", h.UpdateCityStatus) //TODO
-				})
-			})
+					r.Group(func(r chi.Router) {
+						r.Use(auth)
+						r.Patch("/", h.UpdateCity)
+						r.Patch("/status", h.UpdateCityStatus)
+					})
 
-			r.Get("/slug/{slug}", h.GetCityBySlug)
+					r.Route("/govs", func(r chi.Router) {
+						r.Get("/", h.SearchGovs)
 
-			r.Route("/govs", func(r chi.Router) {
+						r.With(auth).Route("/invite", func(r chi.Router) {
+							r.Post("/", h.CreateInvite)
+							r.Post("/{token}", h.AnswerToInvite)
+						})
 
-				r.Get("/", h.SearchGovs)
+						r.Route("/mayor", func(r chi.Router) {
+							r.Get("/", h.GetCityMayor) // get current mayor
+							r.With(auth, sysadmin).Post("/", h.CreateMayor)
+							r.With(auth).Post("/transfer", h.TransferMayor)
+						})
 
-				r.With(auth).Route("/invite", func(r chi.Router) {
-					r.Post("/", h.CreateInvite)
-					r.Post("/{token}", h.AnswerToInvite)
-				})
+						r.With(auth).Route("/me", func(r chi.Router) {
+							r.Get("/", h.GetOwnGov)
+							r.Put("/", h.UpdateOwnGov)
+							r.Delete("/", h.RefuseOwnGov)
+						})
 
-				r.Route("/{user_id}", func(r chi.Router) {
-					r.Get("/", h.GetGov)
-				})
+						r.Route("/{user_id}", func(r chi.Router) {
+							r.Get("/", h.GetGov)
+							r.With(auth).Delete("/", h.DeleteGov)
+						})
 
-				r.Route("/mayor", func(r chi.Router) {
-					r.With(auth).With(sysadmin).Post("/", h.CreateMayor)
-
-					r.With(auth).Post("/transfer", h.TransferMayor)
-				})
-
-				r.With(auth).Route("/me", func(r chi.Router) {
-					r.Get("/", h.GetOwnGov)
-					r.Put("/", h.UpdateOwnGov)
-					r.Delete("/", h.RefuseOwnGov)
+					})
 				})
 			})
 		})
