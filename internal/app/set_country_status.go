@@ -8,7 +8,7 @@ import (
 	"github.com/chains-lab/cities-svc/internal/app/entities/country"
 	"github.com/chains-lab/cities-svc/internal/app/entities/gov"
 	"github.com/chains-lab/cities-svc/internal/app/models"
-	"github.com/chains-lab/cities-svc/internal/constant"
+	"github.com/chains-lab/enum"
 	"github.com/google/uuid"
 )
 
@@ -18,16 +18,22 @@ func (a App) SetCountryStatusSupported(ctx context.Context, countryID uuid.UUID)
 		return models.Country{}, err
 	}
 
-	countryStatus := constant.CountryStatusSupported
+	countryStatus := enum.CountryStatusSupported
 
-	cou, err := a.country.Update(ctx, c.ID, country.UpdateCountryParams{
-		Status: &countryStatus,
+	var cou models.Country
+	txErr := a.transaction(func(ctx context.Context) error {
+		cou, err = a.country.Update(ctx, c.ID, country.UpdateCountryParams{
+			Status: &countryStatus,
+		})
+		if err != nil {
+			return err
+		}
+
+		return nil
 	})
-	if err != nil {
-		return models.Country{}, err
+	if txErr != nil {
+		return models.Country{}, txErr
 	}
-
-	//TODO in future kafka event about country status change
 
 	return cou, nil
 }
@@ -39,8 +45,8 @@ func (a App) SetCountryStatusDeprecated(ctx context.Context, countryID uuid.UUID
 	}
 
 	updatedAt := time.Now().UTC()
-	countryStatus := constant.CountryStatusDeprecated
-	cityStatus := constant.CountryStatusDeprecated
+	countryStatus := enum.CountryStatusDeprecated
+	cityStatus := enum.CountryStatusDeprecated
 
 	txErr := a.transaction(func(ctx context.Context) error {
 		if _, err = a.country.Update(ctx, c.ID, country.UpdateCountryParams{
@@ -51,7 +57,7 @@ func (a App) SetCountryStatusDeprecated(ctx context.Context, countryID uuid.UUID
 
 		err = a.cities.UpdateMany(ctx, city.UpdateCitiesFilters{
 			CountryID: &c.ID,
-			Status:    []string{constant.CityStatusOfficial, constant.CityStatusCommunity},
+			Status:    []string{enum.CityStatusOfficial, enum.CityStatusCommunity},
 		}, city.UpdateCitiesParams{
 			Status:    &cityStatus,
 			UpdatedAt: updatedAt,

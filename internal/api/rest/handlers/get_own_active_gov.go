@@ -1,12 +1,14 @@
 package handlers
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/chains-lab/ape"
 	"github.com/chains-lab/ape/problems"
 	"github.com/chains-lab/cities-svc/internal/api/rest/meta"
 	"github.com/chains-lab/cities-svc/internal/api/rest/responses"
+	"github.com/chains-lab/cities-svc/internal/errx"
 )
 
 func (a Adapter) GetOwnGov(w http.ResponseWriter, r *http.Request) {
@@ -23,6 +25,8 @@ func (a Adapter) GetOwnGov(w http.ResponseWriter, r *http.Request) {
 		a.Log(r).WithError(err).Error("failed to get own active gov")
 
 		switch {
+		case errors.Is(err, errx.ErrorInitiatorIsNotActiveCityGov):
+			ape.RenderErr(w, problems.NotFound("no active city government for the user"))
 		default:
 			ape.RenderErr(w, problems.InternalError())
 		}

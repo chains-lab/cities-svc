@@ -8,9 +8,9 @@ import (
 	"time"
 
 	"github.com/chains-lab/cities-svc/internal/app/models"
-	"github.com/chains-lab/cities-svc/internal/constant"
 	"github.com/chains-lab/cities-svc/internal/dbx"
 	"github.com/chains-lab/cities-svc/internal/errx"
+	"github.com/chains-lab/enum"
 	"github.com/google/uuid"
 	"github.com/paulmach/orb"
 )
@@ -53,7 +53,7 @@ func (c City) UpdateOne(ctx context.Context, cityID uuid.UUID, params UpdateCity
 	}
 
 	if params.Status != nil {
-		err = constant.CheckCityStatus(*params.Status)
+		err = enum.CheckCityStatus(*params.Status)
 		if err != nil {
 			return models.City{}, errx.ErrorInvalidCityStatus.Raise(
 				fmt.Errorf("failed to invalid city status, cause: %s", err),
@@ -146,7 +146,7 @@ func (c City) UpdateMany(ctx context.Context, filters UpdateCitiesFilters, param
 	}
 	if filters.Status != nil {
 		for _, s := range filters.Status {
-			err := constant.CheckCityStatus(s)
+			err := enum.CheckCityStatus(s)
 			if err != nil {
 				return errx.ErrorInvalidCityStatus.Raise(
 					fmt.Errorf("failed to invalid city status: %s, cause: %w", s, err),
@@ -167,7 +167,7 @@ func (c City) UpdateMany(ctx context.Context, filters UpdateCitiesFilters, param
 	}
 
 	if params.Status != nil {
-		err := constant.CheckCityStatus(*params.Status)
+		err := enum.CheckCityStatus(*params.Status)
 		if err != nil {
 			return errx.ErrorInvalidCityStatus.Raise(
 				fmt.Errorf("failed to invalid city status: %s, cause: %w", *params.Status, err),

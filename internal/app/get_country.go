@@ -8,10 +8,5 @@ import (
 )
 
 func (a App) GetCountryByID(ctx context.Context, ID uuid.UUID) (models.Country, error) {
-	country, err := a.country.GetByID(ctx, ID)
-	if err != nil {
-		return models.Country{}, err
-	}
-
-	return country, nil
+	return a.country.GetByID(ctx, ID)
 }

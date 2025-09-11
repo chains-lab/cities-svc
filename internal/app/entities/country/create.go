@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"github.com/chains-lab/cities-svc/internal/app/models"
-	"github.com/chains-lab/cities-svc/internal/constant"
 	"github.com/chains-lab/cities-svc/internal/dbx"
 	"github.com/chains-lab/cities-svc/internal/errx"
+	"github.com/chains-lab/enum"
 	"github.com/google/uuid"
 )
 
@@ -21,7 +21,7 @@ func (c Country) Create(ctx context.Context, name string, status string) (models
 		return models.Country{}, errx.ErrorCountryAlreadyExistsWithThisName.Raise(err)
 	}
 
-	err = constant.CheckCountryStatus(status)
+	err = enum.CheckCountryStatus(status)
 	if err != nil {
 		return models.Country{}, errx.ErrorInvalidCountryStatus.Raise(
 			fmt.Errorf("failed to parse country status: %w", err),
@@ -31,7 +31,7 @@ func (c Country) Create(ctx context.Context, name string, status string) (models
 	err = c.countryQ.New().Insert(ctx, dbx.Country{
 		ID:        ID,
 		Name:      name,
-		Status:    constant.CountryStatusSupported,
+		Status:    enum.CountryStatusSupported,
 		CreatedAt: now,
 		UpdatedAt: now,
 	})
@@ -44,7 +44,7 @@ func (c Country) Create(ctx context.Context, name string, status string) (models
 	return models.Country{
 		ID:        ID,
 		Name:      name,
-		Status:    constant.CountryStatusSupported,
+		Status:    enum.CountryStatusSupported,
 		CreatedAt: now,
 		UpdatedAt: now,
 	}, nil

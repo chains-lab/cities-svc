@@ -11,22 +11,14 @@ func Invite(m models.Invite) resources.Invite {
 			Id:   m.ID.String(),
 			Type: resources.InviteType,
 			Attributes: resources.InviteDataAttributes{
-				Status:      m.Status,
-				Role:        m.Role,
-				CityId:      m.CityID.String(),
-				InitiatorId: m.InitiatorID.String(),
-				ExpiresAt:   m.ExpiresAt,
-				CreatedAt:   m.CreatedAt,
+				Status:    m.Status,
+				Role:      m.Role,
+				CityId:    m.CityID.String(),
+				Token:     m.Token,
+				ExpiresAt: m.ExpiresAt,
+				CreatedAt: m.CreatedAt,
 			},
 		},
-	}
-
-	if m.UserID != nil {
-		userIDStr := m.UserID.String()
-		resp.Data.Attributes.UserId = &userIDStr
-	}
-	if m.AnsweredAt != nil {
-		resp.Data.Attributes.AnsweredAt = m.AnsweredAt
 	}
 
 	return resp

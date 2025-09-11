@@ -47,9 +47,6 @@ func (a Adapter) UpdateCity(w http.ResponseWriter, r *http.Request) {
 	if req.Data.Attributes.Name != nil {
 		param.Name = req.Data.Attributes.Name
 	}
-	if req.Data.Attributes.Status != nil {
-		param.Status = req.Data.Attributes.Status
-	}
 	if req.Data.Attributes.Point != nil {
 		param.Point = &orb.Point{
 			req.Data.Attributes.Point.Longitude,
@@ -69,7 +66,6 @@ func (a Adapter) UpdateCity(w http.ResponseWriter, r *http.Request) {
 	city, err := a.app.UpdateCity(r.Context(), cityID, param)
 	if err != nil {
 		a.Log(r).WithError(err).Error("failed to update city")
-
 		switch {
 		case errors.Is(err, errx.ErrorCityNotFound):
 			ape.RenderErr(w, problems.NotFound("city not found"))
@@ -86,6 +82,8 @@ func (a Adapter) UpdateCity(w http.ResponseWriter, r *http.Request) {
 		default:
 			ape.RenderErr(w, problems.InternalError())
 		}
+
+		return
 	}
 
 	ape.Render(w, http.StatusOK, responses.City(city))

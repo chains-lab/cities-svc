@@ -28,7 +28,6 @@ CREATE TABLE invites (
     status       status NOT NULL DEFAULT 'sent',
     role         city_gov_roles NOT NULL,
     city_id      UUID NOT NULL REFERENCES city(id) ON DELETE CASCADE,
-    initiator_id UUID NOT NULL,
     user_id      UUID,
     answered_at  TIMESTAMP,
     expires_at   TIMESTAMP NOT NULL,

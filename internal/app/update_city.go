@@ -11,7 +11,6 @@ import (
 
 type UpdateCityParams struct {
 	Name     *string
-	Status   *string
 	Point    *orb.Point
 	Icon     *string
 	Slug     *string
@@ -35,9 +34,6 @@ func (a App) UpdateCity(ctx context.Context, cityID uuid.UUID, params UpdateCity
 	}
 	if params.Icon != nil {
 		update.Icon = params.Icon
-	}
-	if params.Status != nil {
-		update.Status = params.Status
 	}
 
 	return a.cities.UpdateOne(ctx, cityID, update)

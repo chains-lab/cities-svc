@@ -7,9 +7,7 @@ Name | Type | Description | Notes
 **Status** | **string** | status of the invite | 
 **Role** | **string** | role of the user in this city | 
 **CityId** | **string** | city id | 
-**InitiatorId** | **string** | user id of the person who sent the invite | 
-**UserId** | Pointer to **string** | user id of the person who received the invite | [optional] 
-**AnsweredAt** | Pointer to **time.Time** | timestamp when the invite was answered | [optional] 
+**Token** | **string** | unique token for the invite | 
 **ExpiresAt** | **time.Time** | timestamp when the invite will expire | 
 **CreatedAt** | **time.Time** | timestamp when the invite was created | 
 
@@ -17,7 +15,7 @@ Name | Type | Description | Notes
 
 ### NewInviteDataAttributes
 
-`func NewInviteDataAttributes(status string, role string, cityId string, initiatorId string, expiresAt time.Time, createdAt time.Time, ) *InviteDataAttributes`
+`func NewInviteDataAttributes(status string, role string, cityId string, token string, expiresAt time.Time, createdAt time.Time, ) *InviteDataAttributes`
 
 NewInviteDataAttributes instantiates a new InviteDataAttributes object
 This constructor will assign default values to properties that have it defined,
@@ -92,75 +90,25 @@ and a boolean to check if the value has been set.
 SetCityId sets CityId field to given value.
 
 
-### GetInitiatorId
+### GetToken
 
-`func (o *InviteDataAttributes) GetInitiatorId() string`
+`func (o *InviteDataAttributes) GetToken() string`
 
-GetInitiatorId returns the InitiatorId field if non-nil, zero value otherwise.
+GetToken returns the Token field if non-nil, zero value otherwise.
 
-### GetInitiatorIdOk
+### GetTokenOk
 
-`func (o *InviteDataAttributes) GetInitiatorIdOk() (*string, bool)`
+`func (o *InviteDataAttributes) GetTokenOk() (*string, bool)`
 
-GetInitiatorIdOk returns a tuple with the InitiatorId field if it's non-nil, zero value otherwise
+GetTokenOk returns a tuple with the Token field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetInitiatorId
+### SetToken
 
-`func (o *InviteDataAttributes) SetInitiatorId(v string)`
+`func (o *InviteDataAttributes) SetToken(v string)`
 
-SetInitiatorId sets InitiatorId field to given value.
+SetToken sets Token field to given value.
 
-
-### GetUserId
-
-`func (o *InviteDataAttributes) GetUserId() string`
-
-GetUserId returns the UserId field if non-nil, zero value otherwise.
-
-### GetUserIdOk
-
-`func (o *InviteDataAttributes) GetUserIdOk() (*string, bool)`
-
-GetUserIdOk returns a tuple with the UserId field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetUserId
-
-`func (o *InviteDataAttributes) SetUserId(v string)`
-
-SetUserId sets UserId field to given value.
-
-### HasUserId
-
-`func (o *InviteDataAttributes) HasUserId() bool`
-
-HasUserId returns a boolean if a field has been set.
-
-### GetAnsweredAt
-
-`func (o *InviteDataAttributes) GetAnsweredAt() time.Time`
-
-GetAnsweredAt returns the AnsweredAt field if non-nil, zero value otherwise.
-
-### GetAnsweredAtOk
-
-`func (o *InviteDataAttributes) GetAnsweredAtOk() (*time.Time, bool)`
-
-GetAnsweredAtOk returns a tuple with the AnsweredAt field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetAnsweredAt
-
-`func (o *InviteDataAttributes) SetAnsweredAt(v time.Time)`
-
-SetAnsweredAt sets AnsweredAt field to given value.
-
-### HasAnsweredAt
-
-`func (o *InviteDataAttributes) HasAnsweredAt() bool`
-
-HasAnsweredAt returns a boolean if a field has been set.
 
 ### GetExpiresAt
 

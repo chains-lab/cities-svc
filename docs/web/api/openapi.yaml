@@ -655,17 +655,8 @@ components:
           description: city id
           format: uuid
           type: string
-        initiator_id:
-          description: user id of the person who sent the invite
-          format: uuid
-          type: string
-        user_id:
-          description: user id of the person who received the invite
-          format: uuid
-          type: string
-        answered_at:
-          description: timestamp when the invite was answered
-          format: date-time
+        token:
+          description: unique token for the invite
           type: string
         expires_at:
           description: timestamp when the invite will expire
@@ -679,9 +670,9 @@ components:
       - city_id
       - created_at
       - expires_at
-      - initiator_id
       - role
       - status
+      - token
     Invite_data:
       properties:
         id:

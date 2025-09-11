@@ -8,7 +8,6 @@ import (
 	"github.com/chains-lab/cities-svc/internal/app/entities/city"
 	"github.com/chains-lab/cities-svc/internal/app/entities/country"
 	"github.com/chains-lab/cities-svc/internal/app/entities/gov"
-	"github.com/chains-lab/cities-svc/internal/app/entities/invites"
 	"github.com/chains-lab/cities-svc/internal/config"
 	"github.com/chains-lab/cities-svc/internal/dbx"
 )
@@ -17,7 +16,6 @@ type App struct {
 	country country.Country
 	cities  city.City
 	gov     gov.Gov
-	invite  invites.Invite
 
 	db *sql.DB
 }
@@ -31,7 +29,7 @@ func NewApp(cfg config.Config) (App, error) {
 	return App{
 		country: country.NewCountry(pg),
 		cities:  city.NewCity(pg),
-		gov:     gov.NewGov(pg),
+		gov:     gov.NewGov(pg, cfg),
 
 		db: pg,
 	}, nil

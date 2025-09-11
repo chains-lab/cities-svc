@@ -8,9 +8,9 @@ import (
 	"time"
 
 	"github.com/chains-lab/cities-svc/internal/app/models"
-	"github.com/chains-lab/cities-svc/internal/constant"
 	"github.com/chains-lab/cities-svc/internal/dbx"
 	"github.com/chains-lab/cities-svc/internal/errx"
+	"github.com/chains-lab/enum"
 	"github.com/google/uuid"
 )
 
@@ -48,7 +48,7 @@ func (c Country) Update(ctx context.Context, ID uuid.UUID, params UpdateCountryP
 		stmt.Name = params.Name
 	}
 	if params.Status != nil {
-		err := constant.CheckCountryStatus(*params.Status)
+		err := enum.CheckCountryStatus(*params.Status)
 		if err != nil {
 			return models.Country{}, errx.ErrorInvalidCountryStatus.Raise(
 				fmt.Errorf("failed to invalid country status, cause: %w", err),

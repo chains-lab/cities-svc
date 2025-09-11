@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"github.com/chains-lab/cities-svc/internal/app/models"
-	"github.com/chains-lab/cities-svc/internal/constant"
 	"github.com/chains-lab/cities-svc/internal/dbx"
 	"github.com/chains-lab/cities-svc/internal/errx"
+	"github.com/chains-lab/enum"
 	"github.com/google/uuid"
 	"github.com/paulmach/orb"
 )
@@ -42,7 +42,7 @@ func (c City) Create(ctx context.Context, params CreateCityParams) (models.City,
 	resp := models.City{
 		ID:        cityID,
 		CountryID: params.CountryID,
-		Status:    constant.CityStatusCommunity,
+		Status:    enum.CityStatusCommunity,
 		Timezone:  params.Timezone,
 		CreatedAt: now,
 		UpdatedAt: now,
@@ -52,7 +52,7 @@ func (c City) Create(ctx context.Context, params CreateCityParams) (models.City,
 		ID:        cityID,
 		CountryID: params.CountryID,
 		Point:     params.Point,
-		Status:    constant.CityStatusCommunity,
+		Status:    enum.CityStatusCommunity,
 		Name:      params.Name,
 		Timezone:  params.Timezone,
 		CreatedAt: now,

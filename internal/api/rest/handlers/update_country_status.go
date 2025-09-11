@@ -10,8 +10,8 @@ import (
 	"github.com/chains-lab/cities-svc/internal/api/rest/requests"
 	"github.com/chains-lab/cities-svc/internal/api/rest/responses"
 	"github.com/chains-lab/cities-svc/internal/app/models"
-	"github.com/chains-lab/cities-svc/internal/constant"
 	"github.com/chains-lab/cities-svc/internal/errx"
+	"github.com/chains-lab/enum"
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 )
@@ -46,15 +46,15 @@ func (a Adapter) UpdateCountryStatus(w http.ResponseWriter, r *http.Request) {
 	var country models.Country
 
 	switch req.Data.Attributes.Status {
-	case constant.CountryStatusSupported:
+	case enum.CountryStatusSupported:
 		country, err = a.app.SetCountryStatusSupported(r.Context(), countryID)
-	case constant.CountryStatusDeprecated:
+	case enum.CountryStatusDeprecated:
 		country, err = a.app.SetCountryStatusDeprecated(r.Context(), countryID)
 	default:
 		a.Log(r).Error("invalid country status")
 		ape.RenderErr(w, problems.InvalidPointer("data/attributes/status",
 			fmt.Errorf("invalid country status for update, allowed values are: %s, %s",
-				constant.CountryStatusSupported, constant.CountryStatusDeprecated),
+				enum.CountryStatusSupported, enum.CountryStatusDeprecated),
 		),
 		)
 

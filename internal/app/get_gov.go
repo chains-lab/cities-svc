@@ -5,6 +5,7 @@ import (
 
 	"github.com/chains-lab/cities-svc/internal/app/entities/gov"
 	"github.com/chains-lab/cities-svc/internal/app/models"
+	"github.com/chains-lab/enum"
 	"github.com/google/uuid"
 )
 
@@ -13,22 +14,30 @@ func (a App) GetInitiatorGov(ctx context.Context, initiatorID uuid.UUID) (models
 }
 
 func (a App) Get(ctx context.Context, userID uuid.UUID) (models.Gov, error) {
-	return a.gov.Get(ctx, gov.GetGovFilters{
+	return a.gov.GetGov(ctx, gov.GetGovFilters{
 		UserID: &userID,
 	})
 
 }
 
-func (a App) GetForCity(ctx context.Context, cityID, userID uuid.UUID) (models.Gov, error) {
-	return a.gov.Get(ctx, gov.GetGovFilters{
-		CityID: &cityID,
-		UserID: &userID,
-	})
-}
+//func (a App) GetForCity(ctx context.Context, cityID, userID uuid.UUID) (models.Gov, error) {
+//	return a.gov.GetGov(ctx, gov.GetGovFilters{
+//		CityID: &cityID,
+//		UserID: &userID,
+//	})
+//}
+//
+//func (a App) GetForCityAndRole(ctx context.Context, userID, cityID uuid.UUID, role string) (models.Gov, error) {
+//	return a.gov.GetGov(ctx, gov.GetGovFilters{
+//		UserID: &userID,
+//		CityID: &cityID,
+//		Role:   &role,
+//	})
+//}
 
-func (a App) GetForCityAndRole(ctx context.Context, userID, cityID uuid.UUID, role string) (models.Gov, error) {
-	return a.gov.Get(ctx, gov.GetGovFilters{
-		UserID: &userID,
+func (a App) GetCityMayor(ctx context.Context, cityID uuid.UUID) (models.Gov, error) {
+	role := enum.CityGovRoleMayor
+	return a.gov.GetGov(ctx, gov.GetGovFilters{
 		CityID: &cityID,
 		Role:   &role,
 	})

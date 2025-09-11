@@ -10,4 +10,4 @@ var ErrorInviteAlreadyAnswered = ape.DeclareError("INVITE_ALREADY_ANSWERED")
 
 var ErrorInviteExpired = ape.DeclareError("INVITE_EXPIRED")
 
-var ErrorInviteStatusInvalid = ape.DeclareError("INVITE_STATUS_INVALID")
+var ErrorMayorInviteAlreadyExists = ape.DeclareError("MAYOR_INVITE_ALREADY_EXISTS")

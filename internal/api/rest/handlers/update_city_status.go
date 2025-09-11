@@ -10,8 +10,8 @@ import (
 	"github.com/chains-lab/cities-svc/internal/api/rest/requests"
 	"github.com/chains-lab/cities-svc/internal/api/rest/responses"
 	"github.com/chains-lab/cities-svc/internal/app/models"
-	"github.com/chains-lab/cities-svc/internal/constant"
 	"github.com/chains-lab/cities-svc/internal/errx"
+	"github.com/chains-lab/enum"
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 )
@@ -44,17 +44,17 @@ func (a Adapter) UpdateCityStatus(w http.ResponseWriter, r *http.Request) {
 
 	var city models.City
 	switch req.Data.Attributes.Status {
-	case constant.CityStatusOfficial:
+	case enum.CityStatusOfficial:
 		city, err = a.app.SetCityStatusOfficial(r.Context(), cityID)
-	case constant.CityStatusCommunity:
+	case enum.CityStatusCommunity:
 		city, err = a.app.SetCityStatusCommunity(r.Context(), cityID)
-	case constant.CityStatusDeprecated:
+	case enum.CityStatusDeprecated:
 		city, err = a.app.SetCityStatusDeprecated(r.Context(), cityID)
 	default:
 		a.Log(r).Error("invalid city status")
 		ape.RenderErr(w, problems.InvalidPointer("data/attributes/status",
 			fmt.Errorf("invalid city status for update, allowed values are: %s, %s, %s",
-				constant.CityStatusOfficial, constant.CityStatusCommunity, constant.CityStatusDeprecated),
+				enum.CityStatusOfficial, enum.CityStatusCommunity, enum.CityStatusDeprecated),
 		),
 		)
 	}

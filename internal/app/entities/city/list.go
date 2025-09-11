@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/chains-lab/cities-svc/internal/app/models"
-	"github.com/chains-lab/cities-svc/internal/constant"
 	"github.com/chains-lab/cities-svc/internal/errx"
+	"github.com/chains-lab/enum"
 	"github.com/chains-lab/pagi"
 	"github.com/google/uuid"
 	"github.com/paulmach/orb"
@@ -50,7 +50,7 @@ func (c City) List(
 	}
 
 	for _, s := range filters.Status {
-		err := constant.CheckCityStatus(s)
+		err := enum.CheckCityStatus(s)
 		if err != nil {
 			return nil, pagi.Response{}, errx.ErrorInvalidCityStatus.Raise(
 				fmt.Errorf("failed to invalid city status: %s, cause: %w", s, err),

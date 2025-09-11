@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/chains-lab/cities-svc/internal/app/models"
-	"github.com/chains-lab/cities-svc/internal/constant"
 	"github.com/chains-lab/cities-svc/internal/errx"
+	"github.com/chains-lab/enum"
 	"github.com/chains-lab/pagi"
 	"github.com/google/uuid"
 )
@@ -16,7 +16,7 @@ type FiltersListParams struct {
 	Role   []string
 }
 
-func (g Gov) SelectGovs(
+func (g Gov) ListGovs(
 	ctx context.Context,
 	filters FiltersListParams,
 	pag pagi.Request,
@@ -42,7 +42,7 @@ func (g Gov) SelectGovs(
 	}
 	if filters.Role != nil && len(filters.Role) > 0 {
 		for _, r := range filters.Role {
-			err := constant.CheckCityGovRole(r)
+			err := enum.CheckCityGovRole(r)
 			if err != nil {
 				return nil, pagi.Response{}, errx.ErrorInvalidGovRole.Raise(
 					fmt.Errorf("invalid city gov role, cause: %w", err),

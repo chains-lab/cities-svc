@@ -14,15 +14,14 @@ const invitesTable = "invites"
 
 // Invite — модель строки из invites.
 type Invite struct {
-	ID          uuid.UUID     `db:"id"`
-	Status      string        `db:"status"` // 'sent' | 'accepted' | 'rejected'
-	Role        string        `db:"role"`   // enum employee_roles
-	CityID      uuid.UUID     `db:"city_id"`
-	InitiatorID uuid.UUID     `db:"initiator_id"` // пользователь-инициатор (из внешнего сервиса)
-	UserID      uuid.NullUUID `db:"user_id"`      // может быть NULL до акцепта
-	AnsweredAt  sql.NullTime  `db:"answered_at"`  // NULL для sent
-	ExpiresAt   time.Time     `db:"expires_at"`
-	CreatedAt   time.Time     `db:"created_at"`
+	ID         uuid.UUID     `db:"id"`
+	Status     string        `db:"status"` // 'sent' | 'accepted' | 'rejected'
+	Role       string        `db:"role"`   // enum employee_roles
+	CityID     uuid.UUID     `db:"city_id"`
+	UserID     uuid.NullUUID `db:"user_id"`     // может быть NULL до акцепта
+	AnsweredAt sql.NullTime  `db:"answered_at"` // NULL для sent
+	ExpiresAt  time.Time     `db:"expires_at"`
+	CreatedAt  time.Time     `db:"created_at"`
 }
 
 // InviteQ — билдер запросов к invites (в стиле твоих Q-структур).
@@ -64,12 +63,11 @@ func (q InviteQ) New() InviteQ { return NewInviteQ(q.db) }
 // created_at/updated_at можно не заполнять — если в схеме стоят DEFAULT, но ты их явно задаёшь в других местах.
 func (q InviteQ) Insert(ctx context.Context, in Invite) error {
 	values := map[string]interface{}{
-		"id":           in.ID,
-		"status":       in.Status,
-		"role":         in.Role,
-		"city_id":      in.CityID,
-		"initiator_id": in.InitiatorID,
-		"expires_at":   in.ExpiresAt,
+		"id":         in.ID,
+		"status":     in.Status,
+		"role":       in.Role,
+		"city_id":    in.CityID,
+		"expires_at": in.ExpiresAt,
 	}
 
 	if in.UserID.Valid {
@@ -118,7 +116,6 @@ func (q InviteQ) Get(ctx context.Context) (Invite, error) {
 		&m.Status,
 		&m.Role,
 		&m.CityID,
-		&m.InitiatorID,
 		&userID,
 		&answeredAt,
 		&m.ExpiresAt,
@@ -165,7 +162,6 @@ func (q InviteQ) Select(ctx context.Context) ([]Invite, error) {
 			&m.Status,
 			&m.Role,
 			&m.CityID,
-			&m.InitiatorID,
 			&userID,
 			&answeredAt,
 			&m.ExpiresAt,
@@ -186,13 +182,12 @@ func (q InviteQ) Select(ctx context.Context) ([]Invite, error) {
 
 // UpdateInviteParams — частичное обновление (DAL без бизнес-логики).
 type UpdateInviteParams struct {
-	Status      *string
-	Role        *string
-	CityID      *uuid.UUID
-	InitiatorID *uuid.UUID
-	UserID      *uuid.NullUUID // двойной указатель, чтобы различать "не менять", "установить", "обнулить(nil)"
-	AnsweredAt  *sql.NullTime  // аналогично: nil — не менять; *nil — записать NULL; *&t — записать t
-	ExpiresAt   *time.Time
+	Status     *string
+	Role       *string
+	CityID     *uuid.UUID
+	UserID     *uuid.NullUUID // двойной указатель, чтобы различать "не менять", "установить", "обнулить(nil)"
+	AnsweredAt *sql.NullTime  // аналогично: nil — не менять; *nil — записать NULL; *&t — записать t
+	ExpiresAt  *time.Time
 }
 
 // Update — выполнит UPDATE по текущим фильтрам.
@@ -207,9 +202,6 @@ func (q InviteQ) Update(ctx context.Context, p UpdateInviteParams) error {
 	}
 	if p.CityID != nil {
 		updates["city_id"] = *p.CityID
-	}
-	if p.InitiatorID != nil {
-		updates["initiator_id"] = *p.InitiatorID
 	}
 	if p.UserID != nil { // задано желание изменить user_id
 		if p.UserID.Valid {
@@ -274,14 +266,6 @@ func (q InviteQ) FilterCityID(cityID uuid.UUID) InviteQ {
 	q.updater = q.updater.Where(sq.Eq{"city_id": cityID})
 	q.deleter = q.deleter.Where(sq.Eq{"city_id": cityID})
 	q.counter = q.counter.Where(sq.Eq{"city_id": cityID})
-	return q
-}
-
-func (q InviteQ) FilterInitiatorID(initiatorID uuid.UUID) InviteQ {
-	q.selector = q.selector.Where(sq.Eq{"initiator_id": initiatorID})
-	q.updater = q.updater.Where(sq.Eq{"initiator_id": initiatorID})
-	q.deleter = q.deleter.Where(sq.Eq{"initiator_id": initiatorID})
-	q.counter = q.counter.Where(sq.Eq{"initiator_id": initiatorID})
 	return q
 }
 

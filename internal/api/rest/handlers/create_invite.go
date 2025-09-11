@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/chains-lab/ape"
@@ -8,7 +9,8 @@ import (
 	"github.com/chains-lab/cities-svc/internal/api/rest/meta"
 	"github.com/chains-lab/cities-svc/internal/api/rest/requests"
 	"github.com/chains-lab/cities-svc/internal/api/rest/responses"
-	"github.com/google/uuid"
+	"github.com/chains-lab/cities-svc/internal/app"
+	"github.com/chains-lab/cities-svc/internal/errx"
 )
 
 func (a Adapter) CreateInvite(w http.ResponseWriter, r *http.Request) {
@@ -28,20 +30,17 @@ func (a Adapter) CreateInvite(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userID, err := uuid.Parse(req.Data.Attributes.UserId)
-	if err != nil {
-		a.Log(r).WithError(err).Error("invalid user ID format")
-		ape.RenderErr(w, problems.InvalidPointer("/data/attributes/user_id", err))
-
-		return
-	}
-
-	//TODO
-	gov, _, err := a.app.CreateInvite(r.Context(), initiator.ID, userID, req.Data.Attributes.Role)
+	inv, err := a.app.CreateInvite(r.Context(), app.CreateInviteParams{
+		InitiatorID: initiator.ID,
+		Role:        req.Data.Attributes.Role,
+	})
 	if err != nil {
 		a.Log(r).WithError(err).Error("failed to create gov")
 		switch {
-
+		case errors.Is(err, errx.ErrorInvalidGovRole):
+			ape.RenderErr(w, problems.InvalidPointer("/data/attributes/role", err))
+		case errors.Is(err, errx.ErrorGovAlreadyExists):
+			ape.RenderErr(w, problems.Conflict("gov already exists for this user"))
 		default:
 			ape.RenderErr(w, problems.InternalError())
 		}
@@ -49,7 +48,7 @@ func (a Adapter) CreateInvite(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	a.Log(r).Infof("gov %s created successfully by user %s", gov.ID, initiator.ID)
+	a.Log(r).Infof("gov %s created successfully by user %s", inv.ID, initiator.ID)
 
-	ape.Render(w, http.StatusCreated, responses.Invite(gov))
+	ape.Render(w, http.StatusCreated, responses.Invite(inv))
 }

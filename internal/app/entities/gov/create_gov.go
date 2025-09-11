@@ -6,20 +6,20 @@ import (
 	"time"
 
 	"github.com/chains-lab/cities-svc/internal/app/models"
-	"github.com/chains-lab/cities-svc/internal/constant"
 	"github.com/chains-lab/cities-svc/internal/dbx"
 	"github.com/chains-lab/cities-svc/internal/errx"
+	"github.com/chains-lab/enum"
 	"github.com/google/uuid"
 )
 
-type CreateParams struct {
+type createParams struct {
 	UserID uuid.UUID
 	CityID uuid.UUID
 	Role   string
 }
 
-func (g Gov) Create(ctx context.Context, params CreateParams) (models.Gov, error) {
-	err := constant.CheckCityGovRole(params.Role)
+func (g Gov) createGov(ctx context.Context, params createParams) (models.Gov, error) {
+	err := enum.CheckCityGovRole(params.Role)
 	if err != nil {
 		return models.Gov{}, errx.ErrorInvalidGovRole.Raise(
 			fmt.Errorf("invalid city gov role, cause: %w", err),

@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/chains-lab/cities-svc/internal/app/models"
-	"github.com/chains-lab/cities-svc/internal/constant"
 	"github.com/chains-lab/cities-svc/internal/errx"
+	"github.com/chains-lab/enum"
 	"github.com/chains-lab/pagi"
 )
 
@@ -38,7 +38,7 @@ func (c Country) List(
 
 	if filters.Statuses != nil {
 		for _, s := range filters.Statuses {
-			if err := constant.CheckCountryStatus(s); err != nil {
+			if err := enum.CheckCountryStatus(s); err != nil {
 				return nil, pagi.Response{}, errx.ErrorInvalidCountryStatus.Raise(
 					fmt.Errorf("failed to parse country status, cause: %w", err),
 				)

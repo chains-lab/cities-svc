@@ -28,5 +28,5 @@ func (a App) ListGovs(
 		input.Role = filters.Roles
 	}
 
-	return a.gov.SelectGovs(ctx, input, pag, sort)
+	return a.gov.ListGovs(ctx, input, pag, sort)
 }

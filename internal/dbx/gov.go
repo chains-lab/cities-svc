@@ -148,11 +148,13 @@ type UpdateCityGovParams struct {
 	Status    *string
 	Role      *string
 	Label     *sql.NullString
-	UpdatedAt *time.Time
+	UpdatedAt time.Time
 }
 
 func (q GovQ) Update(ctx context.Context, p UpdateCityGovParams) error {
-	updates := map[string]interface{}{}
+	updates := map[string]interface{}{
+		"updated_at": p.UpdatedAt,
+	}
 
 	if p.CityID != nil {
 		updates["city_id"] = *p.CityID
@@ -166,11 +168,6 @@ func (q GovQ) Update(ctx context.Context, p UpdateCityGovParams) error {
 		} else {
 			updates["label"] = p.Label
 		}
-	}
-	if p.UpdatedAt != nil {
-		updates["updated_at"] = *p.UpdatedAt
-	} else {
-		updates["updated_at"] = time.Now().UTC()
 	}
 
 	if len(updates) == 0 {

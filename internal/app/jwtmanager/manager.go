@@ -1,7 +1,6 @@
 package jwtmanager
 
 import (
-	"errors"
 	"fmt"
 	"time"
 
@@ -9,7 +8,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/chains-lab/cities-svc/internal/config"
-	"github.com/chains-lab/cities-svc/internal/constant"
+	"github.com/chains-lab/enum"
 )
 
 // Manager подписывает/проверяет инвайт-JWT.
@@ -19,48 +18,43 @@ type Manager struct {
 }
 
 type InviteData struct {
-	JTI       string
+	JTI       uuid.UUID
 	CityID    uuid.UUID
 	Role      string
-	InvitedBy uuid.UUID
 	ExpiresAt time.Time
 	Issuer    string
 }
 
 // наши claims внутри JWT
 type inviteClaims struct {
-	CityID    uuid.UUID `json:"city_id"`
-	Role      string    `json:"role"`
-	InvitedBy uuid.UUID `json:"invited_by,omitempty"`
+	CityID uuid.UUID `json:"city_id"`
+	Role   string    `json:"role"`
 	jwt.RegisteredClaims
 }
 
 func NewManager(cfg config.Config) Manager {
 	return Manager{
-		iss: constant.ServiceName,
+		iss: enum.CitiesSVC,
 		sk:  cfg.JWT.Invite.SecretKey,
 	}
 }
 
 type InvitePayload struct {
+	ID        uuid.UUID
 	CityID    uuid.UUID
 	Role      string
-	InvitedBy uuid.UUID
 	ExpiredAt time.Time
+	CreatedAt time.Time
 }
 
-func (m Manager) CreateInviteToken(p InvitePayload) (string, uuid.UUID, error) {
-	now := time.Now().UTC()
-	id := uuid.New()
-
+func (m Manager) CreateInviteToken(p InvitePayload) (string, error) {
 	claims := inviteClaims{
-		CityID:    p.CityID,
-		Role:      p.Role,
-		InvitedBy: p.InvitedBy,
+		CityID: p.CityID,
+		Role:   p.Role,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ID:        id.String(),
+			ID:        p.ID.String(),
 			Issuer:    m.iss,
-			IssuedAt:  jwt.NewNumericDate(now),
+			IssuedAt:  jwt.NewNumericDate(p.CreatedAt),
 			ExpiresAt: jwt.NewNumericDate(p.ExpiredAt),
 		},
 	}
@@ -68,9 +62,9 @@ func (m Manager) CreateInviteToken(p InvitePayload) (string, uuid.UUID, error) {
 	t := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	signed, err := t.SignedString(m.sk)
 	if err != nil {
-		return "", uuid.Nil, err
+		return "", err
 	}
-	return signed, id, nil
+	return signed, nil
 }
 
 func (m Manager) DecryptInviteToken(tokenStr string) (InviteData, error) {
@@ -91,22 +85,26 @@ func (m Manager) DecryptInviteToken(tokenStr string) (InviteData, error) {
 		return out, err
 	}
 	if !token.Valid {
-		return out, errors.New("invalid token")
+		return out, fmt.Errorf("invalid token")
 	}
 
 	if claims.Issuer != "" && claims.Issuer != m.iss {
-		return out, errors.New("invalid issuer")
+		return out, fmt.Errorf("invalid issuer")
 	}
 
 	if claims.ExpiresAt == nil || time.Now().After(claims.ExpiresAt.Time) {
-		return out, errors.New("token expired")
+		return out, fmt.Errorf("token expired")
+	}
+
+	JTI, err := uuid.Parse(claims.ID)
+	if err != nil {
+		return out, fmt.Errorf("invalid jti format: %w", err)
 	}
 
 	out = InviteData{
-		JTI:       claims.ID,
+		JTI:       JTI,
 		CityID:    claims.CityID,
 		Role:      claims.Role,
-		InvitedBy: claims.InvitedBy,
 		ExpiresAt: claims.ExpiresAt.Time,
 		Issuer:    claims.Issuer,
 	}

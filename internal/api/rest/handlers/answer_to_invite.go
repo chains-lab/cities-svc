@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/chains-lab/ape"
@@ -8,6 +9,7 @@ import (
 	"github.com/chains-lab/cities-svc/internal/api/rest/meta"
 	"github.com/chains-lab/cities-svc/internal/api/rest/requests"
 	"github.com/chains-lab/cities-svc/internal/api/rest/responses"
+	"github.com/chains-lab/cities-svc/internal/errx"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -33,7 +35,18 @@ func (a Adapter) AnswerToInvite(w http.ResponseWriter, r *http.Request) {
 	invite, err := a.app.AnswerToInvite(r.Context(), initiator.ID, req.Data.Attributes.Answer, token)
 	if err != nil {
 		a.Log(r).WithError(err).Error("failed to answer to invite")
-		ape.RenderErr(w, problems.InternalError())
+		switch {
+		case errors.Is(err, errx.ErrorInvalidInviteToken):
+			ape.RenderErr(w, problems.Unauthorized("invalid invite token"))
+		case errors.Is(err, errx.ErrorInviteAlreadyAnswered):
+			ape.RenderErr(w, problems.Conflict("invite already answered"))
+		case errors.Is(err, errx.ErrorInviteNotFound):
+			ape.RenderErr(w, problems.NotFound("invite not found"))
+		case errors.Is(err, errx.ErrorInviteExpired):
+			ape.RenderErr(w, problems.Conflict("invite expired"))
+		default:
+			ape.RenderErr(w, problems.InternalError())
+		}
 
 		return
 	}

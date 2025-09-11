@@ -28,12 +28,8 @@ type InviteDataAttributes struct {
 	Role string `json:"role"`
 	// city id
 	CityId string `json:"city_id"`
-	// user id of the person who sent the invite
-	InitiatorId string `json:"initiator_id"`
-	// user id of the person who received the invite
-	UserId *string `json:"user_id,omitempty"`
-	// timestamp when the invite was answered
-	AnsweredAt *time.Time `json:"answered_at,omitempty"`
+	// unique token for the invite
+	Token string `json:"token"`
 	// timestamp when the invite will expire
 	ExpiresAt time.Time `json:"expires_at"`
 	// timestamp when the invite was created
@@ -46,12 +42,12 @@ type _InviteDataAttributes InviteDataAttributes
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewInviteDataAttributes(status string, role string, cityId string, initiatorId string, expiresAt time.Time, createdAt time.Time) *InviteDataAttributes {
+func NewInviteDataAttributes(status string, role string, cityId string, token string, expiresAt time.Time, createdAt time.Time) *InviteDataAttributes {
 	this := InviteDataAttributes{}
 	this.Status = status
 	this.Role = role
 	this.CityId = cityId
-	this.InitiatorId = initiatorId
+	this.Token = token
 	this.ExpiresAt = expiresAt
 	this.CreatedAt = createdAt
 	return &this
@@ -137,92 +133,28 @@ func (o *InviteDataAttributes) SetCityId(v string) {
 	o.CityId = v
 }
 
-// GetInitiatorId returns the InitiatorId field value
-func (o *InviteDataAttributes) GetInitiatorId() string {
+// GetToken returns the Token field value
+func (o *InviteDataAttributes) GetToken() string {
 	if o == nil {
 		var ret string
 		return ret
 	}
 
-	return o.InitiatorId
+	return o.Token
 }
 
-// GetInitiatorIdOk returns a tuple with the InitiatorId field value
+// GetTokenOk returns a tuple with the Token field value
 // and a boolean to check if the value has been set.
-func (o *InviteDataAttributes) GetInitiatorIdOk() (*string, bool) {
+func (o *InviteDataAttributes) GetTokenOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.InitiatorId, true
+	return &o.Token, true
 }
 
-// SetInitiatorId sets field value
-func (o *InviteDataAttributes) SetInitiatorId(v string) {
-	o.InitiatorId = v
-}
-
-// GetUserId returns the UserId field value if set, zero value otherwise.
-func (o *InviteDataAttributes) GetUserId() string {
-	if o == nil || IsNil(o.UserId) {
-		var ret string
-		return ret
-	}
-	return *o.UserId
-}
-
-// GetUserIdOk returns a tuple with the UserId field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *InviteDataAttributes) GetUserIdOk() (*string, bool) {
-	if o == nil || IsNil(o.UserId) {
-		return nil, false
-	}
-	return o.UserId, true
-}
-
-// HasUserId returns a boolean if a field has been set.
-func (o *InviteDataAttributes) HasUserId() bool {
-	if o != nil && !IsNil(o.UserId) {
-		return true
-	}
-
-	return false
-}
-
-// SetUserId gets a reference to the given string and assigns it to the UserId field.
-func (o *InviteDataAttributes) SetUserId(v string) {
-	o.UserId = &v
-}
-
-// GetAnsweredAt returns the AnsweredAt field value if set, zero value otherwise.
-func (o *InviteDataAttributes) GetAnsweredAt() time.Time {
-	if o == nil || IsNil(o.AnsweredAt) {
-		var ret time.Time
-		return ret
-	}
-	return *o.AnsweredAt
-}
-
-// GetAnsweredAtOk returns a tuple with the AnsweredAt field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *InviteDataAttributes) GetAnsweredAtOk() (*time.Time, bool) {
-	if o == nil || IsNil(o.AnsweredAt) {
-		return nil, false
-	}
-	return o.AnsweredAt, true
-}
-
-// HasAnsweredAt returns a boolean if a field has been set.
-func (o *InviteDataAttributes) HasAnsweredAt() bool {
-	if o != nil && !IsNil(o.AnsweredAt) {
-		return true
-	}
-
-	return false
-}
-
-// SetAnsweredAt gets a reference to the given time.Time and assigns it to the AnsweredAt field.
-func (o *InviteDataAttributes) SetAnsweredAt(v time.Time) {
-	o.AnsweredAt = &v
+// SetToken sets field value
+func (o *InviteDataAttributes) SetToken(v string) {
+	o.Token = v
 }
 
 // GetExpiresAt returns the ExpiresAt field value
@@ -286,13 +218,7 @@ func (o InviteDataAttributes) ToMap() (map[string]interface{}, error) {
 	toSerialize["status"] = o.Status
 	toSerialize["role"] = o.Role
 	toSerialize["city_id"] = o.CityId
-	toSerialize["initiator_id"] = o.InitiatorId
-	if !IsNil(o.UserId) {
-		toSerialize["user_id"] = o.UserId
-	}
-	if !IsNil(o.AnsweredAt) {
-		toSerialize["answered_at"] = o.AnsweredAt
-	}
+	toSerialize["token"] = o.Token
 	toSerialize["expires_at"] = o.ExpiresAt
 	toSerialize["created_at"] = o.CreatedAt
 	return toSerialize, nil
@@ -306,7 +232,7 @@ func (o *InviteDataAttributes) UnmarshalJSON(data []byte) (err error) {
 		"status",
 		"role",
 		"city_id",
-		"initiator_id",
+		"token",
 		"expires_at",
 		"created_at",
 	}

@@ -7,8 +7,8 @@ import (
 	"fmt"
 
 	"github.com/chains-lab/cities-svc/internal/app/models"
-	"github.com/chains-lab/cities-svc/internal/constant"
 	"github.com/chains-lab/cities-svc/internal/errx"
+	"github.com/chains-lab/enum"
 	"github.com/google/uuid"
 )
 
@@ -18,7 +18,7 @@ type GetGovFilters struct {
 	Role   *string
 }
 
-func (g Gov) Get(ctx context.Context, filters GetGovFilters) (models.Gov, error) {
+func (g Gov) GetGov(ctx context.Context, filters GetGovFilters) (models.Gov, error) {
 	query := g.govQ.New()
 
 	if filters.UserID != nil {
@@ -28,7 +28,7 @@ func (g Gov) Get(ctx context.Context, filters GetGovFilters) (models.Gov, error)
 		query = query.FilterCityID(*filters.CityID)
 	}
 	if filters.Role != nil {
-		err := constant.CheckCityGovRole(*filters.Role)
+		err := enum.CheckCityGovRole(*filters.Role)
 		if err != nil {
 			return models.Gov{}, errx.ErrorInvalidGovRole.Raise(
 				fmt.Errorf("invalid city gov role, cause: %w", err),
@@ -55,13 +55,13 @@ func (g Gov) Get(ctx context.Context, filters GetGovFilters) (models.Gov, error)
 }
 
 func (g Gov) GetInitiatorGov(ctx context.Context, initiatorID uuid.UUID) (models.Gov, error) {
-	initiator, err := g.Get(ctx, GetGovFilters{
+	initiator, err := g.GetGov(ctx, GetGovFilters{
 		UserID: &initiatorID,
 	})
 	if err != nil {
 		switch {
 		case errors.Is(err, errx.ErrorCityGovNotFound):
-			return models.Gov{}, errx.ErrorNotActiveCityGovInitiator.Raise(
+			return models.Gov{}, errx.ErrorInitiatorIsNotActiveCityGov.Raise(
 				fmt.Errorf("initiator %s is not an active city gov", initiatorID),
 			)
 		default:

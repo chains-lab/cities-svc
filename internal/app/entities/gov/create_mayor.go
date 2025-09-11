@@ -7,16 +7,16 @@ import (
 	"time"
 
 	"github.com/chains-lab/cities-svc/internal/app/models"
-	"github.com/chains-lab/cities-svc/internal/constant"
 	"github.com/chains-lab/cities-svc/internal/dbx"
 	"github.com/chains-lab/cities-svc/internal/errx"
+	"github.com/chains-lab/enum"
 	"github.com/google/uuid"
 )
 
 func (g Gov) CreateMayor(ctx context.Context, userID, cityID uuid.UUID) (models.Gov, error) {
-	_, err := g.Get(ctx, GetGovFilters{
+	_, err := g.GetGov(ctx, GetGovFilters{
 		CityID: &cityID,
-		Role:   func(s string) *string { return &s }(constant.CityGovRoleMayor),
+		Role:   func(s string) *string { return &s }(enum.CityGovRoleMayor),
 	})
 	if err != nil && !errors.Is(err, errx.ErrorCityGovNotFound) {
 		return models.Gov{}, err
@@ -32,7 +32,7 @@ func (g Gov) CreateMayor(ctx context.Context, userID, cityID uuid.UUID) (models.
 	stmt := dbx.Gov{
 		UserID:    userID,
 		CityID:    cityID,
-		Role:      constant.CityGovRoleMayor,
+		Role:      enum.CityGovRoleMayor,
 		UpdatedAt: now,
 		CreatedAt: now,
 	}
@@ -40,7 +40,7 @@ func (g Gov) CreateMayor(ctx context.Context, userID, cityID uuid.UUID) (models.
 	resp := models.Gov{
 		UserID:    userID,
 		CityID:    cityID,
-		Role:      constant.CityGovRoleMayor,
+		Role:      enum.CityGovRoleMayor,
 		UpdatedAt: now,
 		CreatedAt: now,
 	}

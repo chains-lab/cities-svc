@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"math"
 	"net/http"
 	"strconv"
@@ -50,17 +51,17 @@ func (a Adapter) SearchCities(w http.ResponseWriter, r *http.Request) {
 	if (latStr != "" || lonStr != "") || (radMStr != "" || radKMStr != "") {
 		// требуем lat+lon+radius
 		if latStr == "" || lonStr == "" {
-			ape.RenderErr(w, problems.InvalidParameter("lat/lon", errors.New("both lat and lon are required when using radius")))
+			ape.RenderErr(w, problems.InvalidParameter("lat/lon", fmt.Errorf("both lat and lon are required when using radius")))
 			return
 		}
 		lat, err := strconv.ParseFloat(latStr, 64)
 		if err != nil || math.IsNaN(lat) || math.IsInf(lat, 0) || lat < -90 || lat > 90 {
-			ape.RenderErr(w, problems.InvalidParameter("lat", errors.New("invalid latitude")))
+			ape.RenderErr(w, problems.InvalidParameter("lat", fmt.Errorf("invalid latitude")))
 			return
 		}
 		lon, err := strconv.ParseFloat(lonStr, 64)
 		if err != nil || math.IsNaN(lon) || math.IsInf(lon, 0) || lon < -180 || lon > 180 {
-			ape.RenderErr(w, problems.InvalidParameter("lon", errors.New("invalid longitude")))
+			ape.RenderErr(w, problems.InvalidParameter("lon", fmt.Errorf("invalid longitude")))
 			return
 		}
 		var radiusM uint
@@ -68,19 +69,19 @@ func (a Adapter) SearchCities(w http.ResponseWriter, r *http.Request) {
 		case radKMStr != "":
 			km, err := strconv.ParseFloat(radKMStr, 64)
 			if err != nil || !(km > 0) {
-				ape.RenderErr(w, problems.InvalidParameter("radius_km", errors.New("must be > 0")))
+				ape.RenderErr(w, problems.InvalidParameter("radius_km", fmt.Errorf("must be > 0")))
 				return
 			}
 			radiusM = uint(math.Round(km * 1000.0))
 		case radMStr != "":
 			rm, err := strconv.ParseUint(radMStr, 10, 64)
 			if err != nil || rm == 0 {
-				ape.RenderErr(w, problems.InvalidParameter("radius_m", errors.New("must be > 0")))
+				ape.RenderErr(w, problems.InvalidParameter("radius_m", fmt.Errorf("must be > 0")))
 				return
 			}
 			radiusM = uint(rm)
 		default:
-			ape.RenderErr(w, problems.InvalidParameter("radius", errors.New("radius_km or radius_m is required with lat/lon")))
+			ape.RenderErr(w, problems.InvalidParameter("radius", fmt.Errorf("radius_km or radius_m is required with lat/lon")))
 			return
 		}
 
@@ -96,7 +97,7 @@ func (a Adapter) SearchCities(w http.ResponseWriter, r *http.Request) {
 		if n, err := strconv.ParseUint(v, 10, 64); err == nil && n > 0 {
 			pag.Page = n
 		} else {
-			ape.RenderErr(w, problems.InvalidParameter("page", errors.New("must be positive integer")))
+			ape.RenderErr(w, problems.InvalidParameter("page", fmt.Errorf("must be positive integer")))
 			return
 		}
 	}
@@ -104,7 +105,7 @@ func (a Adapter) SearchCities(w http.ResponseWriter, r *http.Request) {
 		if n, err := strconv.ParseUint(v, 10, 64); err == nil && n > 0 {
 			pag.Size = n
 		} else {
-			ape.RenderErr(w, problems.InvalidParameter("size", errors.New("must be positive integer")))
+			ape.RenderErr(w, problems.InvalidParameter("size", fmt.Errorf("must be positive integer")))
 			return
 		}
 	}

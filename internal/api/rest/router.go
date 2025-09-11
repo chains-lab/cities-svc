@@ -6,7 +6,7 @@ import (
 
 	"github.com/chains-lab/cities-svc/internal/api/rest/meta"
 	"github.com/chains-lab/cities-svc/internal/config"
-	"github.com/chains-lab/cities-svc/internal/constant"
+	"github.com/chains-lab/enum"
 	"github.com/chains-lab/gatekit/mdlv"
 	"github.com/chains-lab/gatekit/roles"
 	"github.com/go-chi/chi/v5"
@@ -30,8 +30,8 @@ type Handlers interface {
 	CreateInvite(w http.ResponseWriter, r *http.Request)
 	AnswerToInvite(w http.ResponseWriter, r *http.Request)
 	GetGov(w http.ResponseWriter, r *http.Request)
-	CreateMayor(w http.ResponseWriter, r *http.Request)
-	TransferMayor(w http.ResponseWriter, r *http.Request)
+	DeleteGov(w http.ResponseWriter, r *http.Request)
+	InviteMayor(w http.ResponseWriter, r *http.Request)
 
 	GetOwnGov(w http.ResponseWriter, r *http.Request)
 	UpdateOwnGov(w http.ResponseWriter, r *http.Request)
@@ -39,7 +39,7 @@ type Handlers interface {
 }
 
 func (s *Service) Api(ctx context.Context, cfg config.Config, h Handlers) {
-	svc := mdlv.ServiceGrant(constant.ServiceName, cfg.JWT.Service.SecretKey)
+	svc := mdlv.ServiceGrant(enum.CitiesSVC, cfg.JWT.Service.SecretKey)
 	auth := mdlv.Auth(meta.UserCtxKey, cfg.JWT.User.AccessToken.SecretKey)
 	sysadmin := mdlv.RoleGrant(meta.UserCtxKey, map[string]bool{
 		roles.Admin:     true,
@@ -60,8 +60,8 @@ func (s *Service) Api(ctx context.Context, cfg config.Config, h Handlers) {
 
 					r.Group(func(r chi.Router) {
 						r.Use(auth, sysadmin)
-						r.Patch("/", h.UpdateCountry) // частичное обновление
-						r.Patch("/status", h.UpdateCountryStatus)
+						r.Put("/", h.UpdateCountry)
+						r.Put("/status", h.UpdateCountryStatus)
 					})
 				})
 			})
@@ -75,24 +75,17 @@ func (s *Service) Api(ctx context.Context, cfg config.Config, h Handlers) {
 				r.Route("/{city_id}", func(r chi.Router) {
 					r.Get("/", h.GetCity)
 
-					r.Group(func(r chi.Router) {
-						r.Use(auth)
-						r.Patch("/", h.UpdateCity)
-						r.Patch("/status", h.UpdateCityStatus)
-					})
+					r.With(auth).Put("/", h.UpdateCity)
+					r.With(auth).Put("/status", h.UpdateCityStatus)
 
 					r.Route("/govs", func(r chi.Router) {
 						r.Get("/", h.SearchGovs)
 
 						r.With(auth).Route("/invite", func(r chi.Router) {
 							r.Post("/", h.CreateInvite)
-							r.Post("/{token}", h.AnswerToInvite)
-						})
+							r.With(auth).Post("/mayor", h.InviteMayor)
 
-						r.Route("/mayor", func(r chi.Router) {
-							r.Get("/", h.GetCityMayor) // get current mayor
-							r.With(auth, sysadmin).Post("/", h.CreateMayor)
-							r.With(auth).Post("/transfer", h.TransferMayor)
+							r.Post("/{token}", h.AnswerToInvite)
 						})
 
 						r.With(auth).Route("/me", func(r chi.Router) {
@@ -105,7 +98,6 @@ func (s *Service) Api(ctx context.Context, cfg config.Config, h Handlers) {
 							r.Get("/", h.GetGov)
 							r.With(auth).Delete("/", h.DeleteGov)
 						})
-
 					})
 				})
 			})

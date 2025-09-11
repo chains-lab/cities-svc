@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -10,6 +11,7 @@ import (
 	"github.com/chains-lab/ape/problems"
 	"github.com/chains-lab/cities-svc/internal/api/rest/responses"
 	"github.com/chains-lab/cities-svc/internal/app"
+	"github.com/chains-lab/cities-svc/internal/errx"
 	"github.com/chains-lab/pagi"
 	"github.com/google/uuid"
 )
@@ -72,11 +74,13 @@ func (a Adapter) SearchGovs(w http.ResponseWriter, r *http.Request) {
 	govs, resp, err := a.app.ListGovs(ctx, filters, pag, sort)
 	if err != nil {
 		a.Log(r).WithError(err).Error("failed to search govs")
-
 		switch {
+		case errors.Is(err, errx.ErrorInvalidGovRole):
+			ape.RenderErr(w, problems.InvalidParameter("role", err))
 		default:
 			ape.RenderErr(w, problems.InternalError())
 		}
+
 		return
 	}
 

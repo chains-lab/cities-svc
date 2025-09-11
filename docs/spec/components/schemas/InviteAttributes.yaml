@@ -3,7 +3,7 @@ required:
   - status
   - role
   - city_id
-  - initiator_id
+  - token
   - expires_at
   - created_at
 properties:
@@ -17,18 +17,9 @@ properties:
     type: string
     format: uuid
     description: "city id"
-  initiator_id:
+  token:
     type: string
-    format: uuid
-    description: "user id of the person who sent the invite"
-  user_id:
-    type: string
-    format: uuid
-    description: "user id of the person who received the invite"
-  answered_at:
-    type: string
-    format: date-time
-    description: "timestamp when the invite was answered"
+    description: "unique token for the invite"
   expires_at:
     type: string
     format: date-time
