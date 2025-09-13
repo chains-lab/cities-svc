@@ -13,7 +13,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (g Gov) AnsweredInvite(ctx context.Context, userID uuid.UUID, token, status string) (models.Invite, error) {
+func (g Gov) AcceptInvite(ctx context.Context, userID uuid.UUID, token string) (models.Invite, error) {
 	data, err := g.jwt.DecryptInviteToken(token)
 	if err != nil {
 		return models.Invite{}, errx.ErrorInvalidInviteToken.Raise(
@@ -40,6 +40,7 @@ func (g Gov) AnsweredInvite(ctx context.Context, userID uuid.UUID, token, status
 		return models.Invite{}, errx.ErrorInvalidInviteToken.Raise(fmt.Errorf("token city_id mismatch"))
 	}
 
+	status := enum.InviteStatusAccepted
 	upd := dbx.UpdateInviteParams{
 		Status:     &status,
 		UserID:     &uuid.NullUUID{UUID: userID, Valid: true},
@@ -51,30 +52,20 @@ func (g Gov) AnsweredInvite(ctx context.Context, userID uuid.UUID, token, status
 		)
 	}
 
-	switch status {
-	case enum.InviteStatusAccepted:
-		if data.Role == enum.CityGovRoleMayor {
-			err = g.deleteCityMayor(ctx, inv.CityID)
-			if err != nil {
-				return models.Invite{}, err
-			}
-		}
-
-		_, err = g.createGov(ctx, createParams{
-			UserID: userID,
-			CityID: inv.CityID,
-			Role:   data.Role,
-		})
+	if data.Role == enum.CityGovRoleMayor {
+		err = g.deleteCityMayor(ctx, inv.CityID)
 		if err != nil {
 			return models.Invite{}, err
 		}
-	case enum.InviteStatusRejected:
-		// nothing to do
-	default:
-		return models.Invite{}, errx.ErrorUnexpectedInviteStatus.Raise(
-			fmt.Errorf("invalid invite status: %s", status),
-		)
+	}
 
+	_, err = g.createGov(ctx, createParams{
+		UserID: userID,
+		CityID: inv.CityID,
+		Role:   data.Role,
+	})
+	if err != nil {
+		return models.Invite{}, err
 	}
 
 	inv.Status = status

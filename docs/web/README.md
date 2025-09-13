@@ -83,9 +83,6 @@ Class | Method | HTTP request | Description
 
 ## Documentation For Models
 
- - [AnswerToInvite](docs/AnswerToInvite.md)
- - [AnswerToInviteData](docs/AnswerToInviteData.md)
- - [AnswerToInviteDataAttributes](docs/AnswerToInviteDataAttributes.md)
  - [CitiesCollection](docs/CitiesCollection.md)
  - [City](docs/City.md)
  - [CityAttributes](docs/CityAttributes.md)

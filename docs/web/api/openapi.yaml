@@ -64,12 +64,6 @@ components:
           $ref: '#/components/schemas/CreateMayor_data'
       required:
       - data
-    AnswerToInvite:
-      properties:
-        data:
-          $ref: '#/components/schemas/AnswerToInvite_data'
-      required:
-      - data
     SentInvite:
       properties:
         data:
@@ -536,32 +530,6 @@ components:
       required:
       - attributes
       - type
-    AnswerToInvite_data_attributes:
-      properties:
-        answer:
-          description: answer to the invite
-          enum:
-          - accepted
-          - declined
-          type: string
-      required:
-      - answer
-    AnswerToInvite_data:
-      properties:
-        id:
-          description: invite id
-          format: uuid
-          type: string
-        type:
-          enum:
-          - answer_to_invite
-          type: string
-        attributes:
-          $ref: '#/components/schemas/AnswerToInvite_data_attributes'
-      required:
-      - attributes
-      - id
-      - type
     SentInvite_data_attributes:
       properties:
         city_id:
@@ -681,7 +649,7 @@ components:
           type: string
         type:
           enum:
-          - invite
+          - invite_city_gov
           type: string
         attributes:
           $ref: '#/components/schemas/Invite_data_attributes'

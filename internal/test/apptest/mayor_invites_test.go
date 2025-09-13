@@ -1,4 +1,4 @@
-package app_test
+package apptest
 
 import (
 	"context"
@@ -52,9 +52,9 @@ func TestMayorCreateInvite(t *testing.T) {
 
 	userID := uuid.New()
 
-	inv, err = s.app.AnswerToInvite(ctx, userID, inv.Token, enum.InviteStatusAccepted)
+	inv, err = s.app.AcceptInvite(ctx, userID, inv.Token)
 	if err != nil {
-		t.Fatalf("AnswerToInvite: %v", err)
+		t.Fatalf("AcceptInvite: %v", err)
 	}
 	if inv.Status != enum.InviteStatusAccepted {
 		t.Errorf("expected invite status 'accepted', got '%s'", inv.Status)
@@ -79,56 +79,7 @@ func TestMayorCreateInvite(t *testing.T) {
 
 	secondUserID := uuid.New()
 
-	_, err = s.app.AnswerToInvite(ctx, secondUserID, inv.Token, enum.InviteStatusAccepted)
-	if !errors.Is(err, errx.ErrorInviteAlreadyAnswered) {
-		t.Fatalf("expected error %v, got %v", errx.ErrorInviteAlreadyAnswered, err)
-	}
-}
-
-func TestMayorCreateInviteDecline(t *testing.T) {
-	s, err := newSetup(t)
-	cleanDb(t)
-	if err != nil {
-		t.Fatalf("newSetup: %v", err)
-	}
-
-	ctx := context.Background()
-
-	ukr := CreateAndActivateCountry(s, t, "Ukraine")
-	kyiv := CreateCity(s, t, ukr.ID, "Kyiv")
-	kyiv, err = s.app.SetCityStatusOfficial(ctx, kyiv.ID)
-	if err != nil {
-		t.Fatalf("SetCityStatusOfficial: %v", err)
-	}
-
-	inv, err := s.app.CreateInviteMayor(ctx, kyiv.ID, uuid.New(), roles.SuperUser)
-	if err != nil {
-		t.Fatalf("CreateInviteMayor: %v", err)
-	}
-
-	userID := uuid.New()
-
-	inv, err = s.app.AnswerToInvite(ctx, userID, inv.Token, enum.InviteStatusRejected)
-	if err != nil {
-		t.Fatalf("AnswerToInvite: %v", err)
-	}
-	if inv.Status != enum.InviteStatusRejected {
-		t.Errorf("expected invite status 'rejected', got '%s'", inv.Status)
-	}
-	if inv.AnsweredAt == nil {
-		t.Errorf("expected invite AnsweredAt to be set, got nil")
-	}
-	if inv.UserID != nil && *inv.UserID != userID {
-		t.Errorf("expected invite UserID to be set to %s, got %s", userID, inv.UserID)
-	}
-
-	_, err = s.app.GetCityMayor(ctx, kyiv.ID)
-	if !errors.Is(err, errx.ErrorCityGovNotFound) {
-		t.Fatalf("expected error %v, got %v", errx.ErrorCityGovNotFound, err)
-	}
-
-	secondUserID := uuid.New()
-	_, err = s.app.AnswerToInvite(ctx, secondUserID, inv.Token, enum.InviteStatusAccepted)
+	_, err = s.app.AcceptInvite(ctx, secondUserID, inv.Token)
 	if !errors.Is(err, errx.ErrorInviteAlreadyAnswered) {
 		t.Fatalf("expected error %v, got %v", errx.ErrorInviteAlreadyAnswered, err)
 	}

@@ -10,12 +10,12 @@ import (
 	"github.com/google/uuid"
 )
 
-func (a App) AnswerToInvite(ctx context.Context, initiatorID uuid.UUID, token, status string) (models.Invite, error) {
+func (a App) AcceptInvite(ctx context.Context, initiatorID uuid.UUID, token string) (models.Invite, error) {
 	var invite models.Invite
 	var err error
 
 	txErr := a.transaction(func(ctx context.Context) error {
-		invite, err = a.gov.AnsweredInvite(ctx, initiatorID, token, status)
+		invite, err = a.gov.AcceptInvite(ctx, initiatorID, token)
 		if err != nil {
 			return err
 		}

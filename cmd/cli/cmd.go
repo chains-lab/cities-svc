@@ -25,6 +25,6 @@ func StartServices(ctx context.Context, cfg config.Config, log logium.Logger, wg
 	run(func() {
 		handl := handlers.NewAdapter(cfg, log, app)
 
-		restSVC.Api(ctx, cfg, handl)
+		restSVC.Router(ctx, cfg, handl)
 	})
 }

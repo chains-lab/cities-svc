@@ -1,4 +1,4 @@
-package app_test
+package apptest
 
 import (
 	"context"
@@ -19,9 +19,9 @@ func CreateMayor(s Setup, t *testing.T, cityID, userID uuid.UUID) models.Gov {
 		t.Fatalf("CreateInviteMayor: %v", err)
 	}
 
-	inv, err = s.app.AnswerToInvite(context.Background(), userID, inv.Token, enum.InviteStatusAccepted)
+	inv, err = s.app.AcceptInvite(context.Background(), userID, inv.Token)
 	if err != nil {
-		t.Fatalf("AnswerToInvite: %v", err)
+		t.Fatalf("AcceptInvite: %v", err)
 	}
 
 	mayor, err := s.app.GetCityMayor(context.Background(), cityID)
@@ -61,9 +61,9 @@ func TestCreateInviteMayor(t *testing.T) {
 	}
 
 	userAdmin := uuid.New()
-	InviteForAdmin, err = s.app.AnswerToInvite(ctx, userAdmin, InviteForAdmin.Token, enum.InviteStatusAccepted)
+	InviteForAdmin, err = s.app.AcceptInvite(ctx, userAdmin, InviteForAdmin.Token)
 	if err != nil {
-		t.Fatalf("AnswerToInvite: %v", err)
+		t.Fatalf("AcceptInvite: %v", err)
 	}
 	if InviteForAdmin.Status != enum.InviteStatusAccepted {
 		t.Errorf("expected invite status 'accepted', got '%s'", InviteForAdmin.Status)
@@ -87,9 +87,9 @@ func TestCreateInviteMayor(t *testing.T) {
 		t.Fatalf("SentInvite: %v", err)
 	}
 
-	InviteForModerator, err = s.app.AnswerToInvite(ctx, userModerator, InviteForModerator.Token, enum.InviteStatusAccepted)
+	InviteForModerator, err = s.app.AcceptInvite(ctx, userModerator, InviteForModerator.Token)
 	if err != nil {
-		t.Fatalf("AnswerToInvite: %v", err)
+		t.Fatalf("AcceptInvite: %v", err)
 	}
 }
 
@@ -120,9 +120,9 @@ func TestTransferMayor(t *testing.T) {
 		t.Fatalf("CreateInviteMayor: %v", err)
 	}
 
-	inv, err = s.app.AnswerToInvite(ctx, newMayorUserID, inv.Token, enum.InviteStatusAccepted)
+	inv, err = s.app.AcceptInvite(ctx, newMayorUserID, inv.Token)
 	if err != nil {
-		t.Fatalf("AnswerToInvite: %v", err)
+		t.Fatalf("AcceptInvite: %v", err)
 	}
 
 	mayor, err = s.app.GetCityMayor(context.Background(), inv.CityID)

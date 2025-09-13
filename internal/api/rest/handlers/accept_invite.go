@@ -2,20 +2,17 @@ package handlers
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 
 	"github.com/chains-lab/ape"
 	"github.com/chains-lab/ape/problems"
 	"github.com/chains-lab/cities-svc/internal/api/rest/meta"
-	"github.com/chains-lab/cities-svc/internal/api/rest/requests"
 	"github.com/chains-lab/cities-svc/internal/api/rest/responses"
 	"github.com/chains-lab/cities-svc/internal/errx"
-	"github.com/chains-lab/enum"
 	"github.com/go-chi/chi/v5"
 )
 
-func (a Adapter) AnswerToInvite(w http.ResponseWriter, r *http.Request) {
+func (a Adapter) AcceptInvite(w http.ResponseWriter, r *http.Request) {
 	initiator, err := meta.User(r.Context())
 	if err != nil {
 		a.log.WithError(err).Error("failed to get user from context")
@@ -24,17 +21,9 @@ func (a Adapter) AnswerToInvite(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	req, err := requests.AnswerToInvite(r)
-	if err != nil {
-		a.log.WithError(err).Error("failed to decode answer to invite request")
-		ape.RenderErr(w, problems.BadRequest(err)...)
-
-		return
-	}
-
 	token := chi.URLParam(r, "token")
 
-	invite, err := a.app.AnswerToInvite(r.Context(), initiator.ID, req.Data.Attributes.Answer, token)
+	invite, err := a.app.AcceptInvite(r.Context(), initiator.ID, token)
 	if err != nil {
 		a.log.WithError(err).Error("failed to answer to invite")
 		switch {
@@ -47,14 +36,6 @@ func (a Adapter) AnswerToInvite(w http.ResponseWriter, r *http.Request) {
 		case errors.Is(err, errx.ErrorInviteExpired):
 			ape.RenderErr(w, problems.Conflict("invite expired"))
 		case errors.Is(err, errx.ErrorUnexpectedInviteStatus):
-			ape.RenderErr(w, problems.InvalidParameter(
-				"data/attributes/status",
-				fmt.Errorf("unexpected invite status: %s, need: %s or %s",
-					req.Data.Attributes.Answer,
-					enum.InviteStatusAccepted,
-					enum.InviteStatusRejected,
-				),
-			))
 		case errors.Is(err, errx.ErrorAnswerToInviteForInactiveCity):
 			ape.RenderErr(w, problems.Conflict("cannot accept invite for inactive city"))
 		default:

@@ -5,9 +5,6 @@ api/openapi.yaml
 api_test_.go
 client.go
 configuration.go
-docs/AnswerToInvite.md
-docs/AnswerToInviteData.md
-docs/AnswerToInviteDataAttributes.md
 docs/CitiesCollection.md
 docs/City.md
 docs/CityAttributes.md
@@ -64,9 +61,6 @@ docs/UpdateOwnActiveGovDataAttributes.md
 git_push.sh
 go.mod
 go.sum
-model_answer_to_invite.go
-model_answer_to_invite_data.go
-model_answer_to_invite_data_attributes.go
 model_cities_collection.go
 model_city.go
 model_city_attributes.go

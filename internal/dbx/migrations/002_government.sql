@@ -19,8 +19,7 @@ CREATE TABLE city_govs (
 
 CREATE TYPE invite_status AS ENUM (
     'sent',
-    'accepted',
-    'rejected'
+    'accepted'
 );
 
 CREATE TABLE invites (
@@ -35,7 +34,7 @@ CREATE TABLE invites (
     CONSTRAINT invite_status_answered_ck CHECK (
         (status = 'sent' AND answered_at IS NULL)
             OR
-        (status IN ('accepted','rejected') AND answered_at IS NOT NULL)
+        (status = 'accepted' AND answered_at IS NOT NULL)
     )
 );
 --            ↑↑↑ ВАЖНО: точка с запятой после CREATE TABLE invites

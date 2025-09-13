@@ -34,8 +34,6 @@ components:
       $ref: './spec/components/schemas/UpdateOwnGov.yaml'
     CreateMayor:
       $ref: './spec/components/schemas/CreateMayor.yaml'
-    AnswerToInvite:
-      $ref: './spec/components/schemas/AnswerToInvite.yaml'
 
     SentInvite:
       $ref: './spec/components/schemas/SentInvite.yaml'
