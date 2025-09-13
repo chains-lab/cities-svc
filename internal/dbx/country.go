@@ -209,7 +209,7 @@ func (q CountryQ) FilterNameLike(name string) CountryQ {
 	return q
 }
 
-func (q CountryQ) OrderAlphabetical(asc bool) CountryQ {
+func (q CountryQ) OrderByAlphabetical(asc bool) CountryQ {
 	if asc {
 		q.selector = q.selector.OrderBy("name ASC")
 	} else {

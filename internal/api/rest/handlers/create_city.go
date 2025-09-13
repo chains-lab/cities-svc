@@ -54,6 +54,8 @@ func (a Adapter) CreateCity(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		a.log.WithError(err).Error("error creating city")
 		switch {
+		case errors.Is(err, errx.ErrorCountryNotSupported):
+			ape.RenderErr(w, problems.Conflict("cannot create city in unsupported country"))
 		case errors.Is(err, errx.ErrorInvalidTimeZone):
 			ape.RenderErr(w, problems.InvalidPointer("data/attributes/timezone", err))
 		case errors.Is(err, errx.ErrorInvalidPoint):

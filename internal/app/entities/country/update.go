@@ -2,7 +2,6 @@ package country
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"fmt"
 	"time"
@@ -33,7 +32,7 @@ func (c Country) Update(ctx context.Context, ID uuid.UUID, params UpdateCountryP
 
 	if params.Name != nil {
 		_, err = c.GetByName(ctx, *params.Name)
-		if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		if err != nil && !errors.Is(err, errx.ErrorCountryNotFound) {
 			return models.Country{}, errx.ErrorInternal.Raise(
 				fmt.Errorf("failed to get country by name, cause: %w", err),
 			)

@@ -305,7 +305,6 @@ func (q CitiesQ) OrderByAlphabetical(asc bool) CitiesQ {
 	}
 	orderExpr := fmt.Sprintf("name %s", dir)
 	q.selector = q.selector.OrderBy(orderExpr)
-	q.counter = q.counter.OrderBy(orderExpr)
 	return q
 }
 

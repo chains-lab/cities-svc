@@ -13,21 +13,21 @@ func (a App) GetInitiatorGov(ctx context.Context, initiatorID uuid.UUID) (models
 	return a.gov.GetInitiatorGov(ctx, initiatorID)
 }
 
-func (a App) Get(ctx context.Context, userID uuid.UUID) (models.Gov, error) {
+func (a App) GetGov(ctx context.Context, userID uuid.UUID) (models.Gov, error) {
 	return a.gov.GetGov(ctx, gov.GetGovFilters{
 		UserID: &userID,
 	})
 
 }
 
-//func (a App) GetForCity(ctx context.Context, cityID, userID uuid.UUID) (models.Gov, error) {
+//func (a app) GetForCity(ctx context.Context, cityID, userID uuid.UUID) (models.Gov, error) {
 //	return a.gov.GetGov(ctx, gov.GetGovFilters{
 //		CityID: &cityID,
 //		UserID: &userID,
 //	})
 //}
 //
-//func (a App) GetForCityAndRole(ctx context.Context, userID, cityID uuid.UUID, role string) (models.Gov, error) {
+//func (a app) GetForCityAndRole(ctx context.Context, userID, cityID uuid.UUID, role string) (models.Gov, error) {
 //	return a.gov.GetGov(ctx, gov.GetGovFilters{
 //		UserID: &userID,
 //		CityID: &cityID,

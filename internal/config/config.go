@@ -27,21 +27,6 @@ type DatabaseConfig struct {
 	SQL struct {
 		URL string `mapstructure:"url"`
 	} `mapstructure:"sql"`
-
-	Redis struct {
-		Addr     string `mapstructure:"addr"`
-		Password string `mapstructure:"password"`
-		DB       int    `mapstructure:"db"`
-		Lifetime int    `mapstructure:"lifetime"`
-	} `mapstructure:"redis"`
-}
-
-type OAuthConfig struct {
-	Google struct {
-		ClientID     string `mapstructure:"client_id"`
-		ClientSecret string `mapstructure:"client_secret"`
-		RedirectURL  string `mapstructure:"redirect_url"`
-	}
 }
 
 type KafkaConfig struct {
@@ -63,15 +48,9 @@ type JWTConfig struct {
 	Service struct {
 		SecretKey string `mapstructure:"secret_key"`
 	} `mapstructure:"service"`
-	Invite struct {
+	Invites struct {
 		SecretKey string `mapstructure:"secret_key"`
-	}
-}
-
-type RabbitConfig struct {
-	URL      string `mapstructure:"url"`
-	User     string `mapstructure:"user"`
-	Password string `mapstructure:"password"`
+	} `mapstructure:"gov-invites"`
 }
 
 type SwaggerConfig struct {
@@ -80,21 +59,12 @@ type SwaggerConfig struct {
 	Port    string `mapstructure:"port"`
 }
 
-type PropertiesConfig struct {
-	Residence struct {
-		ApiKey string `mapstructure:"api_key"`
-	}
-}
-
 type Config struct {
-	Server     ServerConfig     `mapstructure:"server"`
-	JWT        JWTConfig        `mapstructure:"jwt"`
-	OAuth      OAuthConfig      `mapstructure:"oauth"`
-	Rabbit     RabbitConfig     `mapstructure:"rabbit"`
-	Kafka      KafkaConfig      `mapstructure:"kafka"`
-	Database   DatabaseConfig   `mapstructure:"database"`
-	Swagger    SwaggerConfig    `mapstructure:"swagger"`
-	Properties PropertiesConfig `mapstructure:"properties"`
+	Server   ServerConfig   `mapstructure:"server"`
+	JWT      JWTConfig      `mapstructure:"jwt"`
+	Kafka    KafkaConfig    `mapstructure:"kafka"`
+	Database DatabaseConfig `mapstructure:"database"`
+	Swagger  SwaggerConfig  `mapstructure:"swagger"`
 }
 
 func LoadConfig() Config {

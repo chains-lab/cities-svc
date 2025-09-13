@@ -13,22 +13,22 @@ import (
 	"github.com/google/uuid"
 )
 
-type CreateInviteParams struct {
+type SentInviteParams struct {
 	InitiatorID uuid.UUID
+	CityID      uuid.UUID
 	Role        string
 }
 
-func (g Gov) CreateInvite(ctx context.Context, params CreateInviteParams) (models.Invite, error) {
-	err := enum.CheckCityGovRole(params.Role)
-	if err != nil {
-		return models.Invite{}, errx.ErrorInvalidGovRole.Raise(
-			fmt.Errorf("check city gov role: %w", err),
-		)
-	}
-
+func (g Gov) SentInvite(ctx context.Context, params SentInviteParams) (models.Invite, error) {
 	initiator, err := g.GetInitiatorGov(ctx, params.InitiatorID)
 	if err != nil {
 		return models.Invite{}, err
+	}
+
+	if initiator.CityID != params.CityID {
+		return models.Invite{}, errx.ErrorInitiatorIsNotThisCityGov.Raise(
+			fmt.Errorf("initiator have not access to city %s", params.CityID),
+		)
 	}
 
 	access, err := enum.CompareCityGovRoles(params.Role, initiator.Role)
@@ -38,7 +38,7 @@ func (g Gov) CreateInvite(ctx context.Context, params CreateInviteParams) (model
 		)
 	}
 	if access <= 0 && initiator.Role != enum.CityGovRoleMayor {
-		return models.Invite{}, errx.ErrorInitiatorRoleHaveNotEnoughRights.Raise(
+		return models.Invite{}, errx.ErrorInitiatorGovRoleHaveNotEnoughRights.Raise(
 			fmt.Errorf("initiator have not enough rights to invite role %s", params.Role),
 		)
 	}
@@ -69,14 +69,14 @@ func (g Gov) CreateInvite(ctx context.Context, params CreateInviteParams) (model
 		CreatedAt: now,
 	}
 
-	err = g.query.New().Insert(ctx, stmt)
+	err = g.inv.New().Insert(ctx, stmt)
 	if err != nil {
 		return models.Invite{}, errx.ErrorInternal.Raise(
 			fmt.Errorf("create invite: %w", err),
 		)
 	}
 
-	return modelsFromDB(stmt, token), nil
+	return inviteFromDB(stmt, token), nil
 }
 
 func (g Gov) CreateMayorInvite(ctx context.Context, cityID uuid.UUID) (models.Invite, error) {
@@ -106,12 +106,12 @@ func (g Gov) CreateMayorInvite(ctx context.Context, cityID uuid.UUID) (models.In
 		CreatedAt: now,
 	}
 
-	err = g.query.New().Insert(ctx, stmt)
+	err = g.inv.New().Insert(ctx, stmt)
 	if err != nil {
 		return models.Invite{}, errx.ErrorInternal.Raise(
 			fmt.Errorf("create invite: %w", err),
 		)
 	}
 
-	return modelsFromDB(stmt, token), nil
+	return inviteFromDB(stmt, token), nil
 }

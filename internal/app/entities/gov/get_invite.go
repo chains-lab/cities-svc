@@ -9,12 +9,11 @@ import (
 	"github.com/chains-lab/cities-svc/internal/app/jwtmanager"
 	"github.com/chains-lab/cities-svc/internal/app/models"
 	"github.com/chains-lab/cities-svc/internal/errx"
-	"github.com/chains-lab/enum"
 	"github.com/google/uuid"
 )
 
 func (g Gov) GetInvite(ctx context.Context, ID uuid.UUID) (models.Invite, error) {
-	inv, err := g.query.New().FilterID(ID).Get(ctx)
+	inv, err := g.inv.New().FilterID(ID).Get(ctx)
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
@@ -29,7 +28,7 @@ func (g Gov) GetInvite(ctx context.Context, ID uuid.UUID) (models.Invite, error)
 	token, err := g.jwt.CreateInviteToken(jwtmanager.InvitePayload{
 		ID:        inv.ID,
 		CityID:    inv.CityID,
-		Role:      enum.CityGovRoleMayor,
+		Role:      inv.Role,
 		ExpiredAt: inv.ExpiresAt,
 		CreatedAt: inv.CreatedAt,
 	})
@@ -39,5 +38,5 @@ func (g Gov) GetInvite(ctx context.Context, ID uuid.UUID) (models.Invite, error)
 		)
 	}
 
-	return modelsFromDB(inv, token), nil
+	return inviteFromDB(inv, token), nil
 }

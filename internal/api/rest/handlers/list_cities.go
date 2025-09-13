@@ -18,23 +18,20 @@ import (
 	"github.com/paulmach/orb"
 )
 
-func (a Adapter) SearchCities(w http.ResponseWriter, r *http.Request) {
+func (a Adapter) ListCities(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	q := r.URL.Query()
 
-	var filters app.FilterListParams
+	var filters app.FilterListCitiesParams
 
-	// name
 	if name := strings.TrimSpace(q.Get("name")); name != "" {
 		filters.Name = &[]string{name}[0]
 	}
 
-	// statuses (?status=active&status=inactive ...)
 	if sts := q["status"]; len(sts) > 0 {
 		filters.Status = sts
 	}
 
-	// country_id
 	if cid := strings.TrimSpace(q.Get("country_id")); cid != "" {
 		id, err := uuid.Parse(cid)
 		if err != nil {
@@ -44,26 +41,27 @@ func (a Adapter) SearchCities(w http.ResponseWriter, r *http.Request) {
 		filters.CountryID = &id
 	}
 
-	// Геофильтр: lat/lon + (radius_km | radius_m)
 	latStr, lonStr := q.Get("lat"), q.Get("lon")
 	radMStr, radKMStr := q.Get("radius_m"), q.Get("radius_km")
 
 	if (latStr != "" || lonStr != "") || (radMStr != "" || radKMStr != "") {
-		// требуем lat+lon+radius
 		if latStr == "" || lonStr == "" {
 			ape.RenderErr(w, problems.InvalidParameter("lat/lon", fmt.Errorf("both lat and lon are required when using radius")))
 			return
 		}
+
 		lat, err := strconv.ParseFloat(latStr, 64)
 		if err != nil || math.IsNaN(lat) || math.IsInf(lat, 0) || lat < -90 || lat > 90 {
 			ape.RenderErr(w, problems.InvalidParameter("lat", fmt.Errorf("invalid latitude")))
 			return
 		}
+
 		lon, err := strconv.ParseFloat(lonStr, 64)
 		if err != nil || math.IsNaN(lon) || math.IsInf(lon, 0) || lon < -180 || lon > 180 {
 			ape.RenderErr(w, problems.InvalidParameter("lon", fmt.Errorf("invalid longitude")))
 			return
 		}
+
 		var radiusM uint
 		switch {
 		case radKMStr != "":
@@ -85,7 +83,7 @@ func (a Adapter) SearchCities(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		filters.Location = &app.FilterListDistance{
+		filters.Location = &app.FilterListCityDistance{
 			Point:   orb.Point{lon, lat},
 			RadiusM: uint64(radiusM),
 		}
@@ -101,6 +99,7 @@ func (a Adapter) SearchCities(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+
 	if v := q.Get("size"); v != "" {
 		if n, err := strconv.ParseUint(v, 10, 64); err == nil && n > 0 {
 			pag.Size = n
@@ -124,12 +123,11 @@ func (a Adapter) SearchCities(w http.ResponseWriter, r *http.Request) {
 				asc = false
 				f = f[1:]
 			}
-			// опционально: whitelist полей sort здесь
+
 			sort = append(sort, pagi.SortField{Field: f, Ascend: asc})
 		}
 	}
 
-	// вызов бизнес-логики
 	cities, resp, err := a.app.ListCities(ctx, filters, pag, sort)
 	if err != nil {
 		a.log.WithError(err).Error("failed to search cities")
@@ -142,6 +140,5 @@ func (a Adapter) SearchCities(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// рендер коллекции (предполагается аналог CountriesCollection)
 	ape.Render(w, http.StatusOK, responses.CitiesCollection(cities, resp))
 }

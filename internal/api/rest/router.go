@@ -14,19 +14,19 @@ import (
 
 type Handlers interface {
 	CreateCountry(w http.ResponseWriter, r *http.Request)
-	SearchCountries(w http.ResponseWriter, r *http.Request)
+	ListCountries(w http.ResponseWriter, r *http.Request)
 	GetCountry(w http.ResponseWriter, r *http.Request)
 	UpdateCountry(w http.ResponseWriter, r *http.Request)
 	UpdateCountryStatus(w http.ResponseWriter, r *http.Request)
 
-	SearchCities(w http.ResponseWriter, r *http.Request)
+	ListCities(w http.ResponseWriter, r *http.Request)
 	CreateCity(w http.ResponseWriter, r *http.Request)
 	GetCity(w http.ResponseWriter, r *http.Request)
 	UpdateCity(w http.ResponseWriter, r *http.Request)
 	UpdateCityStatus(w http.ResponseWriter, r *http.Request)
 
 	GetCityBySlug(w http.ResponseWriter, r *http.Request)
-	SearchGovs(w http.ResponseWriter, r *http.Request)
+	ListGovs(w http.ResponseWriter, r *http.Request)
 	CreateInvite(w http.ResponseWriter, r *http.Request)
 	AnswerToInvite(w http.ResponseWriter, r *http.Request)
 	GetGov(w http.ResponseWriter, r *http.Request)
@@ -53,7 +53,7 @@ func (s *Service) Api(ctx context.Context, cfg config.Config, h Handlers) {
 			r.Route("/countries", func(r chi.Router) {
 				r.With(auth, sysadmin).Post("/", h.CreateCountry)
 
-				r.Get("/", h.SearchCountries)
+				r.Get("/", h.ListCountries)
 
 				r.Route("/{country_id}", func(r chi.Router) {
 					r.Get("/", h.GetCountry)
@@ -67,7 +67,7 @@ func (s *Service) Api(ctx context.Context, cfg config.Config, h Handlers) {
 			})
 
 			r.Route("/cities", func(r chi.Router) {
-				r.Get("/", h.SearchCities)
+				r.Get("/", h.ListCities)
 				r.Get("/slug/{slug}", h.GetCityBySlug)
 
 				r.With(auth, sysadmin).Post("/", h.CreateCity)
@@ -79,11 +79,11 @@ func (s *Service) Api(ctx context.Context, cfg config.Config, h Handlers) {
 					r.With(auth).Put("/status", h.UpdateCityStatus)
 
 					r.Route("/govs", func(r chi.Router) {
-						r.Get("/", h.SearchGovs)
+						r.Get("/", h.ListGovs)
 
 						r.With(auth).Route("/invite", func(r chi.Router) {
 							r.Post("/", h.CreateInvite)
-							r.With(auth).Post("/mayor", h.InviteMayor)
+							r.With(auth, sysadmin).Post("/mayor", h.InviteMayor)
 
 							r.Post("/{token}", h.AnswerToInvite)
 						})

@@ -10,14 +10,14 @@ import (
 	"github.com/paulmach/orb"
 )
 
-type FilterListParams struct {
+type FilterListCitiesParams struct {
 	Name      *string
 	Status    []string
 	CountryID *uuid.UUID
-	Location  *FilterListDistance
+	Location  *FilterListCityDistance
 }
 
-type FilterListDistance struct {
+type FilterListCityDistance struct {
 	Point   orb.Point
 	RadiusM uint64
 }
@@ -26,7 +26,7 @@ type FilterListDistance struct {
 // This method for sysadmin
 func (a App) ListCities(
 	ctx context.Context,
-	filters FilterListParams,
+	filters FilterListCitiesParams,
 	pag pagi.Request,
 	sort []pagi.SortField,
 ) ([]models.City, pagi.Response, error) {

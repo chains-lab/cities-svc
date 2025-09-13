@@ -15,15 +15,15 @@ import (
 func (a Adapter) GetGov(w http.ResponseWriter, r *http.Request) {
 	userID, err := uuid.Parse(chi.URLParam(r, "user_id"))
 	if err != nil {
-		a.Log(r).WithError(err).Error("invalid user_id")
+		a.log.WithError(err).Error("invalid user_id")
 		ape.RenderErr(w, problems.InvalidParameter("user_id", err))
 
 		return
 	}
 
-	gov, err := a.app.Get(r.Context(), userID)
+	gov, err := a.app.GetGov(r.Context(), userID)
 	if err != nil {
-		a.Log(r).WithError(err).Error("failed to get gov")
+		a.log.WithError(err).Error("failed to get gov")
 		switch {
 		case errors.Is(err, errx.ErrorCityGovNotFound):
 			ape.RenderErr(w, problems.NotFound("city government not found"))

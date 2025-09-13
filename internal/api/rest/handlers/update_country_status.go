@@ -19,14 +19,14 @@ import (
 func (a Adapter) UpdateCountryStatus(w http.ResponseWriter, r *http.Request) {
 	req, err := requests.UpdateCountryStatus(r)
 	if err != nil {
-		a.Log(r).WithError(err).Error("failed to parse update country status request")
+		a.log.WithError(err).Error("failed to parse update country status request")
 		ape.RenderErr(w, problems.BadRequest(err)...)
 
 		return
 	}
 
 	if req.Data.Id != chi.URLParam(r, "country_id") {
-		a.Log(r).Error("body id does not match url country_id")
+		a.log.Error("body id does not match url country_id")
 		ape.RenderErr(w,
 			problems.InvalidParameter("country_id", fmt.Errorf("data/id does not match url country_id")),
 			problems.InvalidPointer("/data/id", fmt.Errorf("data/id does not match url country_id")),
@@ -37,7 +37,7 @@ func (a Adapter) UpdateCountryStatus(w http.ResponseWriter, r *http.Request) {
 
 	countryID, err := uuid.Parse(req.Data.Id)
 	if err != nil {
-		a.Log(r).WithError(err).Error("invalid country_id")
+		a.log.WithError(err).Error("invalid country_id")
 		ape.RenderErr(w, problems.InvalidParameter("country_id", err))
 
 		return
@@ -51,7 +51,7 @@ func (a Adapter) UpdateCountryStatus(w http.ResponseWriter, r *http.Request) {
 	case enum.CountryStatusDeprecated:
 		country, err = a.app.SetCountryStatusDeprecated(r.Context(), countryID)
 	default:
-		a.Log(r).Error("invalid country status")
+		a.log.Error("invalid country status")
 		ape.RenderErr(w, problems.InvalidPointer("data/attributes/status",
 			fmt.Errorf("invalid country status for update, allowed values are: %s, %s",
 				enum.CountryStatusSupported, enum.CountryStatusDeprecated),
@@ -62,7 +62,7 @@ func (a Adapter) UpdateCountryStatus(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err != nil {
-		a.Log(r).WithError(err).Error("failed to update country status")
+		a.log.WithError(err).Error("failed to update country status")
 		switch {
 		case errors.Is(err, errx.ErrorCountryNotFound):
 			ape.RenderErr(w, problems.NotFound("country not found"))

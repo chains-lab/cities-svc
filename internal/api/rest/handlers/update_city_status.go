@@ -19,14 +19,14 @@ import (
 func (a Adapter) UpdateCityStatus(w http.ResponseWriter, r *http.Request) {
 	req, err := requests.UpdateCityStatus(r)
 	if err != nil {
-		a.Log(r).WithError(err).Error("failed to parse update city request")
+		a.log.WithError(err).Error("failed to parse update city request")
 		ape.RenderErr(w, problems.BadRequest(err)...)
 
 		return
 	}
 
 	if req.Data.Id != chi.URLParam(r, "city_id") {
-		a.Log(r).Error("body id does not match url city_id")
+		a.log.Error("body id does not match url city_id")
 		ape.RenderErr(w,
 			problems.InvalidParameter("city_id", fmt.Errorf("data/id does not match url city_id")),
 			problems.InvalidPointer("/data/id", fmt.Errorf("data/id does not match url city_id")),
@@ -36,7 +36,7 @@ func (a Adapter) UpdateCityStatus(w http.ResponseWriter, r *http.Request) {
 
 	cityID, err := uuid.Parse(req.Data.Id)
 	if err != nil {
-		a.Log(r).WithError(err).Error("invalid city_id")
+		a.log.WithError(err).Error("invalid city_id")
 		ape.RenderErr(w, problems.InvalidParameter("city_id", err))
 
 		return
@@ -51,7 +51,7 @@ func (a Adapter) UpdateCityStatus(w http.ResponseWriter, r *http.Request) {
 	case enum.CityStatusDeprecated:
 		city, err = a.app.SetCityStatusDeprecated(r.Context(), cityID)
 	default:
-		a.Log(r).Error("invalid city status")
+		a.log.Error("invalid city status")
 		ape.RenderErr(w, problems.InvalidPointer("data/attributes/status",
 			fmt.Errorf("invalid city status for update, allowed values are: %s, %s, %s",
 				enum.CityStatusOfficial, enum.CityStatusCommunity, enum.CityStatusDeprecated),
@@ -60,8 +60,10 @@ func (a Adapter) UpdateCityStatus(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err != nil {
-		a.Log(r).WithError(err).Error("failed to update city status")
+		a.log.WithError(err).Error("failed to update city status")
 		switch {
+		case errors.Is(err, errx.ErrorCannotUpdateCityStatusInUnsupportedCountry):
+			ape.RenderErr(w, problems.Conflict("cannot update city status in unsupported country"))
 		case errors.Is(err, errx.ErrorInvalidCityStatus):
 			ape.RenderErr(w, problems.InvalidPointer("data/attributes/status", fmt.Errorf("invalid city status")))
 		case errors.Is(err, errx.ErrorCityNotFound):

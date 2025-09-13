@@ -32,7 +32,7 @@ func (g Gov) UpdateOne(ctx context.Context, userID uuid.UUID, params UpdateGovPa
 		}
 	}
 
-	err := g.govQ.New().FilterUserID(userID).Update(ctx, stmt)
+	err := g.gov.New().FilterUserID(userID).Update(ctx, stmt)
 	if err != nil {
 		return models.Gov{}, errx.ErrorInternal.Raise(
 			fmt.Errorf("failed to update city gov, cause: %w", err),

@@ -18,14 +18,14 @@ import (
 func (a Adapter) UpdateCountry(w http.ResponseWriter, r *http.Request) {
 	req, err := requests.UpdateCountry(r)
 	if err != nil {
-		a.Log(r).WithError(err).Error("failed to parse update country request")
+		a.log.WithError(err).Error("failed to parse update country request")
 		ape.RenderErr(w, problems.BadRequest(err)...)
 
 		return
 	}
 
 	if req.Data.Id != chi.URLParam(r, "country_id") {
-		a.Log(r).Error("body id does not match url country_id")
+		a.log.Error("body id does not match url country_id")
 		ape.RenderErr(w,
 			problems.InvalidParameter("country_id", fmt.Errorf("data/id does not match url country_id")),
 			problems.InvalidPointer("/data/id", fmt.Errorf("data/id does not match url country_id")),
@@ -36,7 +36,7 @@ func (a Adapter) UpdateCountry(w http.ResponseWriter, r *http.Request) {
 
 	countryID, err := uuid.Parse(req.Data.Id)
 	if err != nil {
-		a.Log(r).WithError(err).Error("invalid country_id")
+		a.log.WithError(err).Error("invalid country_id")
 		ape.RenderErr(w, problems.InvalidParameter("country_id", err))
 
 		return
@@ -49,7 +49,7 @@ func (a Adapter) UpdateCountry(w http.ResponseWriter, r *http.Request) {
 
 	country, err := a.app.UpdateCountry(r.Context(), countryID, params)
 	if err != nil {
-		a.Log(r).WithError(err).Error("failed to update country")
+		a.log.WithError(err).Error("failed to update country")
 		switch {
 		case errors.Is(err, errx.ErrorCountryNotFound):
 			ape.RenderErr(w, problems.NotFound("country not found"))

@@ -40,26 +40,19 @@ func (g Gov) AnsweredInvite(ctx context.Context, userID uuid.UUID, token, status
 		return models.Invite{}, errx.ErrorInvalidInviteToken.Raise(fmt.Errorf("token city_id mismatch"))
 	}
 
-	err = enum.CheckInviteStatus(data.Role)
-	if err != nil {
-		return models.Invite{}, errx.ErrorInvalidGovRole.Raise(
-			fmt.Errorf("check invite status: %w", err),
-		)
-	}
-
 	upd := dbx.UpdateInviteParams{
 		Status:     &status,
 		UserID:     &uuid.NullUUID{UUID: userID, Valid: true},
 		AnsweredAt: &sql.NullTime{Time: now, Valid: true},
 	}
-
-	if err := g.query.New().FilterID(inv.ID).Update(ctx, upd); err != nil {
+	if err := g.inv.New().FilterID(inv.ID).Update(ctx, upd); err != nil {
 		return models.Invite{}, errx.ErrorInternal.Raise(
 			fmt.Errorf("update invite status: %w", err),
 		)
 	}
 
-	if status == enum.InviteStatusAccepted {
+	switch status {
+	case enum.InviteStatusAccepted:
 		if data.Role == enum.CityGovRoleMayor {
 			err = g.deleteCityMayor(ctx, inv.CityID)
 			if err != nil {
@@ -75,6 +68,13 @@ func (g Gov) AnsweredInvite(ctx context.Context, userID uuid.UUID, token, status
 		if err != nil {
 			return models.Invite{}, err
 		}
+	case enum.InviteStatusRejected:
+		// nothing to do
+	default:
+		return models.Invite{}, errx.ErrorUnexpectedInviteStatus.Raise(
+			fmt.Errorf("invalid invite status: %s", status),
+		)
+
 	}
 
 	inv.Status = status

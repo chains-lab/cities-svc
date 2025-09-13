@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"embed"
 
-	"github.com/chains-lab/cities-svc/internal/config"
 	"github.com/pkg/errors"
 	migrate "github.com/rubenv/sql-migrate"
 	"github.com/sirupsen/logrus"
@@ -22,8 +21,8 @@ var migrations = &migrate.EmbedFileSystemMigrationSource{
 	Root:       "migrations",
 }
 
-func MigrateUp(cfg config.Config) error {
-	db, err := sql.Open("postgres", cfg.Database.SQL.URL)
+func MigrateUp(dbUrl string) error {
+	db, err := sql.Open("postgres", dbUrl)
 
 	applied, err := migrate.Exec(db, "postgres", migrations, migrate.Up)
 	if err != nil {
@@ -33,8 +32,8 @@ func MigrateUp(cfg config.Config) error {
 	return nil
 }
 
-func MigrateDown(cfg config.Config) error {
-	db, err := sql.Open("postgres", cfg.Database.SQL.URL)
+func MigrateDown(dbUrl string) error {
+	db, err := sql.Open("postgres", dbUrl)
 
 	applied, err := migrate.Exec(db, "postgres", migrations, migrate.Down)
 	if err != nil {

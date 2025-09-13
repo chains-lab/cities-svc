@@ -10,16 +10,16 @@ import (
 )
 
 type Gov struct {
-	govQ  dbx.GovQ
-	jwt   jwtmanager.Manager
-	query dbx.InviteQ
+	gov dbx.GovQ
+	inv dbx.InviteQ
+	jwt jwtmanager.Manager
 }
 
 func NewGov(db *sql.DB, cfg config.Config) Gov {
 	return Gov{
-		govQ:  dbx.NewCityGovQ(db),
-		jwt:   jwtmanager.NewManager(cfg),
-		query: dbx.NewInviteQ(db),
+		gov: dbx.NewCityGovQ(db),
+		inv: dbx.NewInviteQ(db),
+		jwt: jwtmanager.NewManager(cfg),
 	}
 }
 
@@ -38,7 +38,7 @@ func govFromDb(g dbx.Gov) models.Gov {
 	return res
 }
 
-func modelsFromDB(inv dbx.Invite, token string) models.Invite {
+func inviteFromDB(inv dbx.Invite, token string) models.Invite {
 	res := models.Invite{
 		ID:        inv.ID,
 		Status:    inv.Status,

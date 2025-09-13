@@ -6,6 +6,6 @@ import (
 	"github.com/google/uuid"
 )
 
-func (a App) DeleteGov(ctx context.Context, initiatorID, userID uuid.UUID) error {
-	return a.gov.Delete(ctx, initiatorID, userID)
+func (a App) DeleteGov(ctx context.Context, initiatorID, userID, cityID uuid.UUID) error {
+	return a.gov.Delete(ctx, initiatorID, userID, cityID)
 }

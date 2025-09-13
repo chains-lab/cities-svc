@@ -14,7 +14,7 @@ import (
 func (a Adapter) GetCityBySlug(w http.ResponseWriter, r *http.Request) {
 	city, err := a.app.GetCityBySlug(r.Context(), chi.URLParam(r, "slug"))
 	if err != nil {
-		a.Log(r).WithError(err).Error("failed to get city")
+		a.log.WithError(err).Error("failed to get city")
 		switch {
 		case errors.Is(err, errx.ErrorCityNotFound):
 			ape.RenderErr(w, problems.NotFound("city not found"))

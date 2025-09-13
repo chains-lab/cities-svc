@@ -15,7 +15,7 @@ properties:
           description: "invite id"
         type:
           type: string
-          enum: [ answer_to_invite ]
+          enum: [ city_gov_invite ]
         attributes:
           type: object
           required:

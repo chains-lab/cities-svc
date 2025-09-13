@@ -19,7 +19,7 @@ type GetGovFilters struct {
 }
 
 func (g Gov) GetGov(ctx context.Context, filters GetGovFilters) (models.Gov, error) {
-	query := g.govQ.New()
+	query := g.gov.New()
 
 	if filters.UserID != nil {
 		query = query.FilterUserID(*filters.UserID)

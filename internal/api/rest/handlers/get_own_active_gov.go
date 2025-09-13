@@ -14,7 +14,7 @@ import (
 func (a Adapter) GetOwnGov(w http.ResponseWriter, r *http.Request) {
 	initiator, err := meta.User(r.Context())
 	if err != nil {
-		a.Log(r).WithError(err).Error("failed to get user from context")
+		a.log.WithError(err).Error("failed to get user from context")
 		ape.RenderErr(w, problems.Unauthorized("failed to get user from context"))
 
 		return
@@ -22,7 +22,7 @@ func (a Adapter) GetOwnGov(w http.ResponseWriter, r *http.Request) {
 
 	gov, err := a.app.GetInitiatorGov(r.Context(), initiator.ID)
 	if err != nil {
-		a.Log(r).WithError(err).Error("failed to get own active gov")
+		a.log.WithError(err).Error("failed to get own active gov")
 
 		switch {
 		case errors.Is(err, errx.ErrorInitiatorIsNotActiveCityGov):

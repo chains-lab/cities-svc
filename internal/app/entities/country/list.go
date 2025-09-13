@@ -55,10 +55,13 @@ func (c Country) List(
 	for _, sort := range sort {
 		switch sort.Field {
 		case "name":
-			query = query.OrderAlphabetical(sort.Ascend)
+			query = query.OrderByAlphabetical(sort.Ascend)
 		default:
 
 		}
+	}
+	if len(sort) == 0 {
+		query = query.OrderByAlphabetical(true)
 	}
 
 	total, err := query.Count(ctx)

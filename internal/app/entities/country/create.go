@@ -31,7 +31,7 @@ func (c Country) Create(ctx context.Context, name string, status string) (models
 	err = c.countryQ.New().Insert(ctx, dbx.Country{
 		ID:        ID,
 		Name:      name,
-		Status:    enum.CountryStatusSupported,
+		Status:    status,
 		CreatedAt: now,
 		UpdatedAt: now,
 	})
@@ -44,7 +44,7 @@ func (c Country) Create(ctx context.Context, name string, status string) (models
 	return models.Country{
 		ID:        ID,
 		Name:      name,
-		Status:    enum.CountryStatusSupported,
+		Status:    status,
 		CreatedAt: now,
 		UpdatedAt: now,
 	}, nil

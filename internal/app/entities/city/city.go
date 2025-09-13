@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/chains-lab/cities-svc/internal/app/models"
@@ -73,7 +74,7 @@ func (c City) validateSlug(slug string) error {
 }
 
 func (c City) validateName(name string) error {
-	if name == "" {
+	if strings.Trim(name, " ") == "" {
 		return errx.ErrorInvalidCityName.Raise(
 			fmt.Errorf("city name must not be empty"),
 		)
@@ -90,6 +91,7 @@ func cityFromDb(c dbx.City) models.City {
 	res := models.City{
 		ID:        c.ID,
 		CountryID: c.CountryID,
+		Point:     c.Point,
 		Status:    c.Status,
 		Name:      c.Name,
 		Timezone:  c.Timezone,

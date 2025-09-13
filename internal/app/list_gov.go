@@ -9,14 +9,14 @@ import (
 	"github.com/google/uuid"
 )
 
-type FiltersListParams struct {
+type FiltersListGovsParams struct {
 	CityID *uuid.UUID
 	Roles  []string
 }
 
 func (a App) ListGovs(
 	ctx context.Context,
-	filters FiltersListParams,
+	filters FiltersListGovsParams,
 	pag pagi.Request,
 	sort []pagi.SortField,
 ) ([]models.Gov, pagi.Response, error) {

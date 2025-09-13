@@ -45,7 +45,7 @@ func (g Gov) CreateMayor(ctx context.Context, userID, cityID uuid.UUID) (models.
 		CreatedAt: now,
 	}
 
-	err = g.govQ.New().Insert(ctx, stmt)
+	err = g.gov.New().Insert(ctx, stmt)
 	if err != nil {
 		return models.Gov{}, errx.ErrorInternal.Raise(
 			fmt.Errorf("failed to creating city gov: %w", err),

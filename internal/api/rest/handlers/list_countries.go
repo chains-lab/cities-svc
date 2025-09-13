@@ -14,14 +14,19 @@ import (
 	"github.com/chains-lab/pagi"
 )
 
-func (a Adapter) SearchCountries(w http.ResponseWriter, r *http.Request) {
+func (a Adapter) ListCountries(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	q := r.URL.Query()
 
-	filters := app.FilterCountriesListParams{
-		Name:     q.Get("name"),
-		Statuses: q["status"],
+	filters := app.FilterCountriesListParams{}
+
+	if name := strings.TrimSpace(q.Get("name")); name != "" {
+		filters.Name = name
+	}
+
+	if sts := q["status"]; len(sts) > 0 {
+		filters.Statuses = sts
 	}
 
 	var pag pagi.Request
@@ -30,6 +35,7 @@ func (a Adapter) SearchCountries(w http.ResponseWriter, r *http.Request) {
 			pag.Page = n
 		}
 	}
+
 	if v := q.Get("size"); v != "" {
 		if n, err := strconv.ParseUint(v, 10, 64); err == nil && n > 0 {
 			pag.Size = n

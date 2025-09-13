@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/chains-lab/ape"
@@ -10,13 +11,14 @@ import (
 	"github.com/chains-lab/cities-svc/internal/api/rest/requests"
 	"github.com/chains-lab/cities-svc/internal/api/rest/responses"
 	"github.com/chains-lab/cities-svc/internal/errx"
+	"github.com/chains-lab/enum"
 	"github.com/go-chi/chi/v5"
 )
 
 func (a Adapter) AnswerToInvite(w http.ResponseWriter, r *http.Request) {
 	initiator, err := meta.User(r.Context())
 	if err != nil {
-		a.Log(r).WithError(err).Error("failed to get user from context")
+		a.log.WithError(err).Error("failed to get user from context")
 		ape.RenderErr(w, problems.Unauthorized("failed to get user from context"))
 
 		return
@@ -24,7 +26,7 @@ func (a Adapter) AnswerToInvite(w http.ResponseWriter, r *http.Request) {
 
 	req, err := requests.AnswerToInvite(r)
 	if err != nil {
-		a.Log(r).WithError(err).Error("failed to decode answer to invite request")
+		a.log.WithError(err).Error("failed to decode answer to invite request")
 		ape.RenderErr(w, problems.BadRequest(err)...)
 
 		return
@@ -34,7 +36,7 @@ func (a Adapter) AnswerToInvite(w http.ResponseWriter, r *http.Request) {
 
 	invite, err := a.app.AnswerToInvite(r.Context(), initiator.ID, req.Data.Attributes.Answer, token)
 	if err != nil {
-		a.Log(r).WithError(err).Error("failed to answer to invite")
+		a.log.WithError(err).Error("failed to answer to invite")
 		switch {
 		case errors.Is(err, errx.ErrorInvalidInviteToken):
 			ape.RenderErr(w, problems.Unauthorized("invalid invite token"))
@@ -44,6 +46,17 @@ func (a Adapter) AnswerToInvite(w http.ResponseWriter, r *http.Request) {
 			ape.RenderErr(w, problems.NotFound("invite not found"))
 		case errors.Is(err, errx.ErrorInviteExpired):
 			ape.RenderErr(w, problems.Conflict("invite expired"))
+		case errors.Is(err, errx.ErrorUnexpectedInviteStatus):
+			ape.RenderErr(w, problems.InvalidParameter(
+				"data/attributes/status",
+				fmt.Errorf("unexpected invite status: %s, need: %s or %s",
+					req.Data.Attributes.Answer,
+					enum.InviteStatusAccepted,
+					enum.InviteStatusRejected,
+				),
+			))
+		case errors.Is(err, errx.ErrorAnswerToInviteForInactiveCity):
+			ape.RenderErr(w, problems.Conflict("cannot accept invite for inactive city"))
 		default:
 			ape.RenderErr(w, problems.InternalError())
 		}

@@ -33,7 +33,7 @@ func (c City) UpdateOne(ctx context.Context, cityID uuid.UUID, params UpdateCity
 
 	if params.CountryID == nil && params.Point == nil && params.Status == nil &&
 		params.Name == nil && params.Icon == nil && params.Slug == nil && params.Timezone == nil {
-		return models.City{}, nil
+		return city, nil
 	}
 
 	stmt := dbx.UpdateCityParams{}
@@ -88,7 +88,7 @@ func (c City) UpdateOne(ctx context.Context, cityID uuid.UUID, params UpdateCity
 		err = c.validateSlug(*params.Slug)
 
 		_, err = c.GetBySlug(ctx, *params.Slug)
-		if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		if err != nil && !errors.Is(err, errx.ErrorCityNotFound) {
 			return models.City{}, errx.ErrorInternal.Raise(
 				fmt.Errorf("failed to get city by slug: %w", err),
 			)

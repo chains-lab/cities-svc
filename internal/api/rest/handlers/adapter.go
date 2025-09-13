@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	"net/http"
-
 	"github.com/chains-lab/cities-svc/internal/app"
 	"github.com/chains-lab/cities-svc/internal/config"
 	"github.com/chains-lab/logium"
@@ -20,8 +18,4 @@ func NewAdapter(cfg config.Config, log logium.Logger, a *app.App) Adapter {
 		log: log,
 		cfg: cfg,
 	}
-}
-
-func (a Adapter) Log(r *http.Request) logium.Logger {
-	return a.log
 }

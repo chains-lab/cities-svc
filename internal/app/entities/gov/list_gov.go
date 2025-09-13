@@ -35,7 +35,7 @@ func (g Gov) ListGovs(
 	limit := pag.Size + 1 // +1 чтобы определить наличие next
 	offset := (pag.Page - 1) * pag.Size
 
-	query := g.govQ.New()
+	query := g.gov.New()
 
 	if filters.CityID != nil {
 		query = query.FilterCityID(*filters.CityID)
@@ -59,6 +59,9 @@ func (g Gov) ListGovs(
 		case "created_at":
 			query = query.OrderByCreatedAt(s.Ascend)
 		}
+	}
+	if len(sort) == 0 {
+		query = query.OrderByCreatedAt(false)
 	}
 
 	total, err := query.Count(ctx)

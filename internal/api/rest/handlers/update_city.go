@@ -7,6 +7,7 @@ import (
 
 	"github.com/chains-lab/ape"
 	"github.com/chains-lab/ape/problems"
+	"github.com/chains-lab/cities-svc/internal/api/rest/meta"
 	"github.com/chains-lab/cities-svc/internal/api/rest/requests"
 	"github.com/chains-lab/cities-svc/internal/api/rest/responses"
 	"github.com/chains-lab/cities-svc/internal/app"
@@ -17,16 +18,24 @@ import (
 )
 
 func (a Adapter) UpdateCity(w http.ResponseWriter, r *http.Request) {
+	initiator, err := meta.User(r.Context())
+	if err != nil {
+		a.log.WithError(err).Error("failed to get user from context")
+		ape.RenderErr(w, problems.Unauthorized("failed to get user from context"))
+
+		return
+	}
+
 	req, err := requests.UpdateCity(r)
 	if err != nil {
-		a.Log(r).WithError(err).Error("failed to parse update city request")
+		a.log.WithError(err).Error("failed to parse update city request")
 		ape.RenderErr(w, problems.BadRequest(err)...)
 
 		return
 	}
 
 	if req.Data.Id != chi.URLParam(r, "city_id") {
-		a.Log(r).Error("body id does not match url city_id")
+		a.log.Error("body id does not match url city_id")
 		ape.RenderErr(w,
 			problems.InvalidParameter("city_id", fmt.Errorf("data/id does not match url city_id")),
 			problems.InvalidPointer("/data/id", fmt.Errorf("data/id does not match url city_id")),
@@ -36,7 +45,7 @@ func (a Adapter) UpdateCity(w http.ResponseWriter, r *http.Request) {
 
 	cityID, err := uuid.Parse(req.Data.Id)
 	if err != nil {
-		a.Log(r).WithError(err).Error("invalid city_id")
+		a.log.WithError(err).Error("invalid city_id")
 		ape.RenderErr(w, problems.InvalidParameter("city_id", err))
 
 		return
@@ -63,10 +72,16 @@ func (a Adapter) UpdateCity(w http.ResponseWriter, r *http.Request) {
 		param.Slug = req.Data.Attributes.Slug
 	}
 
-	city, err := a.app.UpdateCity(r.Context(), cityID, param)
+	city, err := a.app.UpdateCity(r.Context(), cityID, initiator.ID, initiator.Role, param)
 	if err != nil {
-		a.Log(r).WithError(err).Error("failed to update city")
+		a.log.WithError(err).Error("failed to update city")
 		switch {
+		case errors.Is(err, errx.ErrorInitiatorIsNotActiveCityGov):
+			ape.RenderErr(w, problems.Forbidden("initiator is not an active city governor"))
+		case errors.Is(err, errx.ErrorInitiatorIsNotThisCityGov):
+			ape.RenderErr(w, problems.Forbidden("initiator is not the city governor"))
+		case errors.Is(err, errx.ErrorInitiatorGovRoleHaveNotEnoughRights):
+			ape.RenderErr(w, problems.Forbidden("initiator governor role have not enough rights"))
 		case errors.Is(err, errx.ErrorCityNotFound):
 			ape.RenderErr(w, problems.NotFound("city not found"))
 		case errors.Is(err, errx.ErrorInvalidPoint):

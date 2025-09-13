@@ -77,6 +77,9 @@ func (c City) List(
 			}
 		}
 	}
+	if len(sort) == 0 {
+		query = query.OrderByAlphabetical(true)
+	}
 
 	total, err := query.Count(ctx)
 	if err != nil {

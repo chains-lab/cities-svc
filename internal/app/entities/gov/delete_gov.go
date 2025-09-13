@@ -17,7 +17,7 @@ type DeleteGovsFilters struct {
 }
 
 func (g Gov) DeleteMany(ctx context.Context, filters DeleteGovsFilters) error {
-	query := g.govQ.New()
+	query := g.gov.New()
 
 	if filters.UserID != nil {
 		query = query.FilterUserID(*filters.UserID)
@@ -48,7 +48,7 @@ func (g Gov) DeleteMany(ctx context.Context, filters DeleteGovsFilters) error {
 	return nil
 }
 
-func (g Gov) Delete(ctx context.Context, InitiatorID, userID uuid.UUID) error {
+func (g Gov) Delete(ctx context.Context, InitiatorID, userID, cityID uuid.UUID) error {
 	initiator, err := g.GetInitiatorGov(ctx, InitiatorID)
 	if err != nil {
 		return err
@@ -59,6 +59,12 @@ func (g Gov) Delete(ctx context.Context, InitiatorID, userID uuid.UUID) error {
 	})
 	if err != nil {
 		return err
+	}
+
+	if initiator.CityID != cityID {
+		return errx.ErrorInitiatorAndUserHaveDifferentCity.Raise(
+			fmt.Errorf("initiator is not gov of city %s", cityID),
+		)
 	}
 
 	if initiator.CityID != gov.CityID {
@@ -74,7 +80,7 @@ func (g Gov) Delete(ctx context.Context, InitiatorID, userID uuid.UUID) error {
 		)
 	}
 	if access >= 0 {
-		return errx.ErrorInitiatorRoleHaveNotEnoughRights.Raise(
+		return errx.ErrorInitiatorGovRoleHaveNotEnoughRights.Raise(
 			fmt.Errorf("initiator have not enough rights to delete role %s", gov.Role),
 		)
 	}
@@ -98,7 +104,7 @@ func (g Gov) RefuseOwnGov(ctx context.Context, userID uuid.UUID) error {
 }
 
 func (g Gov) delete(ctx context.Context, userID uuid.UUID) error {
-	err := g.govQ.New().FilterUserID(userID).Delete(ctx)
+	err := g.gov.New().FilterUserID(userID).Delete(ctx)
 	if err != nil {
 		return errx.ErrorInternal.Raise(
 			fmt.Errorf("failed to delete city gov, cause: %w", err),
@@ -109,7 +115,7 @@ func (g Gov) delete(ctx context.Context, userID uuid.UUID) error {
 }
 
 func (g Gov) deleteCityMayor(ctx context.Context, cityID uuid.UUID) error {
-	err := g.govQ.New().FilterCityID(cityID).FilterRole(enum.CityGovRoleMayor).Delete(ctx)
+	err := g.gov.New().FilterCityID(cityID).FilterRole(enum.CityGovRoleMayor).Delete(ctx)
 	if err != nil {
 		return errx.ErrorInternal.Raise(
 			fmt.Errorf("failed to delete city mayor, cause: %w", err),

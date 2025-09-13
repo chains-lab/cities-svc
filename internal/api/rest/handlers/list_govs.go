@@ -16,11 +16,11 @@ import (
 	"github.com/google/uuid"
 )
 
-func (a Adapter) SearchGovs(w http.ResponseWriter, r *http.Request) {
+func (a Adapter) ListGovs(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	q := r.URL.Query()
 
-	var filters app.FiltersListParams
+	var filters app.FiltersListGovsParams
 
 	if cityID, err := uuid.Parse(q.Get("city_id")); err != nil {
 		filters.CityID = &cityID
@@ -44,6 +44,7 @@ func (a Adapter) SearchGovs(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+
 	if v := q.Get("size"); v != "" {
 		if n, err := strconv.ParseUint(v, 10, 64); err == nil && n > 0 {
 			pag.Size = n
@@ -73,7 +74,7 @@ func (a Adapter) SearchGovs(w http.ResponseWriter, r *http.Request) {
 
 	govs, resp, err := a.app.ListGovs(ctx, filters, pag, sort)
 	if err != nil {
-		a.Log(r).WithError(err).Error("failed to search govs")
+		a.log.WithError(err).Error("failed to search govs")
 		switch {
 		case errors.Is(err, errx.ErrorInvalidGovRole):
 			ape.RenderErr(w, problems.InvalidParameter("role", err))

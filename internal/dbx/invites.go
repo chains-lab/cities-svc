@@ -41,7 +41,6 @@ func NewInviteQ(db *sql.DB) InviteQ {
 		"status",
 		"role",
 		"city_id",
-		"initiator_id",
 		"user_id",
 		"answered_at",
 		"expires_at",

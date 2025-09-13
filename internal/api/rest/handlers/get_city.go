@@ -15,7 +15,7 @@ import (
 func (a Adapter) GetCity(w http.ResponseWriter, r *http.Request) {
 	cityID, err := uuid.Parse(chi.URLParam(r, "city_id"))
 	if err != nil {
-		a.Log(r).WithError(err).Error("invalid city_id")
+		a.log.WithError(err).Error("invalid city_id")
 		ape.RenderErr(w, problems.InvalidParameter("city_id", err))
 
 		return
@@ -23,7 +23,7 @@ func (a Adapter) GetCity(w http.ResponseWriter, r *http.Request) {
 
 	city, err := a.app.GetCityByID(r.Context(), cityID)
 	if err != nil {
-		a.Log(r).WithError(err).Error("failed to get city")
+		a.log.WithError(err).Error("failed to get city")
 		switch {
 		case errors.Is(err, errx.ErrorCityNotFound):
 			ape.RenderErr(w, problems.NotFound("city not found"))
