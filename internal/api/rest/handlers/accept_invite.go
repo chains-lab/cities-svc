@@ -35,9 +35,8 @@ func (a Adapter) AcceptInvite(w http.ResponseWriter, r *http.Request) {
 			ape.RenderErr(w, problems.NotFound("invite not found"))
 		case errors.Is(err, errx.ErrorInviteExpired):
 			ape.RenderErr(w, problems.Conflict("invite expired"))
-		case errors.Is(err, errx.ErrorUnexpectedInviteStatus):
-		case errors.Is(err, errx.ErrorAnswerToInviteForInactiveCity):
-			ape.RenderErr(w, problems.Conflict("cannot accept invite for inactive city"))
+		case errors.Is(err, errx.ErrorAnswerToInviteForNotOffSupCity):
+			ape.RenderErr(w, problems.Conflict("cannot accept invite for not official support city"))
 		default:
 			ape.RenderErr(w, problems.InternalError())
 		}

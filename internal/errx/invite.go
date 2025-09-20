@@ -10,6 +10,4 @@ var ErrorInviteAlreadyAnswered = ape.DeclareError("INVITE_ALREADY_ANSWERED")
 
 var ErrorInviteExpired = ape.DeclareError("INVITE_EXPIRED")
 
-var ErrorUnexpectedInviteStatus = ape.DeclareError("UNEXPECTED_INVITE_STATUS")
-
-var ErrorAnswerToInviteForInactiveCity = ape.DeclareError("ANSWER_TO_INVITE_FOR_INACTIVE_CITY")
+var ErrorAnswerToInviteForNotOffSupCity = ape.DeclareError("ANSWER_TO_INVITE_FOR_NOT_OFFICIAL_SUPPORT_CITY")

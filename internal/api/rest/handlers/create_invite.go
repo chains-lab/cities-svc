@@ -30,7 +30,7 @@ func (a Adapter) CreateInvite(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	inv, err := a.app.SentInvite(r.Context(), app.SentInviteParams{
+	inv, err := a.app.CreateInvite(r.Context(), app.CreateInviteParams{
 		InitiatorID: initiator.ID,
 		Role:        req.Data.Attributes.Role,
 	})

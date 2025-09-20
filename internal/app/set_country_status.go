@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
-	"github.com/chains-lab/cities-svc/internal/app/entities/city"
-	"github.com/chains-lab/cities-svc/internal/app/entities/country"
-	"github.com/chains-lab/cities-svc/internal/app/entities/gov"
+	"github.com/chains-lab/cities-svc/internal/app/domain/city"
+	"github.com/chains-lab/cities-svc/internal/app/domain/country"
+	"github.com/chains-lab/cities-svc/internal/app/domain/gov"
 	"github.com/chains-lab/cities-svc/internal/app/models"
 	"github.com/chains-lab/enum"
 	"github.com/google/uuid"

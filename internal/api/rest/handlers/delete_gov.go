@@ -44,15 +44,15 @@ func (a Adapter) DeleteGov(w http.ResponseWriter, r *http.Request) {
 		case errors.Is(err, errx.ErrorInitiatorAndUserHaveDifferentCity):
 			ape.RenderErr(w, problems.Conflict("initiator and user have different city"))
 		case errors.Is(err, errx.ErrorInitiatorIsNotThisCityGov):
-			ape.RenderErr(w, problems.Conflict("initiator is not this city gov"))
+			ape.RenderErr(w, problems.Forbidden("initiator is not this city gov"))
 		case errors.Is(err, errx.ErrorCityGovNotFound):
 			ape.RenderErr(w, problems.NotFound("city gov not found"))
 		case errors.Is(err, errx.ErrorInitiatorIsNotActiveCityGov):
-			ape.RenderErr(w, problems.Conflict("initiator is not active city gov"))
+			ape.RenderErr(w, problems.Forbidden("initiator is not active city gov"))
 		case errors.Is(err, errx.ErrorInitiatorGovRoleHaveNotEnoughRights):
-			ape.RenderErr(w, problems.Conflict("initiator role have not enough rights"))
+			ape.RenderErr(w, problems.Forbidden("initiator role have not enough rights"))
 		case errors.Is(err, errx.ErrorCannotRefuseMayor):
-			ape.RenderErr(w, problems.Conflict("cannot delete mayor, assign new mayor first"))
+			ape.RenderErr(w, problems.Forbidden("cannot delete mayor, assign new mayor first"))
 		default:
 			ape.RenderErr(w, problems.InternalError())
 		}

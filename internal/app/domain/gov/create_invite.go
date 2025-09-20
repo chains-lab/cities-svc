@@ -19,7 +19,7 @@ type SentInviteParams struct {
 	Role        string
 }
 
-func (g Gov) SentInvite(ctx context.Context, params SentInviteParams) (models.Invite, error) {
+func (g Gov) CreateInvite(ctx context.Context, params SentInviteParams) (models.Invite, error) {
 	initiator, err := g.GetInitiatorGov(ctx, params.InitiatorID)
 	if err != nil {
 		return models.Invite{}, err

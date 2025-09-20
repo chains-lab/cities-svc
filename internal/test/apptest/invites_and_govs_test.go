@@ -51,13 +51,13 @@ func TestCreateInviteMayor(t *testing.T) {
 
 	mayor := CreateMayor(s, t, kyiv.ID, uuid.New())
 
-	InviteForAdmin, err := s.app.SentInvite(ctx, app.SentInviteParams{
+	InviteForAdmin, err := s.app.CreateInvite(ctx, app.SentInviteParams{
 		InitiatorID: mayor.UserID,
 		CityID:      kyiv.ID,
 		Role:        enum.CityGovRoleModerator,
 	})
 	if err != nil {
-		t.Fatalf("SentInvite: %v", err)
+		t.Fatalf("CreateInvite: %v", err)
 	}
 
 	userAdmin := uuid.New()
@@ -78,13 +78,13 @@ func TestCreateInviteMayor(t *testing.T) {
 
 	userModerator := uuid.New()
 
-	InviteForModerator, err := s.app.SentInvite(ctx, app.SentInviteParams{
+	InviteForModerator, err := s.app.CreateInvite(ctx, app.SentInviteParams{
 		InitiatorID: mayor.UserID,
 		CityID:      kyiv.ID,
 		Role:        enum.CityGovRoleModerator,
 	})
 	if err != nil {
-		t.Fatalf("SentInvite: %v", err)
+		t.Fatalf("CreateInvite: %v", err)
 	}
 
 	InviteForModerator, err = s.app.AcceptInvite(ctx, userModerator, InviteForModerator.Token)
