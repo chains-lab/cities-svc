@@ -22,7 +22,7 @@ type City struct {
 }
 
 func (c City) IsNil() bool {
-	return c == City{}
+	return c.ID == uuid.Nil
 }
 
 type CitiesCollection struct {

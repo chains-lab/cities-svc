@@ -15,7 +15,7 @@ type Country struct {
 }
 
 func (c Country) IsNil() bool {
-	return c == Country{}
+	return c.ID == uuid.Nil
 }
 
 type CountriesCollection struct {

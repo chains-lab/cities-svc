@@ -19,7 +19,7 @@ type Invite struct {
 }
 
 func (i Invite) IsNil() bool {
-	return i == Invite{}
+	return i.ID == uuid.Nil
 }
 
 type InviteTokenData struct {
