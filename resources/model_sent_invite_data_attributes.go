@@ -12,6 +12,7 @@ package resources
 
 import (
 	"encoding/json"
+	"github.com/google/uuid"
 	"bytes"
 	"fmt"
 )
@@ -22,7 +23,7 @@ var _ MappedNullable = &SentInviteDataAttributes{}
 // SentInviteDataAttributes struct for SentInviteDataAttributes
 type SentInviteDataAttributes struct {
 	// ID of the city the invite is for
-	CityId string `json:"city_id"`
+	CityId uuid.UUID `json:"city_id"`
 	// Role assigned to the invited user
 	Role string `json:"role"`
 }
@@ -33,7 +34,7 @@ type _SentInviteDataAttributes SentInviteDataAttributes
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewSentInviteDataAttributes(cityId string, role string) *SentInviteDataAttributes {
+func NewSentInviteDataAttributes(cityId uuid.UUID, role string) *SentInviteDataAttributes {
 	this := SentInviteDataAttributes{}
 	this.CityId = cityId
 	this.Role = role
@@ -49,9 +50,9 @@ func NewSentInviteDataAttributesWithDefaults() *SentInviteDataAttributes {
 }
 
 // GetCityId returns the CityId field value
-func (o *SentInviteDataAttributes) GetCityId() string {
+func (o *SentInviteDataAttributes) GetCityId() uuid.UUID {
 	if o == nil {
-		var ret string
+		var ret uuid.UUID
 		return ret
 	}
 
@@ -60,7 +61,7 @@ func (o *SentInviteDataAttributes) GetCityId() string {
 
 // GetCityIdOk returns a tuple with the CityId field value
 // and a boolean to check if the value has been set.
-func (o *SentInviteDataAttributes) GetCityIdOk() (*string, bool) {
+func (o *SentInviteDataAttributes) GetCityIdOk() (*uuid.UUID, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -68,7 +69,7 @@ func (o *SentInviteDataAttributes) GetCityIdOk() (*string, bool) {
 }
 
 // SetCityId sets field value
-func (o *SentInviteDataAttributes) SetCityId(v string) {
+func (o *SentInviteDataAttributes) SetCityId(v uuid.UUID) {
 	o.CityId = v
 }
 

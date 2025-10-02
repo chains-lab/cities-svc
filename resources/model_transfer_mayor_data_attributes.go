@@ -12,6 +12,7 @@ package resources
 
 import (
 	"encoding/json"
+	"github.com/google/uuid"
 	"bytes"
 	"fmt"
 )
@@ -22,7 +23,7 @@ var _ MappedNullable = &TransferMayorDataAttributes{}
 // TransferMayorDataAttributes struct for TransferMayorDataAttributes
 type TransferMayorDataAttributes struct {
 	// ID of the user to be assigned as the new mayor
-	UserId string `json:"user_id"`
+	UserId uuid.UUID `json:"user_id"`
 }
 
 type _TransferMayorDataAttributes TransferMayorDataAttributes
@@ -31,7 +32,7 @@ type _TransferMayorDataAttributes TransferMayorDataAttributes
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewTransferMayorDataAttributes(userId string) *TransferMayorDataAttributes {
+func NewTransferMayorDataAttributes(userId uuid.UUID) *TransferMayorDataAttributes {
 	this := TransferMayorDataAttributes{}
 	this.UserId = userId
 	return &this
@@ -46,9 +47,9 @@ func NewTransferMayorDataAttributesWithDefaults() *TransferMayorDataAttributes {
 }
 
 // GetUserId returns the UserId field value
-func (o *TransferMayorDataAttributes) GetUserId() string {
+func (o *TransferMayorDataAttributes) GetUserId() uuid.UUID {
 	if o == nil {
-		var ret string
+		var ret uuid.UUID
 		return ret
 	}
 
@@ -57,7 +58,7 @@ func (o *TransferMayorDataAttributes) GetUserId() string {
 
 // GetUserIdOk returns a tuple with the UserId field value
 // and a boolean to check if the value has been set.
-func (o *TransferMayorDataAttributes) GetUserIdOk() (*string, bool) {
+func (o *TransferMayorDataAttributes) GetUserIdOk() (*uuid.UUID, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -65,7 +66,7 @@ func (o *TransferMayorDataAttributes) GetUserIdOk() (*string, bool) {
 }
 
 // SetUserId sets field value
-func (o *TransferMayorDataAttributes) SetUserId(v string) {
+func (o *TransferMayorDataAttributes) SetUserId(v uuid.UUID) {
 	o.UserId = v
 }
 

@@ -4,7 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Id** | **string** | city id | 
+**Id** | [**uuid.UUID**](uuid.UUID.md) | city id | 
 **Type** | **string** |  | 
 **Attributes** | [**UpdateCityDataAttributes**](UpdateCityDataAttributes.md) |  | 
 
@@ -12,7 +12,7 @@ Name | Type | Description | Notes
 
 ### NewUpdateCityData
 
-`func NewUpdateCityData(id string, type_ string, attributes UpdateCityDataAttributes, ) *UpdateCityData`
+`func NewUpdateCityData(id uuid.UUID, type_ string, attributes UpdateCityDataAttributes, ) *UpdateCityData`
 
 NewUpdateCityData instantiates a new UpdateCityData object
 This constructor will assign default values to properties that have it defined,
@@ -29,20 +29,20 @@ but it doesn't guarantee that properties required by API are set
 
 ### GetId
 
-`func (o *UpdateCityData) GetId() string`
+`func (o *UpdateCityData) GetId() uuid.UUID`
 
 GetId returns the Id field if non-nil, zero value otherwise.
 
 ### GetIdOk
 
-`func (o *UpdateCityData) GetIdOk() (*string, bool)`
+`func (o *UpdateCityData) GetIdOk() (*uuid.UUID, bool)`
 
 GetIdOk returns a tuple with the Id field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetId
 
-`func (o *UpdateCityData) SetId(v string)`
+`func (o *UpdateCityData) SetId(v uuid.UUID)`
 
 SetId sets Id field to given value.
 

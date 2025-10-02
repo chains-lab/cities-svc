@@ -12,6 +12,7 @@ package resources
 
 import (
 	"encoding/json"
+	"github.com/google/uuid"
 	"bytes"
 	"fmt"
 )
@@ -22,7 +23,7 @@ var _ MappedNullable = &UpdateCityData{}
 // UpdateCityData struct for UpdateCityData
 type UpdateCityData struct {
 	// city id
-	Id string `json:"id"`
+	Id uuid.UUID `json:"id"`
 	Type string `json:"type"`
 	Attributes UpdateCityDataAttributes `json:"attributes"`
 }
@@ -33,7 +34,7 @@ type _UpdateCityData UpdateCityData
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewUpdateCityData(id string, type_ string, attributes UpdateCityDataAttributes) *UpdateCityData {
+func NewUpdateCityData(id uuid.UUID, type_ string, attributes UpdateCityDataAttributes) *UpdateCityData {
 	this := UpdateCityData{}
 	this.Id = id
 	this.Type = type_
@@ -50,9 +51,9 @@ func NewUpdateCityDataWithDefaults() *UpdateCityData {
 }
 
 // GetId returns the Id field value
-func (o *UpdateCityData) GetId() string {
+func (o *UpdateCityData) GetId() uuid.UUID {
 	if o == nil {
-		var ret string
+		var ret uuid.UUID
 		return ret
 	}
 
@@ -61,7 +62,7 @@ func (o *UpdateCityData) GetId() string {
 
 // GetIdOk returns a tuple with the Id field value
 // and a boolean to check if the value has been set.
-func (o *UpdateCityData) GetIdOk() (*string, bool) {
+func (o *UpdateCityData) GetIdOk() (*uuid.UUID, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -69,7 +70,7 @@ func (o *UpdateCityData) GetIdOk() (*string, bool) {
 }
 
 // SetId sets field value
-func (o *UpdateCityData) SetId(v string) {
+func (o *UpdateCityData) SetId(v uuid.UUID) {
 	o.Id = v
 }
 

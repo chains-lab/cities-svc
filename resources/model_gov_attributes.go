@@ -12,6 +12,7 @@ package resources
 
 import (
 	"encoding/json"
+	"github.com/google/uuid"
 	"time"
 	"bytes"
 	"fmt"
@@ -23,11 +24,11 @@ var _ MappedNullable = &GovAttributes{}
 // GovAttributes struct for GovAttributes
 type GovAttributes struct {
 	// city id
-	CityId string `json:"city_id"`
+	CityId uuid.UUID `json:"city_id"`
 	// role of the user in this city
 	Role string `json:"role"`
 	// optional label for the user in this city
-	Label string `json:"label"`
+	Label *string `json:"label,omitempty"`
 	// record creation date
 	CreatedAt time.Time `json:"created_at"`
 	// last update date
@@ -40,11 +41,10 @@ type _GovAttributes GovAttributes
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewGovAttributes(cityId string, role string, label string, createdAt time.Time, updatedAt time.Time) *GovAttributes {
+func NewGovAttributes(cityId uuid.UUID, role string, createdAt time.Time, updatedAt time.Time) *GovAttributes {
 	this := GovAttributes{}
 	this.CityId = cityId
 	this.Role = role
-	this.Label = label
 	this.CreatedAt = createdAt
 	this.UpdatedAt = updatedAt
 	return &this
@@ -59,9 +59,9 @@ func NewGovAttributesWithDefaults() *GovAttributes {
 }
 
 // GetCityId returns the CityId field value
-func (o *GovAttributes) GetCityId() string {
+func (o *GovAttributes) GetCityId() uuid.UUID {
 	if o == nil {
-		var ret string
+		var ret uuid.UUID
 		return ret
 	}
 
@@ -70,7 +70,7 @@ func (o *GovAttributes) GetCityId() string {
 
 // GetCityIdOk returns a tuple with the CityId field value
 // and a boolean to check if the value has been set.
-func (o *GovAttributes) GetCityIdOk() (*string, bool) {
+func (o *GovAttributes) GetCityIdOk() (*uuid.UUID, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -78,7 +78,7 @@ func (o *GovAttributes) GetCityIdOk() (*string, bool) {
 }
 
 // SetCityId sets field value
-func (o *GovAttributes) SetCityId(v string) {
+func (o *GovAttributes) SetCityId(v uuid.UUID) {
 	o.CityId = v
 }
 
@@ -106,28 +106,36 @@ func (o *GovAttributes) SetRole(v string) {
 	o.Role = v
 }
 
-// GetLabel returns the Label field value
+// GetLabel returns the Label field value if set, zero value otherwise.
 func (o *GovAttributes) GetLabel() string {
-	if o == nil {
+	if o == nil || IsNil(o.Label) {
 		var ret string
 		return ret
 	}
-
-	return o.Label
+	return *o.Label
 }
 
-// GetLabelOk returns a tuple with the Label field value
+// GetLabelOk returns a tuple with the Label field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *GovAttributes) GetLabelOk() (*string, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.Label) {
 		return nil, false
 	}
-	return &o.Label, true
+	return o.Label, true
 }
 
-// SetLabel sets field value
+// HasLabel returns a boolean if a field has been set.
+func (o *GovAttributes) HasLabel() bool {
+	if o != nil && !IsNil(o.Label) {
+		return true
+	}
+
+	return false
+}
+
+// SetLabel gets a reference to the given string and assigns it to the Label field.
 func (o *GovAttributes) SetLabel(v string) {
-	o.Label = v
+	o.Label = &v
 }
 
 // GetCreatedAt returns the CreatedAt field value
@@ -190,7 +198,9 @@ func (o GovAttributes) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["city_id"] = o.CityId
 	toSerialize["role"] = o.Role
-	toSerialize["label"] = o.Label
+	if !IsNil(o.Label) {
+		toSerialize["label"] = o.Label
+	}
 	toSerialize["created_at"] = o.CreatedAt
 	toSerialize["updated_at"] = o.UpdatedAt
 	return toSerialize, nil
@@ -203,7 +213,6 @@ func (o *GovAttributes) UnmarshalJSON(data []byte) (err error) {
 	requiredProperties := []string{
 		"city_id",
 		"role",
-		"label",
 		"created_at",
 		"updated_at",
 	}

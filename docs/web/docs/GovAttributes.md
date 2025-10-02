@@ -4,9 +4,9 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**CityId** | **string** | city id | 
+**CityId** | [**uuid.UUID**](uuid.UUID.md) | city id | 
 **Role** | **string** | role of the user in this city | 
-**Label** | **string** | optional label for the user in this city | 
+**Label** | Pointer to **string** | optional label for the user in this city | [optional] 
 **CreatedAt** | **time.Time** | record creation date | 
 **UpdatedAt** | **time.Time** | last update date | 
 
@@ -14,7 +14,7 @@ Name | Type | Description | Notes
 
 ### NewGovAttributes
 
-`func NewGovAttributes(cityId string, role string, label string, createdAt time.Time, updatedAt time.Time, ) *GovAttributes`
+`func NewGovAttributes(cityId uuid.UUID, role string, createdAt time.Time, updatedAt time.Time, ) *GovAttributes`
 
 NewGovAttributes instantiates a new GovAttributes object
 This constructor will assign default values to properties that have it defined,
@@ -31,20 +31,20 @@ but it doesn't guarantee that properties required by API are set
 
 ### GetCityId
 
-`func (o *GovAttributes) GetCityId() string`
+`func (o *GovAttributes) GetCityId() uuid.UUID`
 
 GetCityId returns the CityId field if non-nil, zero value otherwise.
 
 ### GetCityIdOk
 
-`func (o *GovAttributes) GetCityIdOk() (*string, bool)`
+`func (o *GovAttributes) GetCityIdOk() (*uuid.UUID, bool)`
 
 GetCityIdOk returns a tuple with the CityId field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetCityId
 
-`func (o *GovAttributes) SetCityId(v string)`
+`func (o *GovAttributes) SetCityId(v uuid.UUID)`
 
 SetCityId sets CityId field to given value.
 
@@ -88,6 +88,11 @@ and a boolean to check if the value has been set.
 
 SetLabel sets Label field to given value.
 
+### HasLabel
+
+`func (o *GovAttributes) HasLabel() bool`
+
+HasLabel returns a boolean if a field has been set.
 
 ### GetCreatedAt
 

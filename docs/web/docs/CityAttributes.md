@@ -4,7 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**CountryId** | **string** | country id | 
+**CountryId** | [**uuid.UUID**](uuid.UUID.md) | country id | 
 **Point** | [**Point**](Point.md) |  | 
 **Status** | **string** | city status | 
 **Name** | **string** | city name | 
@@ -18,7 +18,7 @@ Name | Type | Description | Notes
 
 ### NewCityAttributes
 
-`func NewCityAttributes(countryId string, point Point, status string, name string, timezone string, createdAt time.Time, updatedAt time.Time, ) *CityAttributes`
+`func NewCityAttributes(countryId uuid.UUID, point Point, status string, name string, timezone string, createdAt time.Time, updatedAt time.Time, ) *CityAttributes`
 
 NewCityAttributes instantiates a new CityAttributes object
 This constructor will assign default values to properties that have it defined,
@@ -35,20 +35,20 @@ but it doesn't guarantee that properties required by API are set
 
 ### GetCountryId
 
-`func (o *CityAttributes) GetCountryId() string`
+`func (o *CityAttributes) GetCountryId() uuid.UUID`
 
 GetCountryId returns the CountryId field if non-nil, zero value otherwise.
 
 ### GetCountryIdOk
 
-`func (o *CityAttributes) GetCountryIdOk() (*string, bool)`
+`func (o *CityAttributes) GetCountryIdOk() (*uuid.UUID, bool)`
 
 GetCountryIdOk returns a tuple with the CountryId field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetCountryId
 
-`func (o *CityAttributes) SetCountryId(v string)`
+`func (o *CityAttributes) SetCountryId(v uuid.UUID)`
 
 SetCountryId sets CountryId field to given value.
 

@@ -12,6 +12,7 @@ package resources
 
 import (
 	"encoding/json"
+	"github.com/google/uuid"
 	"bytes"
 	"fmt"
 )
@@ -22,9 +23,9 @@ var _ MappedNullable = &CreateMayorDataAttributes{}
 // CreateMayorDataAttributes struct for CreateMayorDataAttributes
 type CreateMayorDataAttributes struct {
 	// city id
-	CityId string `json:"city_id"`
+	CityId uuid.UUID `json:"city_id"`
 	// user id
-	UserId string `json:"user_id"`
+	UserId uuid.UUID `json:"user_id"`
 	// label for the user in this city
 	Label string `json:"label"`
 }
@@ -35,7 +36,7 @@ type _CreateMayorDataAttributes CreateMayorDataAttributes
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCreateMayorDataAttributes(cityId string, userId string, label string) *CreateMayorDataAttributes {
+func NewCreateMayorDataAttributes(cityId uuid.UUID, userId uuid.UUID, label string) *CreateMayorDataAttributes {
 	this := CreateMayorDataAttributes{}
 	this.CityId = cityId
 	this.UserId = userId
@@ -52,9 +53,9 @@ func NewCreateMayorDataAttributesWithDefaults() *CreateMayorDataAttributes {
 }
 
 // GetCityId returns the CityId field value
-func (o *CreateMayorDataAttributes) GetCityId() string {
+func (o *CreateMayorDataAttributes) GetCityId() uuid.UUID {
 	if o == nil {
-		var ret string
+		var ret uuid.UUID
 		return ret
 	}
 
@@ -63,7 +64,7 @@ func (o *CreateMayorDataAttributes) GetCityId() string {
 
 // GetCityIdOk returns a tuple with the CityId field value
 // and a boolean to check if the value has been set.
-func (o *CreateMayorDataAttributes) GetCityIdOk() (*string, bool) {
+func (o *CreateMayorDataAttributes) GetCityIdOk() (*uuid.UUID, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -71,14 +72,14 @@ func (o *CreateMayorDataAttributes) GetCityIdOk() (*string, bool) {
 }
 
 // SetCityId sets field value
-func (o *CreateMayorDataAttributes) SetCityId(v string) {
+func (o *CreateMayorDataAttributes) SetCityId(v uuid.UUID) {
 	o.CityId = v
 }
 
 // GetUserId returns the UserId field value
-func (o *CreateMayorDataAttributes) GetUserId() string {
+func (o *CreateMayorDataAttributes) GetUserId() uuid.UUID {
 	if o == nil {
-		var ret string
+		var ret uuid.UUID
 		return ret
 	}
 
@@ -87,7 +88,7 @@ func (o *CreateMayorDataAttributes) GetUserId() string {
 
 // GetUserIdOk returns a tuple with the UserId field value
 // and a boolean to check if the value has been set.
-func (o *CreateMayorDataAttributes) GetUserIdOk() (*string, bool) {
+func (o *CreateMayorDataAttributes) GetUserIdOk() (*uuid.UUID, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -95,7 +96,7 @@ func (o *CreateMayorDataAttributes) GetUserIdOk() (*string, bool) {
 }
 
 // SetUserId sets field value
-func (o *CreateMayorDataAttributes) SetUserId(v string) {
+func (o *CreateMayorDataAttributes) SetUserId(v uuid.UUID) {
 	o.UserId = v
 }
 

@@ -7,9 +7,9 @@ properties:
   id:
     type: string
     format: uuid
-    description: "gov id"
+    description: "user id"
   type:
     type: string
-    enum: [ gov ]
+    enum: [ city_moderator ]
   attributes:
     $ref: './GovAttributes.yaml'

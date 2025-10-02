@@ -4,7 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Id** | **string** | invite id | 
+**Id** | [**uuid.UUID**](uuid.UUID.md) | invite id | 
 **Type** | **string** |  | 
 **Attributes** | [**InviteDataAttributes**](InviteDataAttributes.md) |  | 
 
@@ -12,7 +12,7 @@ Name | Type | Description | Notes
 
 ### NewInviteData
 
-`func NewInviteData(id string, type_ string, attributes InviteDataAttributes, ) *InviteData`
+`func NewInviteData(id uuid.UUID, type_ string, attributes InviteDataAttributes, ) *InviteData`
 
 NewInviteData instantiates a new InviteData object
 This constructor will assign default values to properties that have it defined,
@@ -29,20 +29,20 @@ but it doesn't guarantee that properties required by API are set
 
 ### GetId
 
-`func (o *InviteData) GetId() string`
+`func (o *InviteData) GetId() uuid.UUID`
 
 GetId returns the Id field if non-nil, zero value otherwise.
 
 ### GetIdOk
 
-`func (o *InviteData) GetIdOk() (*string, bool)`
+`func (o *InviteData) GetIdOk() (*uuid.UUID, bool)`
 
 GetIdOk returns a tuple with the Id field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetId
 
-`func (o *InviteData) SetId(v string)`
+`func (o *InviteData) SetId(v uuid.UUID)`
 
 SetId sets Id field to given value.
 

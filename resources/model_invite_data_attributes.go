@@ -12,6 +12,7 @@ package resources
 
 import (
 	"encoding/json"
+	"github.com/google/uuid"
 	"time"
 	"bytes"
 	"fmt"
@@ -27,7 +28,7 @@ type InviteDataAttributes struct {
 	// role of the user in this city
 	Role string `json:"role"`
 	// city id
-	CityId string `json:"city_id"`
+	CityId uuid.UUID `json:"city_id"`
 	// unique token for the invite
 	Token string `json:"token"`
 	// timestamp when the invite will expire
@@ -42,7 +43,7 @@ type _InviteDataAttributes InviteDataAttributes
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewInviteDataAttributes(status string, role string, cityId string, token string, expiresAt time.Time, createdAt time.Time) *InviteDataAttributes {
+func NewInviteDataAttributes(status string, role string, cityId uuid.UUID, token string, expiresAt time.Time, createdAt time.Time) *InviteDataAttributes {
 	this := InviteDataAttributes{}
 	this.Status = status
 	this.Role = role
@@ -110,9 +111,9 @@ func (o *InviteDataAttributes) SetRole(v string) {
 }
 
 // GetCityId returns the CityId field value
-func (o *InviteDataAttributes) GetCityId() string {
+func (o *InviteDataAttributes) GetCityId() uuid.UUID {
 	if o == nil {
-		var ret string
+		var ret uuid.UUID
 		return ret
 	}
 
@@ -121,7 +122,7 @@ func (o *InviteDataAttributes) GetCityId() string {
 
 // GetCityIdOk returns a tuple with the CityId field value
 // and a boolean to check if the value has been set.
-func (o *InviteDataAttributes) GetCityIdOk() (*string, bool) {
+func (o *InviteDataAttributes) GetCityIdOk() (*uuid.UUID, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -129,7 +130,7 @@ func (o *InviteDataAttributes) GetCityIdOk() (*string, bool) {
 }
 
 // SetCityId sets field value
-func (o *InviteDataAttributes) SetCityId(v string) {
+func (o *InviteDataAttributes) SetCityId(v uuid.UUID) {
 	o.CityId = v
 }
 

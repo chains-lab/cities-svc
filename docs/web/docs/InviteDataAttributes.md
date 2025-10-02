@@ -6,7 +6,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Status** | **string** | status of the invite | 
 **Role** | **string** | role of the user in this city | 
-**CityId** | **string** | city id | 
+**CityId** | [**uuid.UUID**](uuid.UUID.md) | city id | 
 **Token** | **string** | unique token for the invite | 
 **ExpiresAt** | **time.Time** | timestamp when the invite will expire | 
 **CreatedAt** | **time.Time** | timestamp when the invite was created | 
@@ -15,7 +15,7 @@ Name | Type | Description | Notes
 
 ### NewInviteDataAttributes
 
-`func NewInviteDataAttributes(status string, role string, cityId string, token string, expiresAt time.Time, createdAt time.Time, ) *InviteDataAttributes`
+`func NewInviteDataAttributes(status string, role string, cityId uuid.UUID, token string, expiresAt time.Time, createdAt time.Time, ) *InviteDataAttributes`
 
 NewInviteDataAttributes instantiates a new InviteDataAttributes object
 This constructor will assign default values to properties that have it defined,
@@ -72,20 +72,20 @@ SetRole sets Role field to given value.
 
 ### GetCityId
 
-`func (o *InviteDataAttributes) GetCityId() string`
+`func (o *InviteDataAttributes) GetCityId() uuid.UUID`
 
 GetCityId returns the CityId field if non-nil, zero value otherwise.
 
 ### GetCityIdOk
 
-`func (o *InviteDataAttributes) GetCityIdOk() (*string, bool)`
+`func (o *InviteDataAttributes) GetCityIdOk() (*uuid.UUID, bool)`
 
 GetCityIdOk returns a tuple with the CityId field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetCityId
 
-`func (o *InviteDataAttributes) SetCityId(v string)`
+`func (o *InviteDataAttributes) SetCityId(v uuid.UUID)`
 
 SetCityId sets CityId field to given value.
 

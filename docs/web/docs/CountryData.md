@@ -4,7 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Id** | **string** | country id | 
+**Id** | [**uuid.UUID**](uuid.UUID.md) | country id | 
 **Type** | **string** |  | 
 **Attributes** | [**CountryAttributes**](CountryAttributes.md) |  | 
 
@@ -12,7 +12,7 @@ Name | Type | Description | Notes
 
 ### NewCountryData
 
-`func NewCountryData(id string, type_ string, attributes CountryAttributes, ) *CountryData`
+`func NewCountryData(id uuid.UUID, type_ string, attributes CountryAttributes, ) *CountryData`
 
 NewCountryData instantiates a new CountryData object
 This constructor will assign default values to properties that have it defined,
@@ -29,20 +29,20 @@ but it doesn't guarantee that properties required by API are set
 
 ### GetId
 
-`func (o *CountryData) GetId() string`
+`func (o *CountryData) GetId() uuid.UUID`
 
 GetId returns the Id field if non-nil, zero value otherwise.
 
 ### GetIdOk
 
-`func (o *CountryData) GetIdOk() (*string, bool)`
+`func (o *CountryData) GetIdOk() (*uuid.UUID, bool)`
 
 GetIdOk returns a tuple with the Id field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetId
 
-`func (o *CountryData) SetId(v string)`
+`func (o *CountryData) SetId(v uuid.UUID)`
 
 SetId sets Id field to given value.
 

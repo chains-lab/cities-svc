@@ -12,6 +12,7 @@ package resources
 
 import (
 	"encoding/json"
+	"github.com/google/uuid"
 	"bytes"
 	"fmt"
 )
@@ -22,7 +23,7 @@ var _ MappedNullable = &SentInviteData{}
 // SentInviteData struct for SentInviteData
 type SentInviteData struct {
 	// invite id
-	Id string `json:"id"`
+	Id uuid.UUID `json:"id"`
 	Type string `json:"type"`
 	Attributes SentInviteDataAttributes `json:"attributes"`
 }
@@ -33,7 +34,7 @@ type _SentInviteData SentInviteData
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewSentInviteData(id string, type_ string, attributes SentInviteDataAttributes) *SentInviteData {
+func NewSentInviteData(id uuid.UUID, type_ string, attributes SentInviteDataAttributes) *SentInviteData {
 	this := SentInviteData{}
 	this.Id = id
 	this.Type = type_
@@ -50,9 +51,9 @@ func NewSentInviteDataWithDefaults() *SentInviteData {
 }
 
 // GetId returns the Id field value
-func (o *SentInviteData) GetId() string {
+func (o *SentInviteData) GetId() uuid.UUID {
 	if o == nil {
-		var ret string
+		var ret uuid.UUID
 		return ret
 	}
 
@@ -61,7 +62,7 @@ func (o *SentInviteData) GetId() string {
 
 // GetIdOk returns a tuple with the Id field value
 // and a boolean to check if the value has been set.
-func (o *SentInviteData) GetIdOk() (*string, bool) {
+func (o *SentInviteData) GetIdOk() (*uuid.UUID, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -69,7 +70,7 @@ func (o *SentInviteData) GetIdOk() (*string, bool) {
 }
 
 // SetId sets field value
-func (o *SentInviteData) SetId(v string) {
+func (o *SentInviteData) SetId(v uuid.UUID) {
 	o.Id = v
 }
 

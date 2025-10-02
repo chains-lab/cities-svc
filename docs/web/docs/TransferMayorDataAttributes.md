@@ -4,13 +4,13 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**UserId** | **string** | ID of the user to be assigned as the new mayor | 
+**UserId** | [**uuid.UUID**](uuid.UUID.md) | ID of the user to be assigned as the new mayor | 
 
 ## Methods
 
 ### NewTransferMayorDataAttributes
 
-`func NewTransferMayorDataAttributes(userId string, ) *TransferMayorDataAttributes`
+`func NewTransferMayorDataAttributes(userId uuid.UUID, ) *TransferMayorDataAttributes`
 
 NewTransferMayorDataAttributes instantiates a new TransferMayorDataAttributes object
 This constructor will assign default values to properties that have it defined,
@@ -27,20 +27,20 @@ but it doesn't guarantee that properties required by API are set
 
 ### GetUserId
 
-`func (o *TransferMayorDataAttributes) GetUserId() string`
+`func (o *TransferMayorDataAttributes) GetUserId() uuid.UUID`
 
 GetUserId returns the UserId field if non-nil, zero value otherwise.
 
 ### GetUserIdOk
 
-`func (o *TransferMayorDataAttributes) GetUserIdOk() (*string, bool)`
+`func (o *TransferMayorDataAttributes) GetUserIdOk() (*uuid.UUID, bool)`
 
 GetUserIdOk returns a tuple with the UserId field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetUserId
 
-`func (o *TransferMayorDataAttributes) SetUserId(v string)`
+`func (o *TransferMayorDataAttributes) SetUserId(v uuid.UUID)`
 
 SetUserId sets UserId field to given value.
 

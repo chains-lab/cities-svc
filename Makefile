@@ -7,13 +7,19 @@ OUTPUT_DIR := ./docs/web
 RESOURCES_DIR := ./resources
 
 generate-models:
+	test -d $(RESOURCES_DIR) || mkdir -p $(RESOURCES_DIR)
+	test -d $(dir $(API_SRC)) || mkdir -p $(dir $(API_SRC))
+	test -d $(dir $(API_BUNDLED)) || mkdir -p $(dir $(API_BUNDLED))
+	test -d $(OUTPUT_DIR) || mkdir -p $(OUTPUT_DIR)
+
 	find $(RESOURCES_DIR) -type f ! \( -name "enum_types.go" -o -name "links.go" \) -delete
 	swagger-cli bundle $(API_SRC) --outfile $(API_BUNDLED) --type yaml
 
 	$(OPENAPI_GENERATOR) generate \
 		-i $(API_BUNDLED) -g go \
 		-o $(OUTPUT_DIR) \
-		--additional-properties=packageName=resources
+		--additional-properties=packageName=resources \
+		--import-mappings uuid.UUID=github.com/google/uuid --type-mappings string+uuid=uuid.UUID
 
 	mkdir -p $(RESOURCES_DIR)
 	find $(OUTPUT_DIR) -name '*.go' -exec mv {} $(RESOURCES_DIR)/ \;

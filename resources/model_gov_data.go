@@ -12,6 +12,7 @@ package resources
 
 import (
 	"encoding/json"
+	"github.com/google/uuid"
 	"bytes"
 	"fmt"
 )
@@ -21,8 +22,8 @@ var _ MappedNullable = &GovData{}
 
 // GovData struct for GovData
 type GovData struct {
-	// gov id
-	Id string `json:"id"`
+	// user id
+	Id uuid.UUID `json:"id"`
 	Type string `json:"type"`
 	Attributes GovAttributes `json:"attributes"`
 }
@@ -33,7 +34,7 @@ type _GovData GovData
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewGovData(id string, type_ string, attributes GovAttributes) *GovData {
+func NewGovData(id uuid.UUID, type_ string, attributes GovAttributes) *GovData {
 	this := GovData{}
 	this.Id = id
 	this.Type = type_
@@ -50,9 +51,9 @@ func NewGovDataWithDefaults() *GovData {
 }
 
 // GetId returns the Id field value
-func (o *GovData) GetId() string {
+func (o *GovData) GetId() uuid.UUID {
 	if o == nil {
-		var ret string
+		var ret uuid.UUID
 		return ret
 	}
 
@@ -61,7 +62,7 @@ func (o *GovData) GetId() string {
 
 // GetIdOk returns a tuple with the Id field value
 // and a boolean to check if the value has been set.
-func (o *GovData) GetIdOk() (*string, bool) {
+func (o *GovData) GetIdOk() (*uuid.UUID, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -69,7 +70,7 @@ func (o *GovData) GetIdOk() (*string, bool) {
 }
 
 // SetId sets field value
-func (o *GovData) SetId(v string) {
+func (o *GovData) SetId(v uuid.UUID) {
 	o.Id = v
 }
 

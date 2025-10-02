@@ -12,6 +12,7 @@ package resources
 
 import (
 	"encoding/json"
+	"github.com/google/uuid"
 	"time"
 	"bytes"
 	"fmt"
@@ -23,7 +24,7 @@ var _ MappedNullable = &CityAttributes{}
 // CityAttributes struct for CityAttributes
 type CityAttributes struct {
 	// country id
-	CountryId string `json:"country_id"`
+	CountryId uuid.UUID `json:"country_id"`
 	Point Point `json:"point"`
 	// city status
 	Status string `json:"status"`
@@ -47,7 +48,7 @@ type _CityAttributes CityAttributes
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCityAttributes(countryId string, point Point, status string, name string, timezone string, createdAt time.Time, updatedAt time.Time) *CityAttributes {
+func NewCityAttributes(countryId uuid.UUID, point Point, status string, name string, timezone string, createdAt time.Time, updatedAt time.Time) *CityAttributes {
 	this := CityAttributes{}
 	this.CountryId = countryId
 	this.Point = point
@@ -68,9 +69,9 @@ func NewCityAttributesWithDefaults() *CityAttributes {
 }
 
 // GetCountryId returns the CountryId field value
-func (o *CityAttributes) GetCountryId() string {
+func (o *CityAttributes) GetCountryId() uuid.UUID {
 	if o == nil {
-		var ret string
+		var ret uuid.UUID
 		return ret
 	}
 
@@ -79,7 +80,7 @@ func (o *CityAttributes) GetCountryId() string {
 
 // GetCountryIdOk returns a tuple with the CountryId field value
 // and a boolean to check if the value has been set.
-func (o *CityAttributes) GetCountryIdOk() (*string, bool) {
+func (o *CityAttributes) GetCountryIdOk() (*uuid.UUID, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -87,7 +88,7 @@ func (o *CityAttributes) GetCountryIdOk() (*string, bool) {
 }
 
 // SetCountryId sets field value
-func (o *CityAttributes) SetCountryId(v string) {
+func (o *CityAttributes) SetCountryId(v uuid.UUID) {
 	o.CountryId = v
 }
 

@@ -1,18 +1,17 @@
 package responses
 
 import (
-	"github.com/chains-lab/cities-svc/internal/app/models"
+	"github.com/chains-lab/cities-svc/internal/domain/models"
 	"github.com/chains-lab/cities-svc/resources"
-	"github.com/chains-lab/pagi"
 )
 
 func City(m models.City) resources.City {
 	resp := resources.City{
 		Data: resources.CityData{
-			Id:   m.ID.String(),
+			Id:   m.ID,
 			Type: resources.CityType,
 			Attributes: resources.CityAttributes{
-				CountryId: m.CountryID.String(),
+				CountryId: m.CountryID,
 				Status:    m.Status,
 				Name:      m.Name,
 				Point: resources.Point{
@@ -36,17 +35,17 @@ func City(m models.City) resources.City {
 	return resp
 }
 
-func CitiesCollection(ms []models.City, pag pagi.Response) resources.CitiesCollection {
+func CitiesCollection(ms models.CitiesCollection) resources.CitiesCollection {
 	resp := resources.CitiesCollection{
-		Data: make([]resources.CityData, 0, len(ms)),
+		Data: make([]resources.CityData, 0, len(ms.Data)),
 		Links: resources.PaginationData{
-			PageNumber: int64(pag.Page),
-			PageSize:   int64(pag.Size),
-			TotalItems: int64(pag.Total),
+			PageNumber: int64(ms.Page),
+			PageSize:   int64(ms.Size),
+			TotalItems: int64(ms.Total),
 		},
 	}
 
-	for _, m := range ms {
+	for _, m := range ms.Data {
 		city := City(m).Data
 
 		resp.Data = append(resp.Data, city)

@@ -12,6 +12,7 @@ package resources
 
 import (
 	"encoding/json"
+	"github.com/google/uuid"
 	"bytes"
 	"fmt"
 )
@@ -22,7 +23,7 @@ var _ MappedNullable = &CreateInviteDataAttributes{}
 // CreateInviteDataAttributes struct for CreateInviteDataAttributes
 type CreateInviteDataAttributes struct {
 	// user id
-	UserId string `json:"user_id"`
+	UserId uuid.UUID `json:"user_id"`
 	// role of the user in this city
 	Role string `json:"role"`
 	// label for the user in this city
@@ -35,7 +36,7 @@ type _CreateInviteDataAttributes CreateInviteDataAttributes
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCreateInviteDataAttributes(userId string, role string, label string) *CreateInviteDataAttributes {
+func NewCreateInviteDataAttributes(userId uuid.UUID, role string, label string) *CreateInviteDataAttributes {
 	this := CreateInviteDataAttributes{}
 	this.UserId = userId
 	this.Role = role
@@ -52,9 +53,9 @@ func NewCreateInviteDataAttributesWithDefaults() *CreateInviteDataAttributes {
 }
 
 // GetUserId returns the UserId field value
-func (o *CreateInviteDataAttributes) GetUserId() string {
+func (o *CreateInviteDataAttributes) GetUserId() uuid.UUID {
 	if o == nil {
-		var ret string
+		var ret uuid.UUID
 		return ret
 	}
 
@@ -63,7 +64,7 @@ func (o *CreateInviteDataAttributes) GetUserId() string {
 
 // GetUserIdOk returns a tuple with the UserId field value
 // and a boolean to check if the value has been set.
-func (o *CreateInviteDataAttributes) GetUserIdOk() (*string, bool) {
+func (o *CreateInviteDataAttributes) GetUserIdOk() (*uuid.UUID, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -71,7 +72,7 @@ func (o *CreateInviteDataAttributes) GetUserIdOk() (*string, bool) {
 }
 
 // SetUserId sets field value
-func (o *CreateInviteDataAttributes) SetUserId(v string) {
+func (o *CreateInviteDataAttributes) SetUserId(v uuid.UUID) {
 	o.UserId = v
 }
 

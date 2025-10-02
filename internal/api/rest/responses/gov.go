@@ -1,18 +1,17 @@
 package responses
 
 import (
-	"github.com/chains-lab/cities-svc/internal/app/models"
+	"github.com/chains-lab/cities-svc/internal/domain/models"
 	"github.com/chains-lab/cities-svc/resources"
-	"github.com/chains-lab/pagi"
 )
 
-func Gov(m models.Gov) resources.Gov {
+func Gov(m models.CityModer) resources.Gov {
 	resp := resources.Gov{
 		Data: resources.GovData{
-			Id:   m.UserID.String(),
+			Id:   m.UserID,
 			Type: resources.GovType,
 			Attributes: resources.GovAttributes{
-				CityId:    m.CityID.String(),
+				CityId:    m.CityID,
 				Role:      m.Role,
 				CreatedAt: m.CreatedAt,
 				UpdatedAt: m.UpdatedAt,
@@ -20,23 +19,23 @@ func Gov(m models.Gov) resources.Gov {
 		},
 	}
 	if m.Label != nil {
-		resp.Data.Attributes.Label = *m.Label
+		resp.Data.Attributes.Label = m.Label
 	}
 
 	return resp
 }
 
-func GovsCollection(ms []models.Gov, pag pagi.Response) resources.GovsCollection {
+func GovsCollection(ms models.CityModersCollection) resources.GovsCollection {
 	resp := resources.GovsCollection{
-		Data: make([]resources.GovData, 0, len(ms)),
+		Data: make([]resources.GovData, 0, len(ms.Data)),
 		Links: resources.PaginationData{
-			PageNumber: int64(pag.Page),
-			PageSize:   int64(pag.Size),
-			TotalItems: int64(pag.Total),
+			PageNumber: int64(ms.Page),
+			PageSize:   int64(ms.Size),
+			TotalItems: int64(ms.Total),
 		},
 	}
 
-	for _, m := range ms {
+	for _, m := range ms.Data {
 		gov := Gov(m).Data
 
 		resp.Data = append(resp.Data, gov)

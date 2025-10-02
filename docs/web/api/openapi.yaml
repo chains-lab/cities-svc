@@ -224,12 +224,12 @@ components:
     GovData:
       properties:
         id:
-          description: gov id
+          description: user id
           format: uuid
           type: string
         type:
           enum:
-          - gov
+          - city_moderator
           type: string
         attributes:
           $ref: '#/components/schemas/GovAttributes'
@@ -260,7 +260,6 @@ components:
       required:
       - city_id
       - created_at
-      - label
       - role
       - updated_at
     GovsCollection:

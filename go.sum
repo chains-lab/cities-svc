@@ -26,6 +26,8 @@ github.com/chains-lab/logium v0.1.1 h1:C5ZroPavjzmqFxW6ajga++NhgpduudSd7uvgWiYZc
 github.com/chains-lab/logium v0.1.1/go.mod h1:6FqyL1KnUmThTZpZt5UzvTSukH3vgz+bgWkODxa3hxw=
 github.com/chains-lab/pagi v0.1.4 h1:Gnh5XWR60d1Nfz6C7XuZpRH2zbCWqbkMRwz2UuB62L0=
 github.com/chains-lab/pagi v0.1.4/go.mod h1:Sd6bQC+IlZBggk78qI76Beed3yf5Yp+qPIwUpFTfTC0=
+github.com/chains-lab/pagi v0.1.6 h1:ftfw6FYTBw21ZBU8kL037Aqe2skoe7DPY3XtO1K6VKU=
+github.com/chains-lab/pagi v0.1.6/go.mod h1:Sd6bQC+IlZBggk78qI76Beed3yf5Yp+qPIwUpFTfTC0=
 github.com/chains-lab/svc-errors v0.2.2 h1:70aJpuCHhptxOXQTIntfSwG8xi0WmthSPUpj3o2F0ds=
 github.com/chains-lab/svc-errors v0.2.2/go.mod h1:+DJZ+olXjBFfb3CdJaaJl1XEmIrmtGty9d78t39IXxA=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

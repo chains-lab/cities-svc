@@ -513,11 +513,11 @@ components:
         id:
           type: string
           format: uuid
-          description: gov id
+          description: user id
         type:
           type: string
           enum:
-            - gov
+            - city_moderator
         attributes:
           $ref: '#/components/schemas/GovAttributes'
     GovAttributes:
@@ -525,7 +525,6 @@ components:
       required:
         - city_id
         - role
-        - label
         - created_at
         - updated_at
       properties:

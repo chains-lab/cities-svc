@@ -4,14 +4,14 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**CityId** | **string** | ID of the city the invite is for | 
+**CityId** | [**uuid.UUID**](uuid.UUID.md) | ID of the city the invite is for | 
 **Role** | **string** | Role assigned to the invited user | 
 
 ## Methods
 
 ### NewSentInviteDataAttributes
 
-`func NewSentInviteDataAttributes(cityId string, role string, ) *SentInviteDataAttributes`
+`func NewSentInviteDataAttributes(cityId uuid.UUID, role string, ) *SentInviteDataAttributes`
 
 NewSentInviteDataAttributes instantiates a new SentInviteDataAttributes object
 This constructor will assign default values to properties that have it defined,
@@ -28,20 +28,20 @@ but it doesn't guarantee that properties required by API are set
 
 ### GetCityId
 
-`func (o *SentInviteDataAttributes) GetCityId() string`
+`func (o *SentInviteDataAttributes) GetCityId() uuid.UUID`
 
 GetCityId returns the CityId field if non-nil, zero value otherwise.
 
 ### GetCityIdOk
 
-`func (o *SentInviteDataAttributes) GetCityIdOk() (*string, bool)`
+`func (o *SentInviteDataAttributes) GetCityIdOk() (*uuid.UUID, bool)`
 
 GetCityIdOk returns a tuple with the CityId field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetCityId
 
-`func (o *SentInviteDataAttributes) SetCityId(v string)`
+`func (o *SentInviteDataAttributes) SetCityId(v uuid.UUID)`
 
 SetCityId sets CityId field to given value.
 

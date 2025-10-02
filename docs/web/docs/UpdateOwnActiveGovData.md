@@ -4,7 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Id** | **string** | user id | 
+**Id** | [**uuid.UUID**](uuid.UUID.md) | user id | 
 **Type** | **string** |  | 
 **Attributes** | [**UpdateOwnActiveGovDataAttributes**](UpdateOwnActiveGovDataAttributes.md) |  | 
 
@@ -12,7 +12,7 @@ Name | Type | Description | Notes
 
 ### NewUpdateOwnActiveGovData
 
-`func NewUpdateOwnActiveGovData(id string, type_ string, attributes UpdateOwnActiveGovDataAttributes, ) *UpdateOwnActiveGovData`
+`func NewUpdateOwnActiveGovData(id uuid.UUID, type_ string, attributes UpdateOwnActiveGovDataAttributes, ) *UpdateOwnActiveGovData`
 
 NewUpdateOwnActiveGovData instantiates a new UpdateOwnActiveGovData object
 This constructor will assign default values to properties that have it defined,
@@ -29,20 +29,20 @@ but it doesn't guarantee that properties required by API are set
 
 ### GetId
 
-`func (o *UpdateOwnActiveGovData) GetId() string`
+`func (o *UpdateOwnActiveGovData) GetId() uuid.UUID`
 
 GetId returns the Id field if non-nil, zero value otherwise.
 
 ### GetIdOk
 
-`func (o *UpdateOwnActiveGovData) GetIdOk() (*string, bool)`
+`func (o *UpdateOwnActiveGovData) GetIdOk() (*uuid.UUID, bool)`
 
 GetIdOk returns a tuple with the Id field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetId
 
-`func (o *UpdateOwnActiveGovData) SetId(v string)`
+`func (o *UpdateOwnActiveGovData) SetId(v uuid.UUID)`
 
 SetId sets Id field to given value.
 
