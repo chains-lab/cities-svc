@@ -7,9 +7,9 @@ toolchain go1.24.7
 require (
 	github.com/Masterminds/squirrel v1.5.4
 	github.com/alecthomas/kingpin v2.2.6+incompatible
-	github.com/chains-lab/ape v0.4.12
-	github.com/chains-lab/enum v0.1.5
-	github.com/chains-lab/gatekit v0.2.3
+	github.com/chains-lab/ape v0.4.14
+	github.com/chains-lab/enum v0.1.7
+	github.com/chains-lab/gatekit v0.2.5
 	github.com/chains-lab/logium v0.1.1
 	github.com/chains-lab/pagi v0.1.6
 	github.com/go-chi/chi/v5 v5.2.2
@@ -22,7 +22,7 @@ require (
 	github.com/rubenv/sql-migrate v1.8.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/viper v1.20.1
-	google.golang.org/grpc v1.74.2
+	golang.org/x/crypto v0.38.0
 )
 
 require (
@@ -44,10 +44,10 @@ require (
 	github.com/subosito/gotenv v1.6.0 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.9.0 // indirect
-	golang.org/x/net v0.40.0 // indirect
 	golang.org/x/sys v0.33.0 // indirect
 	golang.org/x/text v0.25.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250528174236-200df99c418a // indirect
+	google.golang.org/grpc v1.74.2 // indirect
 	google.golang.org/protobuf v1.36.6 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

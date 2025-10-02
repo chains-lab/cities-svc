@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/chains-lab/cities-svc/internal/domain/models"
+	"github.com/chains-lab/cities-svc/internal/domain/services/admin"
 	"github.com/chains-lab/cities-svc/internal/domain/services/city"
-	"github.com/chains-lab/cities-svc/internal/domain/services/citymod"
 	"github.com/chains-lab/cities-svc/internal/domain/services/country"
 	"github.com/chains-lab/logium"
 	"github.com/google/uuid"
@@ -16,12 +16,12 @@ import (
 type CityModSvc interface {
 	Filter(
 		ctx context.Context,
-		filters citymod.FilterParams,
+		filters admin.FilterParams,
 		page, size uint64,
-	) (models.CityModersCollection, error)
+	) (models.CityAdminsCollection, error)
 
-	Get(ctx context.Context, filters citymod.GetFilters) (models.CityModer, error)
-	GetInitiator(ctx context.Context, initiatorID uuid.UUID) (models.CityModer, error)
+	Get(ctx context.Context, filters admin.GetFilters) (models.CityAdmin, error)
+	GetInitiator(ctx context.Context, initiatorID uuid.UUID) (models.CityAdmin, error)
 
 	RefuseOwn(ctx context.Context, userID uuid.UUID) error
 
@@ -32,12 +32,12 @@ type CityModSvc interface {
 		role string,
 		cityID uuid.UUID,
 		duration time.Duration,
-	) (models.Invite, models.InviteToken, error)
+	) (models.Invite, error)
 
-	AcceptInvite(ctx context.Context, userID uuid.UUID, token string) (models.CityModer, error)
+	AcceptInvite(ctx context.Context, userID uuid.UUID, token string) (models.CityAdmin, error)
 
-	UpdateOther(ctx context.Context, UserID uuid.UUID, params citymod.UpdateCityModerParams) (models.CityModer, error)
-	UpdateOwn(ctx context.Context, userID uuid.UUID, params citymod.UpdateCityModerParams) (models.CityModer, error)
+	UpdateOther(ctx context.Context, UserID uuid.UUID, params admin.UpdateParams) (models.CityAdmin, error)
+	UpdateOwn(ctx context.Context, userID uuid.UUID, params admin.UpdateParams) (models.CityAdmin, error)
 
 	GetInvite(ctx context.Context, ID uuid.UUID) (models.Invite, error)
 }

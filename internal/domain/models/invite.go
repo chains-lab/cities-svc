@@ -11,6 +11,7 @@ type Invite struct {
 	Status     string
 	Role       string
 	CityID     uuid.UUID
+	Token      string
 	UserID     *uuid.UUID
 	AnsweredAt *time.Time
 	ExpiresAt  time.Time
@@ -19,12 +20,6 @@ type Invite struct {
 
 func (i Invite) IsNil() bool {
 	return i == Invite{}
-}
-
-type InviteToken string
-
-func (t InviteToken) IsNil() bool {
-	return t == ""
 }
 
 type InviteTokenData struct {

@@ -3,7 +3,6 @@ package jwtmanager
 import (
 	"time"
 
-	"github.com/chains-lab/cities-svc/internal/domain/models"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 )
@@ -20,7 +19,7 @@ func (m Manager) CreateInviteToken(
 	role string,
 	cityID uuid.UUID,
 	ExpiredAt time.Time,
-) (models.InviteToken, error) {
+) (string, error) {
 
 	claims := inviteClaims{
 		CityID: cityID,
@@ -36,5 +35,5 @@ func (m Manager) CreateInviteToken(
 	if err != nil {
 		return "", err
 	}
-	return models.InviteToken(signed), nil
+	return signed, nil
 }

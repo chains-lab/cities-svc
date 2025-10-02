@@ -4,12 +4,12 @@ import (
 	"context"
 
 	"github.com/chains-lab/cities-svc/internal/domain/models"
-	"github.com/chains-lab/cities-svc/internal/domain/services/citymod"
+	"github.com/chains-lab/cities-svc/internal/domain/services/admin"
 	"github.com/chains-lab/logium"
 )
 
 type domain struct {
-	gov govSvc
+	admin CityAdminSvc
 }
 
 type Middleware struct {
@@ -17,15 +17,15 @@ type Middleware struct {
 	domain domain
 }
 
-func New(log logium.Logger, gov govSvc) Middleware {
+func New(log logium.Logger, gov CityAdminSvc) Middleware {
 	return Middleware{
 		log: log,
 		domain: domain{
-			gov: gov,
+			admin: gov,
 		},
 	}
 }
 
-type govSvc interface {
-	Get(ctx context.Context, filters citymod.GetFilters) (models.CityModer, error)
+type CityAdminSvc interface {
+	Get(ctx context.Context, filters admin.GetFilters) (models.CityAdmin, error)
 }

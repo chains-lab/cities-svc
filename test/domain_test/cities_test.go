@@ -98,8 +98,8 @@ func TestCreateCityInUnsupportedCountry(t *testing.T) {
 		Point:     [2]float64{30.5234, 50.4501},
 		Timezone:  "America/New_York",
 	})
-	if !errors.Is(err, errx.ErrorCountryNotSupported) {
-		t.Fatalf("expected error %v, got %v", errx.ErrorCountryNotSupported, err)
+	if !errors.Is(err, errx.ErrorCountryIsNotSupported) {
+		t.Fatalf("expected error %v, got %v", errx.ErrorCountryIsNotSupported, err)
 	}
 }
 
@@ -426,7 +426,7 @@ func TestSetCityStatus(t *testing.T) {
 		t.Errorf("expected city status 'deprecated', got '%s'", kyiv.Status)
 	}
 
-	_, _, err = s.domain.moder.CreateInvite(context.Background(), enum.CityGovRoleMayor, kyiv.ID, time.Hour)
+	_, err = s.domain.moder.CreateInvite(context.Background(), enum.CityAdminRoleHead, kyiv.ID, time.Hour)
 	if !errors.Is(err, errx.ErrorCityIsNotSupported) {
 		t.Fatalf("expected error when creating mayor invite for deprecated city, got: %v", err)
 	}
@@ -469,7 +469,7 @@ func TestSetCityStatusInUnsupportedCountry(t *testing.T) {
 	}
 
 	_, err = s.domain.city.UpdateStatus(ctx, kyiv.ID, enum.CityStatusOfficial)
-	if !errors.Is(err, errx.ErrorCannotUpdateCityStatusInUnsupportedCountry) {
+	if !errors.Is(err, errx.ErrorCountryIsNotSupported) {
 		t.Fatalf("expected error when setting city status in deprecated country, got: %v", err)
 	}
 

@@ -45,6 +45,7 @@ func inviteSchemaToModel(s pgdb.Invite) models.Invite {
 		Status:    s.Status,
 		Role:      s.Role,
 		CityID:    s.CityID,
+		Token:     s.Token,
 		CreatedAt: s.CreatedAt,
 		ExpiresAt: s.ExpiresAt,
 	}
@@ -64,6 +65,7 @@ func modelToInviteSchema(m models.Invite) pgdb.Invite {
 		Status:    m.Status,
 		Role:      m.Role,
 		CityID:    m.CityID,
+		Token:     m.Token,
 		ExpiresAt: m.ExpiresAt,
 		CreatedAt: m.CreatedAt,
 	}

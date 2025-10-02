@@ -30,16 +30,16 @@ type Handlers interface {
 	ListGovs(w http.ResponseWriter, r *http.Request)
 	CreateInvite(w http.ResponseWriter, r *http.Request)
 	AcceptInvite(w http.ResponseWriter, r *http.Request)
-	GetGov(w http.ResponseWriter, r *http.Request)
-	DeleteGov(w http.ResponseWriter, r *http.Request)
+	GetCityAdmin(w http.ResponseWriter, r *http.Request)
+	DeleteCityAdmin(w http.ResponseWriter, r *http.Request)
 
-	GetOwnGov(w http.ResponseWriter, r *http.Request)
-	UpdateOwnGov(w http.ResponseWriter, r *http.Request)
-	RefuseOwnGov(w http.ResponseWriter, r *http.Request)
+	GetOwnCityAdmin(w http.ResponseWriter, r *http.Request)
+	UpdateOwnCityAdmin(w http.ResponseWriter, r *http.Request)
+	RefuseOwnCityAdmin(w http.ResponseWriter, r *http.Request)
 }
 
 type Middlewares interface {
-	CityGovRoles(
+	CityAdminRoles(
 		UserCtxKey interface{},
 		allowedGovRoles map[string]bool,
 		allowedSysadminRoles map[string]bool,
@@ -50,24 +50,24 @@ func Run(ctx context.Context, cfg internal.Config, log logium.Logger, h Handlers
 	svc := mdlv.ServiceGrant(enum.CitiesSVC, cfg.JWT.Service.SecretKey)
 	auth := mdlv.Auth(meta.UserCtxKey, cfg.JWT.User.AccessToken.SecretKey)
 	sysadmin := mdlv.RoleGrant(meta.UserCtxKey, map[string]bool{
-		roles.Admin:     true,
-		roles.SuperUser: true,
+		roles.Admin: true,
 	})
+
 	user := mdlv.RoleGrant(meta.UserCtxKey, map[string]bool{
 		roles.User: true,
 	})
 
-	cityMod := m.CityGovRoles(meta.UserCtxKey, map[string]bool{
-		enum.CityGovRoleModerator: true,
-		enum.CityGovRoleMayor:     true,
+	cityMod := m.CityAdminRoles(meta.UserCtxKey, map[string]bool{
+		enum.CityAdminRoleHead:      true,
+		enum.CityAdminRoleModerator: true,
 	}, map[string]bool{
 		roles.Admin: true,
 	})
 
-	cityStuff := m.CityGovRoles(meta.UserCtxKey, map[string]bool{
-		enum.CityGovRoleModerator: true,
-		enum.CityGovRoleMayor:     true,
-		enum.CityGovRoleAdvisor:   true,
+	cityStuff := m.CityAdminRoles(meta.UserCtxKey, map[string]bool{
+		enum.CityAdminRoleHead:      true,
+		enum.CityAdminRoleModerator: true,
+		enum.CityAdminMember:        true,
 	}, map[string]bool{
 		roles.Admin: true,
 	})
@@ -115,14 +115,14 @@ func Run(ctx context.Context, cfg internal.Config, log logium.Logger, h Handlers
 						})
 
 						r.With(auth, user, cityStuff).Route("/me", func(r chi.Router) {
-							r.Get("/", h.GetOwnGov)
-							r.Put("/", h.UpdateOwnGov)
-							r.Delete("/", h.RefuseOwnGov)
+							r.Get("/", h.GetOwnCityAdmin)
+							r.Put("/", h.UpdateOwnCityAdmin)
+							r.Delete("/", h.RefuseOwnCityAdmin)
 						})
 
 						r.Route("/{user_id}", func(r chi.Router) {
-							r.Get("/", h.GetGov)
-							r.With(auth, user).Delete("/", h.DeleteGov)
+							r.Get("/", h.GetCityAdmin)
+							r.With(auth, user).Delete("/", h.DeleteCityAdmin)
 						})
 					})
 				})

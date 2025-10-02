@@ -1,0 +1,15 @@
+type: object
+required:
+  - id
+  - type
+  - attributes
+properties:
+  id:
+    type: string
+    format: uuid
+    description: "user id"
+  type:
+    type: string
+    enum: [ city_moderator ]
+  attributes:
+    $ref: './CityAdminAttributes.yaml'

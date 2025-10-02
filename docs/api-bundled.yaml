@@ -496,14 +496,14 @@ components:
             $ref: '#/components/schemas/CityData'
         links:
           $ref: '#/components/schemas/PaginationData'
-    Gov:
+    CityAdmin:
       type: object
       required:
         - data
       properties:
         data:
-          $ref: '#/components/schemas/GovData'
-    GovData:
+          $ref: '#/components/schemas/CityAdminData'
+    CityAdminData:
       type: object
       required:
         - id
@@ -519,8 +519,8 @@ components:
           enum:
             - city_moderator
         attributes:
-          $ref: '#/components/schemas/GovAttributes'
-    GovAttributes:
+          $ref: '#/components/schemas/CityAdminAttributes'
+    CityAdminAttributes:
       type: object
       required:
         - city_id
@@ -546,7 +546,7 @@ components:
           type: string
           format: date-time
           description: last update date
-    GovsCollection:
+    CityAdminsCollection:
       type: object
       required:
         - data
@@ -555,7 +555,7 @@ components:
         data:
           type: array
           items:
-            $ref: '#/components/schemas/GovData'
+            $ref: '#/components/schemas/CityAdminData'
         links:
           $ref: '#/components/schemas/PaginationData'
     Invite:

@@ -19,14 +19,14 @@ type SqlDB struct {
 	cities    pgdb.CitiesQ
 	countries pgdb.CountriesQ
 	invites   pgdb.InvitesQ
-	cityMod   pgdb.CityModersQ
+	cityMod   pgdb.CityAdminsQ
 }
 
 func NewDatabase(db *sql.DB) *Database {
 	citySql := pgdb.NewCitiesQ(db)
 	countrySql := pgdb.NewCountriesQ(db)
 	inviteSql := pgdb.NewInvitesQ(db)
-	cityModSql := pgdb.NewCityModersQ(db)
+	cityModSql := pgdb.NewCityAdminsQ(db)
 
 	return &Database{
 		sql: SqlDB{

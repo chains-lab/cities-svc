@@ -6,22 +6,24 @@ import (
 
 	"github.com/chains-lab/ape"
 	"github.com/chains-lab/ape/problems"
+	"github.com/chains-lab/cities-svc/internal/api/rest/meta"
 	"github.com/chains-lab/cities-svc/internal/api/rest/requests"
 	"github.com/chains-lab/cities-svc/internal/api/rest/responses"
 	"github.com/chains-lab/cities-svc/internal/domain/services/city"
+	validation "github.com/go-ozzo/ozzo-validation/v4"
 
 	"github.com/chains-lab/cities-svc/internal/domain/errx"
 	"github.com/paulmach/orb"
 )
 
 func (a Service) UpdateCity(w http.ResponseWriter, r *http.Request) {
-	//initiator, err := meta.User(r.Context())
-	//if err != nil {
-	//	a.log.WithError(err).Error("failed to get user from context")
-	//	ape.RenderErr(w, problems.Unauthorized("failed to get user from context"))
-	//
-	//	return
-	//}
+	initiator, err := meta.User(r.Context())
+	if err != nil {
+		a.log.WithError(err).Error("failed to get user from context")
+		ape.RenderErr(w, problems.Unauthorized("failed to get user from context"))
+
+		return
+	}
 
 	req, err := requests.UpdateCity(r)
 	if err != nil {
@@ -56,30 +58,35 @@ func (a Service) UpdateCity(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		a.log.WithError(err).Error("failed to update city")
 		switch {
-		case errors.Is(err, errx.ErrorInitiatorIsNotActiveCityGov):
-			ape.RenderErr(w, problems.Forbidden("initiator is not an active city governor"))
-		case errors.Is(err, errx.ErrorInitiatorIsNotThisCityGov):
-			ape.RenderErr(w, problems.Forbidden("initiator is not the city governor"))
-		case errors.Is(err, errx.ErrorInitiatorGovRoleHaveNotEnoughRights):
-			ape.RenderErr(w, problems.Forbidden("initiator governor role have not enough rights"))
 		case errors.Is(err, errx.ErrorCityNotFound):
 			ape.RenderErr(w, problems.NotFound("city not found"))
 		case errors.Is(err, errx.ErrorInvalidPoint):
-			ape.RenderErr(w, problems.InvalidPointer("data/attributes/point", err))
+			ape.RenderErr(w, problems.BadRequest(validation.Errors{
+				"data/attributes/point": err,
+			})...)
 		case errors.Is(err, errx.ErrorInvalidTimeZone):
-			ape.RenderErr(w, problems.InvalidPointer("data/attributes/timezone", err))
+			ape.RenderErr(w, problems.BadRequest(validation.Errors{
+				"data/attributes/timezone": err,
+			})...)
+		case errors.Is(err, errx.ErrorInvalidCityStatus):
+			ape.RenderErr(w, problems.BadRequest(validation.Errors{
+				"data/attributes/status": err,
+			})...)
+		case errors.Is(err, errx.ErrorInvalidCityName):
+			ape.RenderErr(w, problems.BadRequest(validation.Errors{
+				"data/attributes/name": err,
+			})...)
 		case errors.Is(err, errx.ErrorCityAlreadyExistsWithThisSlug):
 			ape.RenderErr(w, problems.Conflict("city with the given slug already exists"))
-		case errors.Is(err, errx.ErrorInvalidCityStatus):
-			ape.RenderErr(w, problems.InvalidPointer("data/attributes/status", err))
-		case errors.Is(err, errx.ErrorInvalidCityName):
-			ape.RenderErr(w, problems.InvalidPointer("data/attributes/name", err))
+
 		default:
 			ape.RenderErr(w, problems.InternalError())
 		}
 
 		return
 	}
+
+	a.log.Infof("city %s updated by user %s", res.ID, initiator.ID)
 
 	ape.Render(w, http.StatusOK, responses.City(res))
 }

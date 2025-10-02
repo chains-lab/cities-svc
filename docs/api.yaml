@@ -63,14 +63,14 @@ components:
     CitiesCollection:
       $ref: './spec/components/schemas/CitiesCollection.yaml'
 
-    Gov:
-      $ref: './spec/components/schemas/Gov.yaml'
-    GovData:
-      $ref: './spec/components/schemas/GovData.yaml'
-    GovAttributes:
-      $ref: './spec/components/schemas/GovAttributes.yaml'
-    GovsCollection:
-      $ref: './spec/components/schemas/GovsCollection.yaml'
+    CityAdmin:
+      $ref: './spec/components/schemas/CityAdmin.yaml'
+    CityAdminData:
+      $ref: './spec/components/schemas/CityAdminData.yaml'
+    CityAdminAttributes:
+      $ref: './spec/components/schemas/CityAdminAttributes.yaml'
+    CityAdminsCollection:
+      $ref: './spec/components/schemas/CityAdminsCollection.yaml'
 
     Invite:
       $ref: './spec/components/schemas/Invite.yaml'

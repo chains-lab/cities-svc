@@ -17,6 +17,7 @@ type Invite struct {
 	Status     string        `db:"status"`
 	Role       string        `db:"role"`
 	CityID     uuid.UUID     `db:"city_id"`
+	Token      string        `db:"token"`
 	UserID     uuid.NullUUID `db:"user_id"`
 	AnsweredAt sql.NullTime  `db:"answered_at"`
 	ExpiresAt  time.Time     `db:"expires_at"`
@@ -39,6 +40,7 @@ func NewInvitesQ(db *sql.DB) InvitesQ {
 		"status",
 		"role",
 		"city_id",
+		"token",
 		"user_id",
 		"answered_at",
 		"expires_at",
@@ -62,6 +64,7 @@ func (q InvitesQ) Insert(ctx context.Context, in Invite) error {
 		"status":     in.Status,
 		"role":       in.Role,
 		"city_id":    in.CityID,
+		"token":      in.Token,
 		"expires_at": in.ExpiresAt,
 	}
 
@@ -110,6 +113,7 @@ func (q InvitesQ) Get(ctx context.Context) (Invite, error) {
 		&m.Status,
 		&m.Role,
 		&m.CityID,
+		&m.Token,
 		&userID,
 		&answeredAt,
 		&m.ExpiresAt,
@@ -155,6 +159,7 @@ func (q InvitesQ) Select(ctx context.Context) ([]Invite, error) {
 			&m.Status,
 			&m.Role,
 			&m.CityID,
+			&m.Token,
 			&userID,
 			&answeredAt,
 			&m.ExpiresAt,
@@ -252,6 +257,14 @@ func (q InvitesQ) FilterRole(role ...string) InvitesQ {
 	q.updater = q.updater.Where(sq.Eq{"role": role})
 	q.deleter = q.deleter.Where(sq.Eq{"role": role})
 	q.counter = q.counter.Where(sq.Eq{"role": role})
+	return q
+}
+
+func (q InvitesQ) FilterToken(token string) InvitesQ {
+	q.selector = q.selector.Where(sq.Eq{"token": token})
+	q.updater = q.updater.Where(sq.Eq{"token": token})
+	q.deleter = q.deleter.Where(sq.Eq{"token": token})
+	q.counter = q.counter.Where(sq.Eq{"token": token})
 	return q
 }
 

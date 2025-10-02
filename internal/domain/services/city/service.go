@@ -118,7 +118,7 @@ func (s Service) CountryIsSupported(ctx context.Context, countryID uuid.UUID) er
 		)
 	}
 	if country.Status != enum.CountryStatusSupported {
-		return errx.ErrorCountryNotSupported.Raise(
+		return errx.ErrorCountryIsNotSupported.Raise(
 			fmt.Errorf("country with ID %s is not active", countryID),
 		)
 	}

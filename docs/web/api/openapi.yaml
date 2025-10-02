@@ -215,13 +215,13 @@ components:
       required:
       - data
       - links
-    Gov:
+    CityAdmin:
       properties:
         data:
-          $ref: '#/components/schemas/GovData'
+          $ref: '#/components/schemas/CityAdminData'
       required:
       - data
-    GovData:
+    CityAdminData:
       properties:
         id:
           description: user id
@@ -232,12 +232,12 @@ components:
           - city_moderator
           type: string
         attributes:
-          $ref: '#/components/schemas/GovAttributes'
+          $ref: '#/components/schemas/CityAdminAttributes'
       required:
       - attributes
       - id
       - type
-    GovAttributes:
+    CityAdminAttributes:
       properties:
         city_id:
           description: city id
@@ -262,11 +262,11 @@ components:
       - created_at
       - role
       - updated_at
-    GovsCollection:
+    CityAdminsCollection:
       properties:
         data:
           items:
-            $ref: '#/components/schemas/GovData'
+            $ref: '#/components/schemas/CityAdminData'
           type: array
         links:
           $ref: '#/components/schemas/PaginationData'

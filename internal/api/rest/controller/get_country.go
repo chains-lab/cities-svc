@@ -9,6 +9,7 @@ import (
 	"github.com/chains-lab/cities-svc/internal/api/rest/responses"
 	"github.com/chains-lab/cities-svc/internal/domain/errx"
 	"github.com/go-chi/chi/v5"
+	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/google/uuid"
 )
 
@@ -16,7 +17,9 @@ func (a Service) GetCountry(w http.ResponseWriter, r *http.Request) {
 	countryID, err := uuid.Parse(chi.URLParam(r, "country_id"))
 	if err != nil {
 		a.log.WithError(err).Error("invalid country_id")
-		ape.RenderErr(w, problems.BadRequest(err)...)
+		ape.RenderErr(w, problems.BadRequest(validation.Errors{
+			"country_id": err,
+		})...)
 
 		return
 	}

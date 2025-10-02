@@ -11,6 +11,7 @@ import (
 	"github.com/chains-lab/cities-svc/internal/api/rest/responses"
 	"github.com/chains-lab/cities-svc/internal/domain/errx"
 	"github.com/chains-lab/cities-svc/internal/domain/services/city"
+	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/paulmach/orb"
 )
 
@@ -43,14 +44,20 @@ func (a Service) CreateCity(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		a.log.WithError(err).Error("error creating city")
 		switch {
-		case errors.Is(err, errx.ErrorCountryNotSupported):
+		case errors.Is(err, errx.ErrorCountryIsNotSupported):
 			ape.RenderErr(w, problems.Conflict("cannot create city in unsupported country"))
 		case errors.Is(err, errx.ErrorInvalidTimeZone):
-			ape.RenderErr(w, problems.InvalidPointer("data/attributes/timezone", err))
+			ape.RenderErr(w, problems.BadRequest(validation.Errors{
+				"data/attributes/timezone": err,
+			})...)
 		case errors.Is(err, errx.ErrorInvalidPoint):
-			ape.RenderErr(w, problems.InvalidPointer("data/attributes/point", err))
+			ape.RenderErr(w, problems.BadRequest(validation.Errors{
+				"data/attributes/point": err,
+			})...)
 		case errors.Is(err, errx.ErrorInvalidCityName):
-			ape.RenderErr(w, problems.InvalidPointer("data/attributes/name", err))
+			ape.RenderErr(w, problems.BadRequest(validation.Errors{
+				"data/attributes/name": err,
+			})...)
 		default:
 			ape.RenderErr(w, problems.InternalError())
 		}

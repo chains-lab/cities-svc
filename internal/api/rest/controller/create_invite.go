@@ -44,21 +44,16 @@ func (a Service) CreateInvite(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//TODO WHAt do with token?
-	inv, token, err := a.domain.moder.CreateInvite(r.Context(), req.Data.Attributes.Role, CityID, 24*time.Hour)
+	inv, err := a.domain.moder.CreateInvite(r.Context(), req.Data.Attributes.Role, CityID, 24*time.Hour)
 	if err != nil {
 		a.log.WithError(err).Error("failed to create city moder")
 		switch {
-		case errors.Is(err, errx.ErrorCannotCreateInviteForNotOfficialCity):
+		case errors.Is(err, errx.ErrorInvalidCityAdminRole):
+			ape.RenderErr(w, problems.BadRequest(validation.Errors{
+				"role": err,
+			})...)
+		case errors.Is(err, errx.ErrorCityIsNotSupported):
 			ape.RenderErr(w, problems.Conflict("cannot create invite for not official city"))
-		case errors.Is(err, errx.ErrorInitiatorIsNotThisCityGov):
-			ape.RenderErr(w, problems.Forbidden("only city city moder can create invite"))
-		case errors.Is(err, errx.ErrorInitiatorGovRoleHaveNotEnoughRights):
-			ape.RenderErr(w, problems.NotFound("initiator role have not enough rights to invite this role"))
-		case errors.Is(err, errx.ErrorInvalidGovRole):
-			ape.RenderErr(w, problems.InvalidPointer("/data/attributes/role", err))
-		case errors.Is(err, errx.ErrorGovAlreadyExists):
-			ape.RenderErr(w, problems.Conflict("city moder already exists for this user"))
 		default:
 			ape.RenderErr(w, problems.InternalError())
 		}
@@ -66,7 +61,7 @@ func (a Service) CreateInvite(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	a.log.Infof("citymod %s created successfully by user %s", inv.ID, initiator.ID)
+	a.log.Infof("admin %s created successfully by user %s", inv.ID, initiator.ID)
 
-	ape.Render(w, http.StatusCreated, responses.Invite(inv, token))
+	ape.Render(w, http.StatusCreated, responses.Invite(inv))
 }

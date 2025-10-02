@@ -29,13 +29,15 @@ func (a Service) AcceptInvite(w http.ResponseWriter, r *http.Request) {
 		switch {
 		case errors.Is(err, errx.ErrorInvalidInviteToken):
 			ape.RenderErr(w, problems.Unauthorized("invalid invite token"))
-		case errors.Is(err, errx.ErrorInviteAlreadyAnswered):
-			ape.RenderErr(w, problems.Conflict("invite already answered"))
 		case errors.Is(err, errx.ErrorInviteNotFound):
 			ape.RenderErr(w, problems.NotFound("invite not found"))
+		case errors.Is(err, errx.ErrorInviteAlreadyAnswered):
+			ape.RenderErr(w, problems.Conflict("invite already answered"))
 		case errors.Is(err, errx.ErrorInviteExpired):
 			ape.RenderErr(w, problems.Conflict("invite expired"))
-		case errors.Is(err, errx.ErrorAnswerToInviteForNotOffSupCity):
+		case errors.Is(err, errx.ErrorUserIsAlreadyCityAdmin):
+			ape.RenderErr(w, problems.Conflict("user is already a city admin"))
+		case errors.Is(err, errx.ErrorCityIsNotSupported):
 			ape.RenderErr(w, problems.Conflict("cannot accept invite for not official support city"))
 		default:
 			ape.RenderErr(w, problems.InternalError())
@@ -44,5 +46,5 @@ func (a Service) AcceptInvite(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ape.Render(w, http.StatusCreated, responses.Gov(res))
+	ape.Render(w, http.StatusCreated, responses.CityAdmin(res))
 }

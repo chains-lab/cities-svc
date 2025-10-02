@@ -8,9 +8,8 @@ import (
 	"github.com/chains-lab/ape/problems"
 	"github.com/chains-lab/cities-svc/internal/api/rest/requests"
 	"github.com/chains-lab/cities-svc/internal/api/rest/responses"
-	"github.com/chains-lab/cities-svc/internal/domain/services/country"
-
 	"github.com/chains-lab/cities-svc/internal/domain/errx"
+	"github.com/chains-lab/cities-svc/internal/domain/services/country"
 )
 
 func (a Service) UpdateCountry(w http.ResponseWriter, r *http.Request) {

@@ -33,7 +33,7 @@ func (s Service) UpdateStatus(ctx context.Context, cityID uuid.UUID, status stri
 				return err
 			}
 			if cou.Status != enum.CountryStatusSupported {
-				return errx.ErrorCannotUpdateCityStatusInUnsupportedCountry.Raise(
+				return errx.ErrorCountryIsNotSupported.Raise(
 					fmt.Errorf("%s is not supported", ci.CountryID),
 				)
 			}
@@ -44,7 +44,7 @@ func (s Service) UpdateStatus(ctx context.Context, cityID uuid.UUID, status stri
 				return err
 			}
 			if cou.Status != enum.CountryStatusSupported {
-				return errx.ErrorCannotUpdateCityStatusInUnsupportedCountry.Raise(
+				return errx.ErrorCountryIsNotSupported.Raise(
 					fmt.Errorf("%s is not supported", ci.CountryID),
 				)
 			}
@@ -74,7 +74,7 @@ func (s Service) UpdateStatus(ctx context.Context, cityID uuid.UUID, status stri
 
 		ci.Status = status
 		ci.UpdatedAt = now
-		
+
 		return nil
 	})
 

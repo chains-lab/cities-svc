@@ -9,7 +9,9 @@ import (
 	"github.com/google/uuid"
 )
 
-func (m Manager) DecryptInviteToken(tokenStr models.InviteToken) (models.InviteTokenData, error) {
+func (m Manager) DecryptInviteToken(
+	tokenStr string,
+) (models.InviteTokenData, error) {
 	var out models.InviteTokenData
 
 	parser := jwt.NewParser(

@@ -6,7 +6,7 @@ import (
 
 	"github.com/chains-lab/ape"
 	"github.com/chains-lab/ape/problems"
-	"github.com/chains-lab/cities-svc/internal/domain/services/citymod"
+	"github.com/chains-lab/cities-svc/internal/domain/services/admin"
 	"github.com/chains-lab/gatekit/auth"
 	"github.com/chains-lab/gatekit/roles"
 	"github.com/go-chi/chi/v5"
@@ -14,7 +14,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (m Middleware) CityGovRoles(UserCtxKey interface{}, allowedGovRoles map[string]bool, allowedSysadminRoles map[string]bool) func(http.Handler) http.Handler {
+func (m Middleware) CityAdminRoles(UserCtxKey interface{}, allowedGovRoles map[string]bool, allowedSysadminRoles map[string]bool) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
@@ -50,12 +50,12 @@ func (m Middleware) CityGovRoles(UserCtxKey interface{}, allowedGovRoles map[str
 				return
 			}
 
-			initiator, err := m.domain.gov.Get(ctx, citymod.GetFilters{
+			initiator, err := m.domain.admin.Get(ctx, admin.GetFilters{
 				CityID: &cityID,
 				UserID: &user.ID,
 			})
 			if err != nil {
-				m.log.WithError(err).Errorf("failed to get gov for user %s and city %s", user.ID, cityID)
+				m.log.WithError(err).Errorf("failed to get admin for user %s and city %s", user.ID, cityID)
 				ape.RenderErr(w,
 					problems.Unauthorized("User is not a city moderator"),
 				)

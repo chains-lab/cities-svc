@@ -5,7 +5,7 @@ import (
 	"github.com/chains-lab/cities-svc/resources"
 )
 
-func Invite(m models.Invite, token models.InviteToken) resources.Invite {
+func Invite(m models.Invite) resources.Invite {
 	resp := resources.Invite{
 		Data: resources.InviteData{
 			Id:   m.ID,
@@ -13,7 +13,7 @@ func Invite(m models.Invite, token models.InviteToken) resources.Invite {
 			Attributes: resources.InviteDataAttributes{
 				Status:    m.Status,
 				Role:      m.Role,
-				Token:     string(token),
+				Token:     m.Token,
 				CityId:    m.CityID,
 				ExpiresAt: m.ExpiresAt,
 				CreatedAt: m.CreatedAt,

@@ -18,5 +18,6 @@ func CreateInvite(r *http.Request) (req resources.CreateInvite, err error) {
 		"data/type":       validation.Validate(req.Data.Type, validation.Required, validation.In(resources.CreateInviteType)),
 		"data/attributes": validation.Validate(req.Data.Attributes, validation.Required),
 	}
+
 	return req, errs.Filter()
 }
