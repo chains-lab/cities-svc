@@ -17,7 +17,7 @@ func (s Service) RefuseOwn(ctx context.Context, userID uuid.UUID) error {
 	err = s.db.DeleteCityAdmin(ctx, userID, mod.CityID)
 	if err != nil {
 		return errx.ErrorInternal.Raise(
-			fmt.Errorf("delete admin: %w", err),
+			fmt.Errorf("failed to delete city admin, cause: %w", err),
 		)
 	}
 

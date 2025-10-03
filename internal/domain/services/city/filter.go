@@ -31,7 +31,7 @@ func (s Service) Filter(
 	res, err := s.db.FilterCities(ctx, filters, page, size)
 	if err != nil {
 		return models.CitiesCollection{}, errx.ErrorInternal.Raise(
-			fmt.Errorf("failed to filter cities: %w", err),
+			fmt.Errorf("failed to filter cities, cause: %w", err),
 		)
 	}
 

@@ -51,11 +51,11 @@ func (s Service) Update(ctx context.Context, cityID uuid.UUID, params UpdatePara
 		_, err = s.GetBySlug(ctx, *params.Slug)
 		if err != nil && !errors.Is(err, errx.ErrorCityNotFound) {
 			return models.City{}, errx.ErrorInternal.Raise(
-				fmt.Errorf("failed to get city by slug: %w", err),
+				fmt.Errorf("failed to get city by slug, cause: %w", err),
 			)
 		} else if err == nil {
 			return models.City{}, errx.ErrorCityAlreadyExistsWithThisSlug.Raise(
-				fmt.Errorf("city with slug: %s already exists", params.Slug),
+				fmt.Errorf("city with slug: %s already exists", *params.Slug),
 			)
 		}
 

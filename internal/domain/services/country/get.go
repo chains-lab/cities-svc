@@ -13,7 +13,7 @@ func (s Service) GetByID(ctx context.Context, ID uuid.UUID) (models.Country, err
 	country, err := s.db.GetCountryByID(ctx, ID)
 	if err != nil {
 		return models.Country{}, errx.ErrorInternal.Raise(
-			fmt.Errorf("error get country by id %s, cause: %w", ID, err),
+			fmt.Errorf("failed to get country by id %s, cause: %w", ID, err),
 		)
 	}
 
@@ -30,7 +30,7 @@ func (s Service) GetByName(ctx context.Context, name string) (models.Country, er
 	country, err := s.db.GetCountryByName(ctx, name)
 	if err != nil {
 		return models.Country{}, errx.ErrorInternal.Raise(
-			fmt.Errorf("get country by name %s, cause: %w", name, err),
+			fmt.Errorf("failed to get country by name %s, cause: %w", name, err),
 		)
 	}
 

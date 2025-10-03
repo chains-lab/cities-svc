@@ -1,4 +1,4 @@
-package admin
+package invite
 
 import (
 	"context"
@@ -12,7 +12,7 @@ import (
 func (s Service) GetInvite(ctx context.Context, ID uuid.UUID) (models.Invite, error) {
 	inv, err := s.db.GetInvite(ctx, ID)
 	if err != nil {
-		return models.Invite{}, errx.ErrorInternal.Raise(fmt.Errorf("get invite by ID, cause %w", err))
+		return models.Invite{}, errx.ErrorInternal.Raise(fmt.Errorf("failed to get invite by ID, cause %w", err))
 	}
 
 	if inv.IsNil() {

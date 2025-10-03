@@ -21,7 +21,7 @@ func (s Service) Filter(
 	res, err := s.db.FilterCountries(ctx, filters, page, size)
 	if err != nil {
 		return models.CountriesCollection{}, errx.ErrorInternal.Raise(
-			fmt.Errorf("failed to filter countries: %w", err),
+			fmt.Errorf("failed to filter countries, cause: %w", err),
 		)
 	}
 

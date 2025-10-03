@@ -32,7 +32,7 @@ func (s Service) Create(ctx context.Context, userID, cityID uuid.UUID, role stri
 	err = s.db.CreateCityAdmin(ctx, resp)
 	if err != nil {
 		return models.CityAdmin{}, errx.ErrorInternal.Raise(
-			fmt.Errorf("failed to creating city admin: %w", err),
+			fmt.Errorf("failed to creating city admin, cause: %w", err),
 		)
 	}
 

@@ -22,7 +22,7 @@ func (s Service) Filter(
 	res, err := s.db.FilterCityAdmins(ctx, filters, page, size)
 	if err != nil {
 		return models.CityAdminsCollection{}, errx.ErrorInternal.Raise(
-			fmt.Errorf("failed filter city admin, cause: %w", err),
+			fmt.Errorf("failed to filter city admin, cause: %w", err),
 		)
 	}
 

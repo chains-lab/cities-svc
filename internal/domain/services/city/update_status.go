@@ -52,7 +52,7 @@ func (s Service) UpdateStatus(ctx context.Context, cityID uuid.UUID, status stri
 			err = s.db.DeleteGovForCity(ctx, ci.ID)
 			if err != nil {
 				return errx.ErrorInternal.Raise(
-					fmt.Errorf("failed to delete city status: %w", err),
+					fmt.Errorf("failed to delete city status, cause: %w", err),
 				)
 			}
 
@@ -60,7 +60,7 @@ func (s Service) UpdateStatus(ctx context.Context, cityID uuid.UUID, status stri
 			err = s.db.DeleteGovForCity(ctx, ci.ID)
 			if err != nil {
 				return errx.ErrorInternal.Raise(
-					fmt.Errorf("failed to delete city status: %w", err),
+					fmt.Errorf("failed to delete city status, cause: %w", err),
 				)
 			}
 		}
@@ -68,7 +68,7 @@ func (s Service) UpdateStatus(ctx context.Context, cityID uuid.UUID, status stri
 		err = s.db.UpdateCityStatus(ctx, cityID, status, now)
 		if err != nil {
 			return errx.ErrorInternal.Raise(
-				fmt.Errorf("failed to update city status: %w", err),
+				fmt.Errorf("failed to update city status, cause: %w", err),
 			)
 		}
 
@@ -89,7 +89,7 @@ func (s Service) getCountryByID(ctx context.Context, ID uuid.UUID) (models.Count
 	country, err := s.db.GetCountryByID(ctx, ID)
 	if err != nil {
 		return models.Country{}, errx.ErrorInternal.Raise(
-			fmt.Errorf("error get country by id %s, cause: %w", ID, err),
+			fmt.Errorf("failed to get country by id %s, cause: %w", ID, err),
 		)
 	}
 

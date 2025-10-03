@@ -27,19 +27,8 @@ type CityModSvc interface {
 
 	Delete(ctx context.Context, UserID, CityID uuid.UUID) error
 
-	CreateInvite(
-		ctx context.Context,
-		role string,
-		cityID uuid.UUID,
-		duration time.Duration,
-	) (models.Invite, error)
-
-	AcceptInvite(ctx context.Context, userID uuid.UUID, token string) (models.Invite, error)
-
 	UpdateOther(ctx context.Context, UserID uuid.UUID, params admin.UpdateParams) (models.CityAdmin, error)
 	UpdateOwn(ctx context.Context, userID uuid.UUID, params admin.UpdateParams) (models.CityAdmin, error)
-
-	GetInvite(ctx context.Context, ID uuid.UUID) (models.Invite, error)
 }
 
 type CitySvc interface {
@@ -77,10 +66,22 @@ type CountrySvc interface {
 	Update(ctx context.Context, ID uuid.UUID, params country.UpdateParams) (models.Country, error)
 }
 
+type inviteSvc interface {
+	Create(
+		ctx context.Context,
+		role string,
+		cityID uuid.UUID,
+		duration time.Duration,
+	) (models.Invite, error)
+
+	Accept(ctx context.Context, userID uuid.UUID, token string) (models.Invite, error)
+}
+
 type domain struct {
 	moder   CityModSvc
 	city    CitySvc
 	country CountrySvc
+	invite  inviteSvc
 }
 
 type Service struct {
@@ -88,13 +89,14 @@ type Service struct {
 	log    logium.Logger
 }
 
-func New(log logium.Logger, country CountrySvc, city CitySvc, cityMod CityModSvc) Service {
+func New(log logium.Logger, country CountrySvc, city CitySvc, cityMod CityModSvc, invSvc inviteSvc) Service {
 	return Service{
 		log: log,
 		domain: domain{
 			country: country,
 			city:    city,
 			moder:   cityMod,
+			invite:  invSvc,
 		},
 	}
 }

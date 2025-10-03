@@ -13,6 +13,7 @@ import (
 	"github.com/chains-lab/cities-svc/internal/domain/services/admin"
 	"github.com/chains-lab/cities-svc/internal/domain/services/city"
 	"github.com/chains-lab/cities-svc/internal/domain/services/country"
+	"github.com/chains-lab/cities-svc/internal/domain/services/invite"
 	"github.com/chains-lab/cities-svc/internal/infra/jwtmanager"
 	"github.com/chains-lab/cities-svc/test"
 	"github.com/google/uuid"
@@ -33,19 +34,8 @@ type CityModSvc interface {
 
 	Delete(ctx context.Context, UserID, CityID uuid.UUID) error
 
-	CreateInvite(
-		ctx context.Context,
-		role string,
-		cityID uuid.UUID,
-		duration time.Duration,
-	) (models.Invite, error)
-
-	AcceptInvite(ctx context.Context, userID uuid.UUID, token string) (models.Invite, error)
-
 	UpdateOther(ctx context.Context, UserID uuid.UUID, params admin.UpdateParams) (models.CityAdmin, error)
 	UpdateOwn(ctx context.Context, userID uuid.UUID, params admin.UpdateParams) (models.CityAdmin, error)
-
-	GetInvite(ctx context.Context, ID uuid.UUID) (models.Invite, error)
 }
 
 type CitySvc interface {
@@ -83,10 +73,22 @@ type CountrySvc interface {
 	Update(ctx context.Context, ID uuid.UUID, params country.UpdateParams) (models.Country, error)
 }
 
+type InvitesSvc interface {
+	Create(
+		ctx context.Context,
+		role string,
+		cityID uuid.UUID,
+		duration time.Duration,
+	) (models.Invite, error)
+
+	Accept(ctx context.Context, userID uuid.UUID, token string) (models.Invite, error)
+}
+
 type domain struct {
 	moder   CityModSvc
 	city    CitySvc
 	country CountrySvc
+	invites InvitesSvc
 }
 
 type Setup struct {
@@ -122,13 +124,15 @@ func newSetup(t *testing.T) (Setup, error) {
 
 	citySvc := city.NewService(database)
 	countrySvc := country.NewService(database)
-	cityModerSvc := admin.NewService(database, jwtInviteManager)
+	cityModerSvc := admin.NewService(database)
+	inviteSvc := invite.NewService(database, jwtInviteManager)
 
 	return Setup{
 		domain: domain{
 			country: countrySvc,
 			city:    citySvc,
 			moder:   cityModerSvc,
+			invites: inviteSvc,
 		},
 	}, nil
 }

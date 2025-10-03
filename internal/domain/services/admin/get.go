@@ -19,7 +19,7 @@ func (s Service) Get(ctx context.Context, filters GetFilters) (models.CityAdmin,
 	gov, err := s.db.GetCityAdmin(ctx, filters)
 	if err != nil {
 		return models.CityAdmin{}, errx.ErrorInternal.Raise(
-			fmt.Errorf("invalid city admin role, cause: %w", err),
+			fmt.Errorf("failed to get city admin, cause: %w", err),
 		)
 	}
 
@@ -38,7 +38,7 @@ func (s Service) GetInitiator(ctx context.Context, initiatorID uuid.UUID) (model
 	})
 	if err != nil {
 		return models.CityAdmin{}, errx.ErrorInternal.Raise(
-			fmt.Errorf("invalid city admin role, cause: %w", err),
+			fmt.Errorf("failed to get city admin, cause: %w", err),
 		)
 	}
 

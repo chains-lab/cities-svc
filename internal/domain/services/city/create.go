@@ -54,7 +54,7 @@ func (s Service) Create(ctx context.Context, params CreateParams) (models.City, 
 	})
 	if err != nil {
 		return models.City{}, errx.ErrorInternal.Raise(
-			fmt.Errorf("failed to creating city: %w", err),
+			fmt.Errorf("failed to creating city, cause: %w", err),
 		)
 	}
 

@@ -1,4 +1,4 @@
-package admin
+package invite
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (s Service) CreateInvite(
+func (s Service) Create(
 	ctx context.Context,
 	role string,
 	cityID uuid.UUID,
@@ -24,7 +24,7 @@ func (s Service) CreateInvite(
 	token, err := s.jwt.CreateInviteToken(inviteID, role, cityID, now.Add(duration))
 	if err != nil {
 		return models.Invite{}, errx.ErrorInternal.Raise(
-			fmt.Errorf("create invite token: %w", err),
+			fmt.Errorf("create invite token, cause: %w", err),
 		)
 	}
 
@@ -40,7 +40,7 @@ func (s Service) CreateInvite(
 	hash, err := s.jwt.HashInviteToken(token)
 	if err != nil {
 		return models.Invite{}, errx.ErrorInternal.Raise(
-			fmt.Errorf("hash invite token: %w", err),
+			fmt.Errorf("hash invite token, cause: %w", err),
 		)
 	}
 
@@ -57,7 +57,7 @@ func (s Service) CreateInvite(
 	err = s.db.CreateInvite(ctx, invite)
 	if err != nil {
 		return models.Invite{}, errx.ErrorInternal.Raise(
-			fmt.Errorf("create invite: %w", err),
+			fmt.Errorf("failed to create invite, cause: %w", err),
 		)
 	}
 

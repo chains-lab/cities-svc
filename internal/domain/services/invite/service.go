@@ -1,4 +1,4 @@
-package admin
+package invite
 
 import (
 	"context"
@@ -11,13 +11,29 @@ import (
 	"github.com/google/uuid"
 )
 
-type Service struct {
-	db database
+type JwtManager interface {
+	CreateInviteToken(
+		inviteID uuid.UUID,
+		role string,
+		cityID uuid.UUID,
+		ExpiredAt time.Time,
+	) (string, error)
+
+	DecryptInviteToken(tokenStr string) (models.InviteTokenData, error)
+
+	HashInviteToken(tokenStr string) (string, error)
+	VerifyInviteToken(tokenStr, hashed string) error
 }
 
-func NewService(db database) Service {
+type Service struct {
+	db  database
+	jwt JwtManager
+}
+
+func NewService(db database, jwt JwtManager) Service {
 	return Service{
-		db: db,
+		db:  db,
+		jwt: jwt,
 	}
 }
 
@@ -25,10 +41,10 @@ type database interface {
 	Transaction(ctx context.Context, fn func(ctx context.Context) error) error
 
 	CreateCityAdmin(ctx context.Context, input models.CityAdmin) error
-	GetCityAdmin(ctx context.Context, filters GetFilters) (models.CityAdmin, error)
-	FilterCityAdmins(ctx context.Context, filter FilterParams, page, size uint64) (models.CityAdminsCollection, error)
-	UpdateCityAdmin(ctx context.Context, userID uuid.UUID, params UpdateParams, updatedAt time.Time) error
 	DeleteCityAdmin(ctx context.Context, userID, cityID uuid.UUID) error
+
+	GetCityAdminByUserAndCityID(ctx context.Context, userID, cityID uuid.UUID) (models.CityAdmin, error)
+	GetCityAdminByUserID(ctx context.Context, userID uuid.UUID) (models.CityAdmin, error)
 
 	CreateInvite(ctx context.Context, input models.Invite) error
 	GetInvite(ctx context.Context, ID uuid.UUID) (models.Invite, error)

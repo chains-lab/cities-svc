@@ -44,7 +44,7 @@ func (a Service) CreateInvite(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	inv, err := a.domain.moder.CreateInvite(r.Context(), req.Data.Attributes.Role, CityID, 24*time.Hour)
+	inv, err := a.domain.invite.Create(r.Context(), req.Data.Attributes.Role, CityID, 24*time.Hour)
 	if err != nil {
 		a.log.WithError(err).Error("failed to create city moder")
 		switch {

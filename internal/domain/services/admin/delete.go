@@ -20,7 +20,7 @@ func (s Service) Delete(ctx context.Context, UserID, cityID uuid.UUID) error {
 	err = s.db.DeleteCityAdmin(ctx, UserID, cityID)
 	if err != nil {
 		return errx.ErrorInternal.Raise(
-			fmt.Errorf("delete city admin: %w", err),
+			fmt.Errorf("failed to delete city admin, cause: %w", err),
 		)
 	}
 

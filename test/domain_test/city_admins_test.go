@@ -15,7 +15,7 @@ import (
 )
 
 func CreateHead(s Setup, t *testing.T, cityID, userID uuid.UUID) models.CityAdmin {
-	inv, err := s.domain.moder.CreateInvite(
+	inv, err := s.domain.invites.Create(
 		context.Background(),
 		enum.CityAdminRoleHead,
 		cityID,
@@ -25,9 +25,9 @@ func CreateHead(s Setup, t *testing.T, cityID, userID uuid.UUID) models.CityAdmi
 		t.Fatalf("CreateInviteMayor: %v", err)
 	}
 
-	inv, err = s.domain.moder.AcceptInvite(context.Background(), userID, inv.Token)
+	inv, err = s.domain.invites.Accept(context.Background(), userID, inv.Token)
 	if err != nil {
-		t.Fatalf("AcceptInvite: %v", err)
+		t.Fatalf("Accept: %v", err)
 	}
 
 	mod, err := s.domain.moder.Get(context.Background(), admin.GetFilters{
@@ -69,7 +69,7 @@ func TestGetModerator(t *testing.T) {
 		t.Errorf("expected head ID to be %s, got %s", head.UserID, gotMayor.UserID)
 	}
 
-	inv, err := s.domain.moder.CreateInvite(
+	inv, err := s.domain.invites.Create(
 		context.Background(),
 		enum.CityAdminRoleModerator,
 		kyiv.ID,
@@ -81,9 +81,9 @@ func TestGetModerator(t *testing.T) {
 
 	moderID := uuid.New()
 
-	inv, err = s.domain.moder.AcceptInvite(context.Background(), moderID, inv.Token)
+	inv, err = s.domain.invites.Accept(context.Background(), moderID, inv.Token)
 	if err != nil {
-		t.Fatalf("AcceptInvite: %v", err)
+		t.Fatalf("Accept: %v", err)
 	}
 
 	gotModer, err := s.domain.moder.Get(ctx, admin.GetFilters{
@@ -113,22 +113,18 @@ func TestCreateInviteMayor(t *testing.T) {
 		t.Fatalf("SetCityStatusOfficial: %v", err)
 	}
 
-	InviteForAdmin, err := s.domain.moder.CreateInvite(ctx, enum.CityAdminRoleHead, kyiv.ID, time.Hour)
+	InviteForAdmin, err := s.domain.invites.Create(ctx, enum.CityAdminRoleHead, kyiv.ID, time.Hour)
 	if err != nil {
-		t.Fatalf("CreateInvite: %v", err)
+		t.Fatalf("Create: %v", err)
 	}
 
 	adminID := uuid.New()
 
-	InviteForAdmin, err = s.domain.moder.AcceptInvite(ctx, adminID, InviteForAdmin.Token)
+	InviteForAdmin, err = s.domain.invites.Accept(ctx, adminID, InviteForAdmin.Token)
 	if err != nil {
-		t.Fatalf("AcceptInvite: %v", err)
+		t.Fatalf("Accept: %v", err)
 	}
 
-	InviteForAdmin, err = s.domain.moder.GetInvite(ctx, InviteForAdmin.ID)
-	if err != nil {
-		t.Fatalf("GetInvite: %v", err)
-	}
 	if InviteForAdmin.Status != enum.InviteStatusAccepted {
 		t.Errorf("expected invite status 'accepted', got '%s'", InviteForAdmin.Status)
 	}
@@ -141,20 +137,16 @@ func TestCreateInviteMayor(t *testing.T) {
 
 	userModerator := uuid.New()
 
-	InviteForModer, err := s.domain.moder.CreateInvite(ctx, enum.CityAdminRoleHead, kyiv.ID, time.Hour)
+	InviteForModer, err := s.domain.invites.Create(ctx, enum.CityAdminRoleHead, kyiv.ID, time.Hour)
 	if err != nil {
-		t.Fatalf("CreateInvite: %v", err)
+		t.Fatalf("Create: %v", err)
 	}
 
-	InviteForModer, err = s.domain.moder.AcceptInvite(ctx, userModerator, InviteForModer.Token)
+	InviteForModer, err = s.domain.invites.Accept(ctx, userModerator, InviteForModer.Token)
 	if err != nil {
-		t.Fatalf("AcceptInvite: %v", err)
+		t.Fatalf("Accept: %v", err)
 	}
 
-	InviteForModer, err = s.domain.moder.GetInvite(ctx, InviteForModer.ID)
-	if err != nil {
-		t.Fatalf("GetInvite: %v", err)
-	}
 	if InviteForModer.Status != enum.InviteStatusAccepted {
 		t.Errorf("expected invite status 'accepted', got '%s'", InviteForModer.Status)
 	}
@@ -178,7 +170,7 @@ func TestCreateInviteNotOfficialCity(t *testing.T) {
 	ukr := CreateAndActivateCountry(s, t, "Ukraine")
 	kyiv := CreateCity(s, t, ukr.ID, "Kyiv")
 
-	_, err = s.domain.moder.CreateInvite(ctx, enum.CityAdminRoleHead, kyiv.ID, time.Hour*24)
+	_, err = s.domain.invites.Create(ctx, enum.CityAdminRoleHead, kyiv.ID, time.Hour*24)
 	if !errors.Is(err, errx.ErrorCityIsNotSupported) {
 		t.Fatalf("expected error %v, got %v", errx.ErrorCityIsNotSupported, err)
 	}

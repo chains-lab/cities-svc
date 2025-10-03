@@ -23,7 +23,7 @@ func (a Service) AcceptInvite(w http.ResponseWriter, r *http.Request) {
 
 	token := chi.URLParam(r, "token")
 
-	res, err := a.domain.moder.AcceptInvite(r.Context(), initiator.ID, token)
+	res, err := a.domain.invite.Accept(r.Context(), initiator.ID, token)
 	if err != nil {
 		a.log.WithError(err).Error("failed to answer to invite")
 		switch {

@@ -13,6 +13,7 @@ import (
 	"github.com/chains-lab/cities-svc/internal/domain/services/admin"
 	"github.com/chains-lab/cities-svc/internal/domain/services/city"
 	"github.com/chains-lab/cities-svc/internal/domain/services/country"
+	"github.com/chains-lab/cities-svc/internal/domain/services/invite"
 	"github.com/chains-lab/cities-svc/internal/infra/jwtmanager"
 
 	"github.com/chains-lab/logium"
@@ -38,9 +39,10 @@ func StartServices(ctx context.Context, cfg internal.Config, log logium.Logger, 
 
 	citySvc := city.NewService(database)
 	countrySvc := country.NewService(database)
-	cityModerSvc := admin.NewService(database, jwtInviteManager)
+	cityModerSvc := admin.NewService(database)
+	inviteSvc := invite.NewService(database, jwtInviteManager)
 
-	ctrl := controller.New(log, countrySvc, citySvc, cityModerSvc)
+	ctrl := controller.New(log, countrySvc, citySvc, cityModerSvc, inviteSvc)
 
 	mdlv := middlewares.New(log, cityModerSvc)
 

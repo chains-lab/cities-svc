@@ -29,7 +29,7 @@ func (s Service) Create(ctx context.Context, name string) (models.Country, error
 	})
 	if err != nil {
 		return models.Country{}, errx.ErrorInternal.Raise(
-			fmt.Errorf("failed to creating country: %w", err),
+			fmt.Errorf("failed to creating country, cause: %w", err),
 		)
 	}
 

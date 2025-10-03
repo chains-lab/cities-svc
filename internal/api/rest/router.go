@@ -47,7 +47,7 @@ type Middlewares interface {
 }
 
 func Run(ctx context.Context, cfg internal.Config, log logium.Logger, h Handlers, m Middlewares) {
-	svc := mdlv.ServiceGrant(enum.CitiesSVC, cfg.JWT.Service.SecretKey)
+	svc := mdlv.ServiceGrant(cfg.Service.Name, cfg.JWT.Service.SecretKey)
 	auth := mdlv.Auth(meta.UserCtxKey, cfg.JWT.User.AccessToken.SecretKey)
 	sysadmin := mdlv.RoleGrant(meta.UserCtxKey, map[string]bool{
 		roles.Admin: true,

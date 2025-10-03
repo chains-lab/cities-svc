@@ -41,6 +41,19 @@ func (d *Database) GetCityAdmin(ctx context.Context, filters admin.GetFilters) (
 	return cityAdminSchemaToModel(row), nil
 }
 
+func (d *Database) GetCityAdminByUserAndCityID(ctx context.Context, userID, cityID uuid.UUID) (models.CityAdmin, error) {
+	return d.GetCityAdmin(ctx, admin.GetFilters{
+		UserID: &userID,
+		CityID: &cityID,
+	})
+}
+
+func (d *Database) GetCityAdminByUserID(ctx context.Context, userID uuid.UUID) (models.CityAdmin, error) {
+	return d.GetCityAdmin(ctx, admin.GetFilters{
+		UserID: &userID,
+	})
+}
+
 func (d *Database) FilterCityAdmins(
 	ctx context.Context,
 	filter admin.FilterParams,

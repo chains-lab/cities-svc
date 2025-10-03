@@ -1,8 +1,7 @@
-package admin
+package invite
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"time"
 
@@ -12,7 +11,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (s Service) AcceptInvite(ctx context.Context, userID uuid.UUID, token string) (models.Invite, error) {
+func (s Service) Accept(ctx context.Context, userID uuid.UUID, token string) (models.Invite, error) {
 	data, err := s.jwt.DecryptInviteToken(token)
 	if err != nil {
 		return models.Invite{}, errx.ErrorInvalidInviteToken.Raise(
@@ -43,16 +42,16 @@ func (s Service) AcceptInvite(ctx context.Context, userID uuid.UUID, token strin
 		)
 	}
 
-	_, err = s.Get(ctx, GetFilters{
-		UserID: &userID,
-	})
-	if err == nil {
-		return models.Invite{}, errx.ErrorUserIsAlreadyCityAdmin.Raise(
-			fmt.Errorf("user is already a city admin"),
+	adm, err := s.db.GetCityAdminByUserAndCityID(ctx, userID, inv.CityID)
+	if err != nil {
+		return models.Invite{}, errx.ErrorInternal.Raise(
+			fmt.Errorf("failed to get city admin by user_id %s and city_id %s, cause: %w", userID, inv.CityID, err),
 		)
 	}
-	if !errors.Is(err, errx.ErrorCityAdminNotFound) {
-		return models.Invite{}, err
+	if !adm.IsNil() {
+		return models.Invite{}, errx.ErrorUserIsAlreadyCityAdmin.Raise(
+			fmt.Errorf("city admin with user_id %s already exists in city_id %s", userID, inv.CityID),
+		)
 	}
 
 	err = s.CityIsOfficialSupport(ctx, inv.CityID)
@@ -61,13 +60,23 @@ func (s Service) AcceptInvite(ctx context.Context, userID uuid.UUID, token strin
 	}
 
 	txErr := s.db.Transaction(ctx, func(ctx context.Context) error {
-		_, err = s.Create(ctx, userID, inv.CityID, data.Role)
+		adm = models.CityAdmin{
+			UserID:    userID,
+			CityID:    inv.CityID,
+			Role:      data.Role,
+			CreatedAt: now,
+			UpdatedAt: now,
+		}
+
+		err = s.db.CreateCityAdmin(ctx, adm)
 		if err != nil {
 			return err
 		}
 
 		if err = s.db.UpdateInviteStatus(ctx, inv.ID, userID, enum.InviteStatusAccepted, now); err != nil {
-			return errx.ErrorInternal.Raise(fmt.Errorf("update invite status: %w", err))
+			return errx.ErrorInternal.Raise(
+				fmt.Errorf("failed to update invite status, cause: %w", err),
+			)
 		}
 		return nil
 	})
