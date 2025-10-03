@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/chains-lab/cities-svc/internal/domain/enum"
 	"github.com/chains-lab/cities-svc/internal/domain/errx"
 	"github.com/chains-lab/cities-svc/internal/domain/models"
-	"github.com/chains-lab/enum"
 	"github.com/google/uuid"
 	"github.com/paulmach/orb"
 )

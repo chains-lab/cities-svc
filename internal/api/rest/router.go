@@ -6,7 +6,7 @@ import (
 
 	"github.com/chains-lab/cities-svc/internal"
 	"github.com/chains-lab/cities-svc/internal/api/rest/meta"
-	"github.com/chains-lab/enum"
+	"github.com/chains-lab/cities-svc/internal/domain/enum"
 	"github.com/chains-lab/gatekit/mdlv"
 	"github.com/chains-lab/gatekit/roles"
 	"github.com/chains-lab/logium"

@@ -4,9 +4,9 @@ import (
 	"context"
 	"testing"
 
+	"github.com/chains-lab/cities-svc/internal/domain/enum"
 	"github.com/chains-lab/cities-svc/internal/domain/services/country"
 	"github.com/chains-lab/cities-svc/test"
-	"github.com/chains-lab/enum"
 )
 
 func TestCountries(t *testing.T) {

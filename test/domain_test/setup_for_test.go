@@ -40,7 +40,7 @@ type CityModSvc interface {
 		duration time.Duration,
 	) (models.Invite, error)
 
-	AcceptInvite(ctx context.Context, userID uuid.UUID, token string) (models.CityAdmin, error)
+	AcceptInvite(ctx context.Context, userID uuid.UUID, token string) (models.Invite, error)
 
 	UpdateOther(ctx context.Context, UserID uuid.UUID, params admin.UpdateParams) (models.CityAdmin, error)
 	UpdateOwn(ctx context.Context, userID uuid.UUID, params admin.UpdateParams) (models.CityAdmin, error)

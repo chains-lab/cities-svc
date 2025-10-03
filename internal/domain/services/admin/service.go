@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/chains-lab/cities-svc/internal/domain/enum"
 	"github.com/chains-lab/cities-svc/internal/domain/errx"
 	"github.com/chains-lab/cities-svc/internal/domain/models"
-	"github.com/chains-lab/enum"
 	"github.com/google/uuid"
 )
 
@@ -48,7 +48,7 @@ type database interface {
 
 	CreateInvite(ctx context.Context, input models.Invite) error
 	GetInvite(ctx context.Context, ID uuid.UUID) (models.Invite, error)
-	UpdateStatusInvite(ctx context.Context, inviteID, userID uuid.UUID, status string, now time.Time) error
+	UpdateInviteStatus(ctx context.Context, inviteID, userID uuid.UUID, status string, now time.Time) error
 
 	GetCountryByID(ctx context.Context, ID uuid.UUID) (models.Country, error)
 	GetCityByID(ctx context.Context, ID uuid.UUID) (models.City, error)

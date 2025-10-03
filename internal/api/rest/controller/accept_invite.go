@@ -46,5 +46,5 @@ func (a Service) AcceptInvite(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ape.Render(w, http.StatusCreated, responses.CityAdmin(res))
+	ape.Render(w, http.StatusCreated, responses.Invite(res))
 }

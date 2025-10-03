@@ -29,7 +29,7 @@ func (d *Database) GetInvite(ctx context.Context, ID uuid.UUID) (models.Invite, 
 	return inviteSchemaToModel(row), nil
 }
 
-func (d *Database) UpdateStatusInvite(ctx context.Context, inviteID uuid.UUID, userID uuid.UUID, status string, answeredAt time.Time) error {
+func (d *Database) UpdateInviteStatus(ctx context.Context, inviteID uuid.UUID, userID uuid.UUID, status string, answeredAt time.Time) error {
 	err := d.sql.invites.New().
 		FilterID(inviteID).
 		UpdateStatus(status).
