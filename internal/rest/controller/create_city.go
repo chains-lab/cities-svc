@@ -6,11 +6,11 @@ import (
 
 	"github.com/chains-lab/ape"
 	"github.com/chains-lab/ape/problems"
-	"github.com/chains-lab/cities-svc/internal/api/rest/meta"
-	"github.com/chains-lab/cities-svc/internal/api/rest/requests"
-	"github.com/chains-lab/cities-svc/internal/api/rest/responses"
 	"github.com/chains-lab/cities-svc/internal/domain/errx"
 	"github.com/chains-lab/cities-svc/internal/domain/services/city"
+	"github.com/chains-lab/cities-svc/internal/rest/meta"
+	"github.com/chains-lab/cities-svc/internal/rest/requests"
+	"github.com/chains-lab/cities-svc/internal/rest/responses"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/paulmach/orb"
 )

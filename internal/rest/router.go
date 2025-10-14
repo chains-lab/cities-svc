@@ -5,11 +5,10 @@ import (
 	"net/http"
 
 	"github.com/chains-lab/cities-svc/internal"
-	"github.com/chains-lab/cities-svc/internal/api/rest/meta"
 	"github.com/chains-lab/cities-svc/internal/domain/enum"
-	"github.com/chains-lab/gatekit/mdlv"
-	"github.com/chains-lab/gatekit/roles"
+	"github.com/chains-lab/cities-svc/internal/rest/meta"
 	"github.com/chains-lab/logium"
+	"github.com/chains-lab/restkit/roles"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -44,16 +43,19 @@ type Middlewares interface {
 		allowedGovRoles map[string]bool,
 		allowedSysadminRoles map[string]bool,
 	) func(http.Handler) http.Handler
+	ServiceGrant(serviceName, skService string) func(http.Handler) http.Handler
+	Auth(userCtxKey interface{}, skUser string) func(http.Handler) http.Handler
+	RoleGrant(userCtxKey interface{}, allowedRoles map[string]bool) func(http.Handler) http.Handler
 }
 
-func Run(ctx context.Context, cfg internal.Config, log logium.Logger, h Handlers, m Middlewares) {
-	svc := mdlv.ServiceGrant(cfg.Service.Name, cfg.JWT.Service.SecretKey)
-	auth := mdlv.Auth(meta.UserCtxKey, cfg.JWT.User.AccessToken.SecretKey)
-	sysadmin := mdlv.RoleGrant(meta.UserCtxKey, map[string]bool{
+func Run(ctx context.Context, cfg internal.Config, log logium.Logger, m Middlewares, h Handlers) {
+	svc := m.ServiceGrant(cfg.Service.Name, cfg.JWT.Service.SecretKey)
+	auth := m.Auth(meta.UserCtxKey, cfg.JWT.User.AccessToken.SecretKey)
+	sysadmin := m.RoleGrant(meta.UserCtxKey, map[string]bool{
 		roles.Admin: true,
 	})
 
-	user := mdlv.RoleGrant(meta.UserCtxKey, map[string]bool{
+	user := m.RoleGrant(meta.UserCtxKey, map[string]bool{
 		roles.User: true,
 	})
 

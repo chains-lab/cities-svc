@@ -6,13 +6,25 @@ import (
 
 	"github.com/chains-lab/ape"
 	"github.com/chains-lab/ape/problems"
-	"github.com/chains-lab/cities-svc/internal/api/rest/responses"
 	"github.com/chains-lab/cities-svc/internal/domain/errx"
+	"github.com/chains-lab/cities-svc/internal/rest/responses"
 	"github.com/go-chi/chi/v5"
+	validation "github.com/go-ozzo/ozzo-validation/v4"
+	"github.com/google/uuid"
 )
 
-func (a Service) GetCityBySlug(w http.ResponseWriter, r *http.Request) {
-	city, err := a.domain.city.GetBySlug(r.Context(), chi.URLParam(r, "slug"))
+func (a Service) GetCity(w http.ResponseWriter, r *http.Request) {
+	cityID, err := uuid.Parse(chi.URLParam(r, "city_id"))
+	if err != nil {
+		a.log.WithError(err).Error("invalid city_id")
+		ape.RenderErr(w, problems.BadRequest(validation.Errors{
+			"city_id": err,
+		})...)
+
+		return
+	}
+
+	city, err := a.domain.city.GetByID(r.Context(), cityID)
 	if err != nil {
 		a.log.WithError(err).Error("failed to get city")
 		switch {
