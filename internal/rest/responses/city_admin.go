@@ -5,27 +5,25 @@ import (
 	"github.com/chains-lab/cities-svc/resources"
 )
 
-func CityAdmin(m models.CityAdmin) resources.CityAdmin {
-	resp := resources.CityAdmin{
+func CityAdmin(m models.CityAdminWithUserData) resources.CityAdmin {
+	return resources.CityAdmin{
 		Data: resources.CityAdminData{
 			Id:   m.UserID,
 			Type: resources.GovType,
 			Attributes: resources.CityAdminAttributes{
 				CityId:    m.CityID,
+				Label:     m.Label,
+				Username:  m.Username,
+				Avatar:    m.Avatar,
 				Role:      m.Role,
 				CreatedAt: m.CreatedAt,
 				UpdatedAt: m.UpdatedAt,
 			},
 		},
 	}
-	if m.Label != nil {
-		resp.Data.Attributes.Label = m.Label
-	}
-
-	return resp
 }
 
-func CityAdminsCollection(ms models.CityAdminsCollection) resources.CityAdminsCollection {
+func CityAdminsCollection(ms models.CityAdminsWithUserDataCollection) resources.CityAdminsCollection {
 	resp := resources.CityAdminsCollection{
 		Data: make([]resources.CityAdminData, 0, len(ms.Data)),
 		Links: resources.PaginationData{

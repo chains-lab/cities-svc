@@ -12,12 +12,14 @@ import (
 )
 
 type Service struct {
-	db database
+	db          database
+	userGuesser UserGuesser
 }
 
-func NewService(db database) Service {
+func NewService(db database, userGuesser UserGuesser) Service {
 	return Service{
-		db: db,
+		db:          db,
+		userGuesser: userGuesser,
 	}
 }
 
@@ -36,6 +38,10 @@ type database interface {
 
 	GetCountryByID(ctx context.Context, ID uuid.UUID) (models.Country, error)
 	GetCityByID(ctx context.Context, ID uuid.UUID) (models.City, error)
+}
+
+type UserGuesser interface {
+	Guess(ctx context.Context, userIDs ...uuid.UUID) (map[uuid.UUID]models.Profile, error)
 }
 
 func (s Service) CityIsOfficialSupport(ctx context.Context, cityID uuid.UUID) error {

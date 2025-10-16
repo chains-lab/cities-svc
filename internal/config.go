@@ -13,6 +13,10 @@ type ServerConfig struct {
 	Name string `mapstructure:"name"`
 }
 
+type ProfileConfig struct {
+	Url string `mapstructure:"url"`
+}
+
 type LogConfig struct {
 	Level  string `mapstructure:"level"`
 	Format string `mapstructure:"format"`
@@ -43,16 +47,8 @@ type JWTConfig struct {
 		AccessToken struct {
 			SecretKey     string        `mapstructure:"secret_key"`
 			TokenLifetime time.Duration `mapstructure:"token_lifetime"`
-		} `mapstructure:"access_token"`
-		RefreshToken struct {
-			SecretKey     string        `mapstructure:"secret_key"`
-			EncryptionKey string        `mapstructure:"encryption_key"`
-			TokenLifetime time.Duration `mapstructure:"token_lifetime"`
-		} `mapstructure:"refresh_token"`
-	} `mapstructure:"user"`
-	Service struct {
-		SecretKey string `mapstructure:"secret_key"`
-	} `mapstructure:"service"`
+		} `mapstructure:"user"`
+	}
 	Invites struct {
 		SecretKey string `mapstructure:"secret_key"`
 	} `mapstructure:"admin-invites"`
@@ -66,6 +62,7 @@ type SwaggerConfig struct {
 
 type Config struct {
 	Service  ServerConfig   `mapstructure:"service"`
+	Profile  ProfileConfig  `mapstructure:"profile"`
 	Log      LogConfig      `mapstructure:"log"`
 	Rest     RestConfig     `mapstructure:"rest"`
 	JWT      JWTConfig      `mapstructure:"jwt"`

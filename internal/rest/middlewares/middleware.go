@@ -29,11 +29,7 @@ func New(log logium.Logger, gov CityAdminSvc) Service {
 }
 
 type CityAdminSvc interface {
-	Get(ctx context.Context, filters admin.GetFilters) (models.CityAdmin, error)
-}
-
-func (s Service) ServiceGrant(serviceName, skService string) func(http.Handler) http.Handler {
-	return mdlv.ServiceGrant(serviceName, skService)
+	Get(ctx context.Context, filters admin.GetFilters) (models.CityAdminWithUserData, error)
 }
 
 func (s Service) Auth(userCtxKey interface{}, skUser string) func(http.Handler) http.Handler {

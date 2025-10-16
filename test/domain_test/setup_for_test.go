@@ -15,6 +15,7 @@ import (
 	"github.com/chains-lab/cities-svc/internal/domain/services/country"
 	"github.com/chains-lab/cities-svc/internal/domain/services/invite"
 	"github.com/chains-lab/cities-svc/internal/infra/jwtmanager"
+	"github.com/chains-lab/cities-svc/internal/infra/usrguesser"
 	"github.com/chains-lab/cities-svc/test"
 	"github.com/google/uuid"
 	"github.com/paulmach/orb"
@@ -25,17 +26,17 @@ type CityModSvc interface {
 		ctx context.Context,
 		filters admin.FilterParams,
 		page, size uint64,
-	) (models.CityAdminsCollection, error)
+	) (models.CityAdminsWithUserDataCollection, error)
 
-	Get(ctx context.Context, filters admin.GetFilters) (models.CityAdmin, error)
-	GetInitiator(ctx context.Context, initiatorID uuid.UUID) (models.CityAdmin, error)
+	Get(ctx context.Context, filters admin.GetFilters) (models.CityAdminWithUserData, error)
+	GetInitiator(ctx context.Context, initiatorID uuid.UUID) (models.CityAdminWithUserData, error)
 
 	RefuseOwn(ctx context.Context, userID uuid.UUID) error
 
 	Delete(ctx context.Context, UserID, CityID uuid.UUID) error
 
-	UpdateOther(ctx context.Context, UserID uuid.UUID, params admin.UpdateParams) (models.CityAdmin, error)
-	UpdateOwn(ctx context.Context, userID uuid.UUID, params admin.UpdateParams) (models.CityAdmin, error)
+	UpdateOther(ctx context.Context, UserID uuid.UUID, params admin.UpdateParams) (models.CityAdminWithUserData, error)
+	UpdateOwn(ctx context.Context, userID uuid.UUID, params admin.UpdateParams) (models.CityAdminWithUserData, error)
 }
 
 type CitySvc interface {
@@ -73,7 +74,7 @@ type CountrySvc interface {
 	Update(ctx context.Context, ID uuid.UUID, params country.UpdateParams) (models.Country, error)
 }
 
-type InvitesSvc interface {
+type InviteSvc interface {
 	Create(
 		ctx context.Context,
 		role string,
@@ -88,7 +89,7 @@ type domain struct {
 	moder   CityModSvc
 	city    CitySvc
 	country CountrySvc
-	invites InvitesSvc
+	invites InviteSvc
 }
 
 type Setup struct {
@@ -111,6 +112,9 @@ func newSetup(t *testing.T) (Setup, error) {
 				URL: test.TestDatabaseURL,
 			},
 		},
+		Profile: internal.ProfileConfig{
+			Url: "http://localhost:8002/profiles-svc/v1/profiles",
+		},
 	}
 
 	pg, err := sql.Open("postgres", cfg.Database.SQL.URL)
@@ -121,10 +125,11 @@ func newSetup(t *testing.T) (Setup, error) {
 	database := data.NewDatabase(pg)
 
 	jwtInviteManager := jwtmanager.NewManager(cfg)
+	userGuesser := usrguesser.NewService(cfg.Profile.Url, nil)
 
 	citySvc := city.NewService(database)
 	countrySvc := country.NewService(database)
-	cityModerSvc := admin.NewService(database)
+	cityModerSvc := admin.NewService(database, userGuesser)
 	inviteSvc := invite.NewService(database, jwtInviteManager)
 
 	return Setup{

@@ -26,9 +26,6 @@ docs/CreateCountryDataAttributes.md
 docs/CreateInvite.md
 docs/CreateInviteData.md
 docs/CreateInviteDataAttributes.md
-docs/CreateMayor.md
-docs/CreateMayorData.md
-docs/CreateMayorDataAttributes.md
 docs/Errors.md
 docs/ErrorsErrorsInner.md
 docs/Invite.md
@@ -40,9 +37,6 @@ docs/SentInvite.md
 docs/SentInviteData.md
 docs/SentInviteDataAttributes.md
 docs/TestAPI.md
-docs/TransferMayor.md
-docs/TransferMayorData.md
-docs/TransferMayorDataAttributes.md
 docs/UpdateCity.md
 docs/UpdateCityData.md
 docs/UpdateCityDataAttributes.md
@@ -82,9 +76,6 @@ model_create_country_data_attributes.go
 model_create_invite.go
 model_create_invite_data.go
 model_create_invite_data_attributes.go
-model_create_mayor.go
-model_create_mayor_data.go
-model_create_mayor_data_attributes.go
 model_errors.go
 model_errors_errors_inner.go
 model_invite.go
@@ -95,9 +86,6 @@ model_point.go
 model_sent_invite.go
 model_sent_invite_data.go
 model_sent_invite_data_attributes.go
-model_transfer_mayor.go
-model_transfer_mayor_data.go
-model_transfer_mayor_data_attributes.go
 model_update_city.go
 model_update_city_data.go
 model_update_city_data_attributes.go

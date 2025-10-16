@@ -58,22 +58,10 @@ components:
           $ref: '#/components/schemas/UpdateOwnActiveGov_data'
       required:
       - data
-    CreateMayor:
-      properties:
-        data:
-          $ref: '#/components/schemas/CreateMayor_data'
-      required:
-      - data
     SentInvite:
       properties:
         data:
           $ref: '#/components/schemas/SentInvite_data'
-      required:
-      - data
-    TransferMayor:
-      properties:
-        data:
-          $ref: '#/components/schemas/TransferMayor_data'
       required:
       - data
     CreateInvite:
@@ -239,12 +227,18 @@ components:
       - type
     CityAdminAttributes:
       properties:
+        username:
+          description: username of the user
+          type: string
         city_id:
           description: city id
           format: uuid
           type: string
         role:
           description: role of the user in this city
+          type: string
+        avatar:
+          description: optional avatar url for the user in this city
           type: string
         label:
           description: optional label for the user in this city
@@ -262,6 +256,7 @@ components:
       - created_at
       - role
       - updated_at
+      - username
     CityAdminsCollection:
       properties:
         data:
@@ -500,35 +495,6 @@ components:
       - attributes
       - id
       - type
-    CreateMayor_data_attributes:
-      properties:
-        city_id:
-          description: city id
-          format: uuid
-          type: string
-        user_id:
-          description: user id
-          format: uuid
-          type: string
-        label:
-          description: label for the user in this city
-          example: City Department of Transportation
-          type: string
-      required:
-      - city_id
-      - label
-      - user_id
-    CreateMayor_data:
-      properties:
-        type:
-          enum:
-          - create_mayor
-          type: string
-        attributes:
-          $ref: '#/components/schemas/CreateMayor_data_attributes'
-      required:
-      - attributes
-      - type
     SentInvite_data_attributes:
       properties:
         city_id:
@@ -553,30 +519,6 @@ components:
           type: string
         attributes:
           $ref: '#/components/schemas/SentInvite_data_attributes'
-      required:
-      - attributes
-      - id
-      - type
-    TransferMayor_data_attributes:
-      properties:
-        user_id:
-          description: ID of the user to be assigned as the new mayor
-          format: uuid
-          type: string
-      required:
-      - user_id
-    TransferMayor_data:
-      properties:
-        id:
-          description: invite id
-          format: uuid
-          type: string
-        type:
-          enum:
-          - transfer_mayor
-          type: string
-        attributes:
-          $ref: '#/components/schemas/TransferMayor_data_attributes'
       required:
       - attributes
       - id

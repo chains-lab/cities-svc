@@ -11,17 +11,17 @@ import (
 	"github.com/google/uuid"
 )
 
-func (s Service) Create(ctx context.Context, userID, cityID uuid.UUID, role string) (models.CityAdmin, error) {
+func (s Service) Create(ctx context.Context, userID, cityID uuid.UUID, role string) (models.CityAdminWithUserData, error) {
 	err := enum.CheckCityAdminRole(role)
 	if err != nil {
-		return models.CityAdmin{}, errx.ErrorInvalidCityAdminRole.Raise(
+		return models.CityAdminWithUserData{}, errx.ErrorInvalidCityAdminRole.Raise(
 			fmt.Errorf("invalid city admin role, cause: %w", err),
 		)
 	}
 
 	now := time.Now().UTC()
 
-	resp := models.CityAdmin{
+	res := models.CityAdmin{
 		UserID:    userID,
 		CityID:    cityID,
 		Role:      role,
@@ -29,12 +29,19 @@ func (s Service) Create(ctx context.Context, userID, cityID uuid.UUID, role stri
 		CreatedAt: now,
 	}
 
-	err = s.db.CreateCityAdmin(ctx, resp)
+	err = s.db.CreateCityAdmin(ctx, res)
 	if err != nil {
-		return models.CityAdmin{}, errx.ErrorInternal.Raise(
+		return models.CityAdminWithUserData{}, errx.ErrorInternal.Raise(
 			fmt.Errorf("failed to creating city admin, cause: %w", err),
 		)
 	}
 
-	return resp, nil
+	profiles, err := s.userGuesser.Guess(ctx, res.UserID)
+	if err != nil {
+		return models.CityAdminWithUserData{}, errx.ErrorInternal.Raise(
+			fmt.Errorf("failed to guess city admin data, cause: %w", err),
+		)
+	}
+
+	return res.AddProfileData(profiles[res.UserID]), nil
 }

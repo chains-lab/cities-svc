@@ -1,10 +1,14 @@
 type: object
 required:
+  - username
   - city_id
   - role
   - created_at
   - updated_at
 properties:
+  username:
+    type: string
+    description: "username of the user"
   city_id:
     type: string
     format: uuid
@@ -12,6 +16,9 @@ properties:
   role:
     type: string
     description: "role of the user in this city"
+  avatar:
+    type: string
+    description: "optional avatar url for the user in this city"
   label:
     type: string
     description: "optional label for the user in this city"

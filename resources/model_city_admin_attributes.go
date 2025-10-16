@@ -23,10 +23,14 @@ var _ MappedNullable = &CityAdminAttributes{}
 
 // CityAdminAttributes struct for CityAdminAttributes
 type CityAdminAttributes struct {
+	// username of the user
+	Username string `json:"username"`
 	// city id
 	CityId uuid.UUID `json:"city_id"`
 	// role of the user in this city
 	Role string `json:"role"`
+	// optional avatar url for the user in this city
+	Avatar *string `json:"avatar,omitempty"`
 	// optional label for the user in this city
 	Label *string `json:"label,omitempty"`
 	// record creation date
@@ -41,8 +45,9 @@ type _CityAdminAttributes CityAdminAttributes
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCityAdminAttributes(cityId uuid.UUID, role string, createdAt time.Time, updatedAt time.Time) *CityAdminAttributes {
+func NewCityAdminAttributes(username string, cityId uuid.UUID, role string, createdAt time.Time, updatedAt time.Time) *CityAdminAttributes {
 	this := CityAdminAttributes{}
+	this.Username = username
 	this.CityId = cityId
 	this.Role = role
 	this.CreatedAt = createdAt
@@ -56,6 +61,30 @@ func NewCityAdminAttributes(cityId uuid.UUID, role string, createdAt time.Time, 
 func NewCityAdminAttributesWithDefaults() *CityAdminAttributes {
 	this := CityAdminAttributes{}
 	return &this
+}
+
+// GetUsername returns the Username field value
+func (o *CityAdminAttributes) GetUsername() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.Username
+}
+
+// GetUsernameOk returns a tuple with the Username field value
+// and a boolean to check if the value has been set.
+func (o *CityAdminAttributes) GetUsernameOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Username, true
+}
+
+// SetUsername sets field value
+func (o *CityAdminAttributes) SetUsername(v string) {
+	o.Username = v
 }
 
 // GetCityId returns the CityId field value
@@ -104,6 +133,38 @@ func (o *CityAdminAttributes) GetRoleOk() (*string, bool) {
 // SetRole sets field value
 func (o *CityAdminAttributes) SetRole(v string) {
 	o.Role = v
+}
+
+// GetAvatar returns the Avatar field value if set, zero value otherwise.
+func (o *CityAdminAttributes) GetAvatar() string {
+	if o == nil || IsNil(o.Avatar) {
+		var ret string
+		return ret
+	}
+	return *o.Avatar
+}
+
+// GetAvatarOk returns a tuple with the Avatar field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *CityAdminAttributes) GetAvatarOk() (*string, bool) {
+	if o == nil || IsNil(o.Avatar) {
+		return nil, false
+	}
+	return o.Avatar, true
+}
+
+// HasAvatar returns a boolean if a field has been set.
+func (o *CityAdminAttributes) HasAvatar() bool {
+	if o != nil && !IsNil(o.Avatar) {
+		return true
+	}
+
+	return false
+}
+
+// SetAvatar gets a reference to the given string and assigns it to the Avatar field.
+func (o *CityAdminAttributes) SetAvatar(v string) {
+	o.Avatar = &v
 }
 
 // GetLabel returns the Label field value if set, zero value otherwise.
@@ -196,8 +257,12 @@ func (o CityAdminAttributes) MarshalJSON() ([]byte, error) {
 
 func (o CityAdminAttributes) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	toSerialize["username"] = o.Username
 	toSerialize["city_id"] = o.CityId
 	toSerialize["role"] = o.Role
+	if !IsNil(o.Avatar) {
+		toSerialize["avatar"] = o.Avatar
+	}
 	if !IsNil(o.Label) {
 		toSerialize["label"] = o.Label
 	}
@@ -211,6 +276,7 @@ func (o *CityAdminAttributes) UnmarshalJSON(data []byte) (err error) {
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
+		"username",
 		"city_id",
 		"role",
 		"created_at",

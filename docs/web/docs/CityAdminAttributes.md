@@ -4,8 +4,10 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**Username** | **string** | username of the user | 
 **CityId** | [**uuid.UUID**](uuid.UUID.md) | city id | 
 **Role** | **string** | role of the user in this city | 
+**Avatar** | Pointer to **string** | optional avatar url for the user in this city | [optional] 
 **Label** | Pointer to **string** | optional label for the user in this city | [optional] 
 **CreatedAt** | **time.Time** | record creation date | 
 **UpdatedAt** | **time.Time** | last update date | 
@@ -14,7 +16,7 @@ Name | Type | Description | Notes
 
 ### NewCityAdminAttributes
 
-`func NewCityAdminAttributes(cityId uuid.UUID, role string, createdAt time.Time, updatedAt time.Time, ) *CityAdminAttributes`
+`func NewCityAdminAttributes(username string, cityId uuid.UUID, role string, createdAt time.Time, updatedAt time.Time, ) *CityAdminAttributes`
 
 NewCityAdminAttributes instantiates a new CityAdminAttributes object
 This constructor will assign default values to properties that have it defined,
@@ -28,6 +30,26 @@ will change when the set of required properties is changed
 NewCityAdminAttributesWithDefaults instantiates a new CityAdminAttributes object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
+
+### GetUsername
+
+`func (o *CityAdminAttributes) GetUsername() string`
+
+GetUsername returns the Username field if non-nil, zero value otherwise.
+
+### GetUsernameOk
+
+`func (o *CityAdminAttributes) GetUsernameOk() (*string, bool)`
+
+GetUsernameOk returns a tuple with the Username field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetUsername
+
+`func (o *CityAdminAttributes) SetUsername(v string)`
+
+SetUsername sets Username field to given value.
+
 
 ### GetCityId
 
@@ -68,6 +90,31 @@ and a boolean to check if the value has been set.
 
 SetRole sets Role field to given value.
 
+
+### GetAvatar
+
+`func (o *CityAdminAttributes) GetAvatar() string`
+
+GetAvatar returns the Avatar field if non-nil, zero value otherwise.
+
+### GetAvatarOk
+
+`func (o *CityAdminAttributes) GetAvatarOk() (*string, bool)`
+
+GetAvatarOk returns a tuple with the Avatar field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetAvatar
+
+`func (o *CityAdminAttributes) SetAvatar(v string)`
+
+SetAvatar sets Avatar field to given value.
+
+### HasAvatar
+
+`func (o *CityAdminAttributes) HasAvatar() bool`
+
+HasAvatar returns a boolean if a field has been set.
 
 ### GetLabel
 

@@ -225,40 +225,6 @@ components:
                 label:
                   type: string
                   description: optional label for the user in this city
-    CreateMayor:
-      type: object
-      required:
-        - data
-      properties:
-        data:
-          type: object
-          required:
-            - type
-            - attributes
-          properties:
-            type:
-              type: string
-              enum:
-                - create_mayor
-            attributes:
-              type: object
-              required:
-                - city_id
-                - user_id
-                - label
-              properties:
-                city_id:
-                  type: string
-                  format: uuid
-                  description: city id
-                user_id:
-                  type: string
-                  format: uuid
-                  description: user id
-                label:
-                  type: string
-                  description: label for the user in this city
-                  example: City Department of Transportation
     SentInvite:
       type: object
       required:
@@ -292,35 +258,6 @@ components:
                 role:
                   type: string
                   description: Role assigned to the invited user
-    TransferMayor:
-      type: object
-      required:
-        - data
-      properties:
-        data:
-          type: object
-          required:
-            - id
-            - type
-            - attributes
-          properties:
-            id:
-              type: string
-              format: uuid
-              description: invite id
-            type:
-              type: string
-              enum:
-                - transfer_mayor
-            attributes:
-              type: object
-              required:
-                - user_id
-              properties:
-                user_id:
-                  type: string
-                  format: uuid
-                  description: ID of the user to be assigned as the new mayor
     CreateInvite:
       type: object
       required:
@@ -523,11 +460,15 @@ components:
     CityAdminAttributes:
       type: object
       required:
+        - username
         - city_id
         - role
         - created_at
         - updated_at
       properties:
+        username:
+          type: string
+          description: username of the user
         city_id:
           type: string
           format: uuid
@@ -535,6 +476,9 @@ components:
         role:
           type: string
           description: role of the user in this city
+        avatar:
+          type: string
+          description: optional avatar url for the user in this city
         label:
           type: string
           description: optional label for the user in this city

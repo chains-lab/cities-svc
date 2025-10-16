@@ -2,7 +2,9 @@ package rest
 
 import (
 	"context"
+	"errors"
 	"net/http"
+	"time"
 
 	"github.com/chains-lab/cities-svc/internal"
 	"github.com/chains-lab/cities-svc/internal/domain/enum"
@@ -43,20 +45,16 @@ type Middlewares interface {
 		allowedGovRoles map[string]bool,
 		allowedSysadminRoles map[string]bool,
 	) func(http.Handler) http.Handler
-	ServiceGrant(serviceName, skService string) func(http.Handler) http.Handler
+
 	Auth(userCtxKey interface{}, skUser string) func(http.Handler) http.Handler
 	RoleGrant(userCtxKey interface{}, allowedRoles map[string]bool) func(http.Handler) http.Handler
 }
 
 func Run(ctx context.Context, cfg internal.Config, log logium.Logger, m Middlewares, h Handlers) {
-	svc := m.ServiceGrant(cfg.Service.Name, cfg.JWT.Service.SecretKey)
 	auth := m.Auth(meta.UserCtxKey, cfg.JWT.User.AccessToken.SecretKey)
+
 	sysadmin := m.RoleGrant(meta.UserCtxKey, map[string]bool{
 		roles.Admin: true,
-	})
-
-	user := m.RoleGrant(meta.UserCtxKey, map[string]bool{
-		roles.User: true,
 	})
 
 	cityMod := m.CityAdminRoles(meta.UserCtxKey, map[string]bool{
@@ -77,8 +75,6 @@ func Run(ctx context.Context, cfg internal.Config, log logium.Logger, m Middlewa
 	r := chi.NewRouter()
 
 	r.Route("/cities-svc/", func(r chi.Router) {
-		r.Use(svc)
-
 		r.Route("/v1", func(r chi.Router) {
 			r.Route("/countries", func(r chi.Router) {
 				r.With(auth, sysadmin).Post("/", h.CreateCountry)
@@ -112,11 +108,11 @@ func Run(ctx context.Context, cfg internal.Config, log logium.Logger, m Middlewa
 						r.Get("/", h.ListGovs)
 
 						r.With(auth).Route("/invite", func(r chi.Router) {
-							r.With(user, cityMod).Post("/", h.CreateInvite)
-							r.With(user).Post("/{token}", h.AcceptInvite)
+							r.With(cityMod).Post("/", h.CreateInvite)
+							r.Post("/{token}", h.AcceptInvite)
 						})
 
-						r.With(auth, user, cityStuff).Route("/me", func(r chi.Router) {
+						r.With(auth, cityStuff).Route("/me", func(r chi.Router) {
 							r.Get("/", h.GetOwnCityAdmin)
 							r.Put("/", h.UpdateOwnCityAdmin)
 							r.Delete("/", h.RefuseOwnCityAdmin)
@@ -124,7 +120,7 @@ func Run(ctx context.Context, cfg internal.Config, log logium.Logger, m Middlewa
 
 						r.Route("/{user_id}", func(r chi.Router) {
 							r.Get("/", h.GetCityAdmin)
-							r.With(auth, user).Delete("/", h.DeleteCityAdmin)
+							r.With(auth).Delete("/", h.DeleteCityAdmin)
 						})
 					})
 				})
@@ -132,9 +128,40 @@ func Run(ctx context.Context, cfg internal.Config, log logium.Logger, m Middlewa
 		})
 	})
 
+	srv := &http.Server{
+		Addr:              cfg.Rest.Port,
+		Handler:           r,
+		ReadTimeout:       cfg.Rest.Timeouts.Read,
+		ReadHeaderTimeout: cfg.Rest.Timeouts.ReadHeader,
+		WriteTimeout:      cfg.Rest.Timeouts.Write,
+		IdleTimeout:       cfg.Rest.Timeouts.Idle,
+	}
+
 	log.Infof("starting REST service on %s", cfg.Rest.Port)
 
-	<-ctx.Done()
+	errCh := make(chan error, 1)
+	go func() {
+		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			errCh <- err
+		} else {
+			errCh <- nil
+		}
+	}()
 
-	log.Info("shutting down REST service")
+	select {
+	case <-ctx.Done():
+		log.Info("shutting down REST service...")
+	case err := <-errCh:
+		if err != nil {
+			log.Errorf("REST server error: %v", err)
+		}
+	}
+
+	shCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := srv.Shutdown(shCtx); err != nil {
+		log.Errorf("REST shutdown error: %v", err)
+	} else {
+		log.Info("REST server stopped")
+	}
 }
