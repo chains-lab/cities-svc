@@ -10,7 +10,7 @@ import (
 	"github.com/chains-lab/cities-svc/internal/rest/meta"
 )
 
-func (a Service) RefuseOwnCityAdmin(w http.ResponseWriter, r *http.Request) {
+func (a Service) RefuseMyCityAdmin(w http.ResponseWriter, r *http.Request) {
 	initiator, err := meta.User(r.Context())
 	if err != nil {
 		a.log.WithError(err).Error("failed to get user from context")

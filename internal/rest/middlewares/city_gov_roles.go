@@ -13,10 +13,9 @@ import (
 	"github.com/google/uuid"
 )
 
-func (s Service) CityAdminRoles(
+func (s Service) CityAdminMember(
 	userCtxKey interface{},
 	allowedGovRoles map[string]bool,
-	allowedSysadminRoles map[string]bool,
 ) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -28,11 +27,6 @@ func (s Service) CityAdminRoles(
 
 			if err := roles.ParseRole(user.Role); err != nil {
 				ape.RenderErr(w, problems.Unauthorized("User role not valid"))
-				return
-			}
-
-			if allowedSysadminRoles[user.Role] {
-				next.ServeHTTP(w, r)
 				return
 			}
 

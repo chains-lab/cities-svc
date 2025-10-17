@@ -11,7 +11,7 @@ import (
 	"github.com/chains-lab/cities-svc/internal/rest/responses"
 )
 
-func (a Service) GetOwnCityAdmin(w http.ResponseWriter, r *http.Request) {
+func (a Service) GetMyCityAdmin(w http.ResponseWriter, r *http.Request) {
 	initiator, err := meta.User(r.Context())
 	if err != nil {
 		a.log.WithError(err).Error("failed to get user from context")

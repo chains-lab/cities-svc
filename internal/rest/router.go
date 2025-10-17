@@ -28,26 +28,25 @@ type Handlers interface {
 	UpdateCityStatus(w http.ResponseWriter, r *http.Request)
 
 	GetCityBySlug(w http.ResponseWriter, r *http.Request)
-	ListGovs(w http.ResponseWriter, r *http.Request)
+	ListAdmins(w http.ResponseWriter, r *http.Request)
 	CreateInvite(w http.ResponseWriter, r *http.Request)
 	AcceptInvite(w http.ResponseWriter, r *http.Request)
 	GetCityAdmin(w http.ResponseWriter, r *http.Request)
 	DeleteCityAdmin(w http.ResponseWriter, r *http.Request)
 
-	GetOwnCityAdmin(w http.ResponseWriter, r *http.Request)
-	UpdateOwnCityAdmin(w http.ResponseWriter, r *http.Request)
-	RefuseOwnCityAdmin(w http.ResponseWriter, r *http.Request)
+	GetMyCityAdmin(w http.ResponseWriter, r *http.Request)
+	UpdateMyCityAdmin(w http.ResponseWriter, r *http.Request)
+	RefuseMyCityAdmin(w http.ResponseWriter, r *http.Request)
 }
 
 type Middlewares interface {
-	CityAdminRoles(
-		UserCtxKey interface{},
-		allowedGovRoles map[string]bool,
-		allowedSysadminRoles map[string]bool,
-	) func(http.Handler) http.Handler
-
 	Auth(userCtxKey interface{}, skUser string) func(http.Handler) http.Handler
 	RoleGrant(userCtxKey interface{}, allowedRoles map[string]bool) func(http.Handler) http.Handler
+
+	CityAdminMember(
+		UserCtxKey interface{},
+		allowedGovRoles map[string]bool,
+	) func(http.Handler) http.Handler
 }
 
 func Run(ctx context.Context, cfg internal.Config, log logium.Logger, m Middlewares, h Handlers) {
@@ -57,19 +56,15 @@ func Run(ctx context.Context, cfg internal.Config, log logium.Logger, m Middlewa
 		roles.Admin: true,
 	})
 
-	cityMod := m.CityAdminRoles(meta.UserCtxKey, map[string]bool{
+	cityMod := m.CityAdminMember(meta.UserCtxKey, map[string]bool{
 		enum.CityAdminRoleHead:      true,
 		enum.CityAdminRoleModerator: true,
-	}, map[string]bool{
-		roles.Admin: true,
 	})
 
-	cityStuff := m.CityAdminRoles(meta.UserCtxKey, map[string]bool{
+	cityStuff := m.CityAdminMember(meta.UserCtxKey, map[string]bool{
 		enum.CityAdminRoleHead:      true,
 		enum.CityAdminRoleModerator: true,
 		enum.CityAdminMember:        true,
-	}, map[string]bool{
-		roles.Admin: true,
 	})
 
 	r := chi.NewRouter()
@@ -92,9 +87,10 @@ func Run(ctx context.Context, cfg internal.Config, log logium.Logger, m Middlewa
 				})
 			})
 
+			r.Get("/city/{slug}", h.GetCityBySlug)
+
 			r.Route("/cities", func(r chi.Router) {
 				r.Get("/", h.ListCities)
-				r.Get("/slug/{slug}", h.GetCityBySlug)
 
 				r.With(auth, sysadmin).Post("/", h.CreateCity)
 
@@ -104,8 +100,8 @@ func Run(ctx context.Context, cfg internal.Config, log logium.Logger, m Middlewa
 					r.With(auth, cityMod).Put("/", h.UpdateCity)
 					r.With(auth, sysadmin).Put("/status", h.UpdateCityStatus)
 
-					r.Route("/govs", func(r chi.Router) {
-						r.Get("/", h.ListGovs)
+					r.Route("/admin", func(r chi.Router) {
+						r.Get("/", h.ListAdmins)
 
 						r.With(auth).Route("/invite", func(r chi.Router) {
 							r.With(cityMod).Post("/", h.CreateInvite)
@@ -113,14 +109,14 @@ func Run(ctx context.Context, cfg internal.Config, log logium.Logger, m Middlewa
 						})
 
 						r.With(auth, cityStuff).Route("/me", func(r chi.Router) {
-							r.Get("/", h.GetOwnCityAdmin)
-							r.Put("/", h.UpdateOwnCityAdmin)
-							r.Delete("/", h.RefuseOwnCityAdmin)
+							r.Get("/", h.GetMyCityAdmin)
+							r.Put("/", h.UpdateMyCityAdmin)
+							r.Delete("/", h.RefuseMyCityAdmin)
 						})
 
 						r.Route("/{user_id}", func(r chi.Router) {
 							r.Get("/", h.GetCityAdmin)
-							r.With(auth).Delete("/", h.DeleteCityAdmin)
+							r.With(auth, cityMod).Delete("/", h.DeleteCityAdmin)
 						})
 					})
 				})

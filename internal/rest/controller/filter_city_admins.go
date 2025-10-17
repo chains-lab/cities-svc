@@ -12,7 +12,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (a Service) ListGovs(w http.ResponseWriter, r *http.Request) {
+func (a Service) ListAdmins(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	q := r.URL.Query()
 
