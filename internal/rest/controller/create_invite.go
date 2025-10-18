@@ -53,7 +53,7 @@ func (a Service) CreateInvite(w http.ResponseWriter, r *http.Request) {
 				"role": err,
 			})...)
 		case errors.Is(err, errx.ErrorCityIsNotSupported):
-			ape.RenderErr(w, problems.Conflict("cannot create invite for not official city"))
+			ape.RenderErr(w, problems.Forbidden("cannot create invite for not official city"))
 		default:
 			ape.RenderErr(w, problems.InternalError())
 		}

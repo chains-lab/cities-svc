@@ -44,9 +44,9 @@ func (a Service) ListCities(w http.ResponseWriter, r *http.Request) {
 	}
 
 	latStr, lonStr := q.Get("lat"), q.Get("lon")
-	radMStr, radKMStr := q.Get("radius_m"), q.Get("radius_km")
+	radM := q.Get("radius")
 
-	if (latStr != "" || lonStr != "") || (radMStr != "" || radKMStr != "") {
+	if (latStr != "" || lonStr != "") || radM != "" {
 		if latStr == "" || lonStr == "" {
 			ape.RenderErr(w, problems.BadRequest(validation.Errors{
 				"lat/lon": fmt.Errorf("both lat and lon are required with radius"),
@@ -70,36 +70,37 @@ func (a Service) ListCities(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		var radiusM uint
-		switch {
-		case radKMStr != "":
-			km, err := strconv.ParseFloat(radKMStr, 64)
-			if err != nil || !(km > 0) {
-				ape.RenderErr(w, problems.BadRequest(validation.Errors{
-					"radius_km": fmt.Errorf("must be > 0"),
-				})...)
-				return
-			}
-			radiusM = uint(math.Round(km * 1000.0))
-		case radMStr != "":
-			rm, err := strconv.ParseUint(radMStr, 10, 64)
-			if err != nil || rm == 0 {
-				ape.RenderErr(w, problems.BadRequest(validation.Errors{
-					"radius_m": fmt.Errorf("must be > 0"),
-				})...)
-				return
-			}
-			radiusM = uint(rm)
-		default:
+		//var radius uint
+		//switch {
+		//case radKMStr != "":
+		//	km, err := strconv.ParseFloat(radKMStr, 64)
+		//	if err != nil || !(km > 0) {
+		//		ape.RenderErr(w, problems.BadRequest(validation.Errors{
+		//			"radius_km": fmt.Errorf("must be > 0"),
+		//		})...)
+		//		return
+		//	}
+		//	radius = uint(math.Round(km * 1000.0))
+		//case radM != "":
+		//default:
+		//	ape.RenderErr(w, problems.BadRequest(validation.Errors{
+		//		"radius_m/radius_km": fmt.Errorf("one of radius_m or radius_km is required"),
+		//	})...)
+		//	return
+		//}
+
+		rm, err := strconv.ParseUint(radM, 10, 64)
+		if err != nil || rm == 0 {
 			ape.RenderErr(w, problems.BadRequest(validation.Errors{
-				"radius_m/radius_km": fmt.Errorf("one of radius_m or radius_km is required"),
+				"radius": fmt.Errorf("must be > 0"),
 			})...)
 			return
 		}
+		radius := uint(rm)
 
 		filters.Location = &city.FilterDistance{
 			Point:   orb.Point{lon, lat},
-			RadiusM: uint64(radiusM),
+			RadiusM: uint64(radius),
 		}
 	}
 

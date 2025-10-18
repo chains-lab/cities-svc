@@ -45,7 +45,7 @@ func (a Service) CreateCity(w http.ResponseWriter, r *http.Request) {
 		a.log.WithError(err).Error("error creating city")
 		switch {
 		case errors.Is(err, errx.ErrorCountryIsNotSupported):
-			ape.RenderErr(w, problems.Conflict("cannot create city in unsupported country"))
+			ape.RenderErr(w, problems.Forbidden("cannot create city in unsupported country"))
 		case errors.Is(err, errx.ErrorInvalidTimeZone):
 			ape.RenderErr(w, problems.BadRequest(validation.Errors{
 				"data/attributes/timezone": err,

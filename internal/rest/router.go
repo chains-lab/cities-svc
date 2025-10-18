@@ -98,9 +98,9 @@ func Run(ctx context.Context, cfg internal.Config, log logium.Logger, m Middlewa
 					r.Get("/", h.GetCity)
 
 					r.With(auth, cityMod).Put("/", h.UpdateCity)
-					r.With(auth, sysadmin).Put("/status", h.UpdateCityStatus)
+					r.With(auth, sysadmin).Patch("/status", h.UpdateCityStatus)
 
-					r.Route("/admin", func(r chi.Router) {
+					r.Route("/admins", func(r chi.Router) {
 						r.Get("/", h.ListAdmins)
 
 						r.With(auth).Route("/invite", func(r chi.Router) {

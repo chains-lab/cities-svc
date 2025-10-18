@@ -38,7 +38,7 @@ func (a Service) AcceptInvite(w http.ResponseWriter, r *http.Request) {
 		case errors.Is(err, errx.ErrorUserIsAlreadyCityAdmin):
 			ape.RenderErr(w, problems.Conflict("user is already a city admin"))
 		case errors.Is(err, errx.ErrorCityIsNotSupported):
-			ape.RenderErr(w, problems.Conflict("cannot accept invite for not official support city"))
+			ape.RenderErr(w, problems.Forbidden("cannot accept invite for not official support city"))
 		default:
 			ape.RenderErr(w, problems.InternalError())
 		}
