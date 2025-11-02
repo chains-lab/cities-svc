@@ -11,25 +11,26 @@ import (
 )
 
 type UpdateParams struct {
-	Label *string
+	Position *string
+	Label    *string
 }
 
-func (s Service) UpdateOther(ctx context.Context, UserID uuid.UUID, params UpdateParams) (models.CityAdminWithUserData, error) {
+func (s Service) Update(ctx context.Context, UserID uuid.UUID, params UpdateParams) (models.CityAdminsWithUserData, error) {
 	res, err := s.Get(ctx, GetFilters{
 		UserID: &UserID,
 	})
 	if err != nil {
-		return models.CityAdminWithUserData{}, err
+		return models.CityAdminsWithUserData{}, err
 	}
 
 	now := time.Now().UTC()
 	if params.Label != nil {
-		res.Label = params.Label
+		res.Admin.Label = params.Label
 	}
 
-	err = s.db.UpdateCityAdmin(ctx, UserID, params, now)
+	err = s.db.UpdateAdmin(ctx, UserID, params, now)
 	if err != nil {
-		return models.CityAdminWithUserData{}, errx.ErrorInternal.Raise(
+		return models.CityAdminsWithUserData{}, errx.ErrorInternal.Raise(
 			fmt.Errorf("failed to update city initiator, cause: %w", err),
 		)
 	}
@@ -37,23 +38,31 @@ func (s Service) UpdateOther(ctx context.Context, UserID uuid.UUID, params Updat
 	return res, nil
 }
 
-func (s Service) UpdateOwn(ctx context.Context, userID uuid.UUID, params UpdateParams) (models.CityAdminWithUserData, error) {
+type UpdateOwnParams struct {
+	Position *string
+	Label    *string
+}
+
+func (s Service) UpdateOwn(ctx context.Context, userID uuid.UUID, params UpdateOwnParams) (models.CityAdminsWithUserData, error) {
 	res, err := s.GetInitiator(ctx, userID)
 	if err != nil {
-		return models.CityAdminWithUserData{}, err
+		return models.CityAdminsWithUserData{}, err
 	}
 
 	now := time.Now().UTC()
 	if params.Label != nil {
-		res.Label = params.Label
+		res.Admin.Label = params.Label
 	}
 
-	err = s.db.UpdateCityAdmin(ctx, userID, params, now)
+	err = s.db.UpdateAdmin(ctx, userID, UpdateParams{
+		Label:    params.Label,
+		Position: params.Position,
+	}, now)
 	if err != nil {
-		return models.CityAdminWithUserData{}, errx.ErrorInternal.Raise(
+		return models.CityAdminsWithUserData{}, errx.ErrorInternal.Raise(
 			fmt.Errorf("failed to update city admin, cause: %w", err),
 		)
 	}
-	
+
 	return res, nil
 }

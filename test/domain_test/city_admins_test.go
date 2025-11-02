@@ -14,10 +14,10 @@ import (
 	"github.com/google/uuid"
 )
 
-func CreateHead(s Setup, t *testing.T, cityID, userID uuid.UUID) models.CityAdminWithUserData {
+func CreateHead(s Setup, t *testing.T, cityID, userID uuid.UUID) models.CityAdminsWithUserData {
 	inv, err := s.domain.invites.Create(
 		context.Background(),
-		enum.CityAdminRoleHead,
+		enum.CityGovRoleExecutive,
 		cityID,
 		time.Hour*24,
 	)
@@ -113,7 +113,7 @@ func TestCreateInviteMayor(t *testing.T) {
 		t.Fatalf("SetCityStatusOfficial: %v", err)
 	}
 
-	InviteForAdmin, err := s.domain.invites.Create(ctx, enum.CityAdminRoleHead, kyiv.ID, time.Hour)
+	InviteForAdmin, err := s.domain.invites.Create(ctx, enum.CityGovRoleExecutive, kyiv.ID, time.Hour)
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
@@ -137,7 +137,7 @@ func TestCreateInviteMayor(t *testing.T) {
 
 	userModerator := uuid.New()
 
-	InviteForModer, err := s.domain.invites.Create(ctx, enum.CityAdminRoleHead, kyiv.ID, time.Hour)
+	InviteForModer, err := s.domain.invites.Create(ctx, enum.CityGovRoleExecutive, kyiv.ID, time.Hour)
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
@@ -170,7 +170,7 @@ func TestCreateInviteNotOfficialCity(t *testing.T) {
 	ukr := CreateAndActivateCountry(s, t, "Ukraine")
 	kyiv := CreateCity(s, t, ukr.ID, "Kyiv")
 
-	_, err = s.domain.invites.Create(ctx, enum.CityAdminRoleHead, kyiv.ID, time.Hour*24)
+	_, err = s.domain.invites.Create(ctx, enum.CityGovRoleExecutive, kyiv.ID, time.Hour*24)
 	if !errors.Is(err, errx.ErrorCityIsNotSupported) {
 		t.Fatalf("expected error %v, got %v", errx.ErrorCityIsNotSupported, err)
 	}

@@ -8,7 +8,7 @@ import (
 
 	"github.com/chains-lab/cities-svc/internal/data/pgdb"
 	"github.com/chains-lab/cities-svc/internal/domain/models"
-	"github.com/chains-lab/cities-svc/internal/domain/services/country"
+
 	"github.com/chains-lab/restkit/pagi"
 	"github.com/google/uuid"
 )

@@ -17,10 +17,17 @@ func (s Service) Delete(ctx context.Context, UserID, cityID uuid.UUID) error {
 		return err
 	}
 
-	err = s.db.DeleteCityAdmin(ctx, UserID, cityID)
+	err = s.db.DeleteAdmin(ctx, UserID, cityID)
 	if err != nil {
 		return errx.ErrorInternal.Raise(
 			fmt.Errorf("failed to delete city admin, cause: %w", err),
+		)
+	}
+
+	err = s.event.CityAdminDeleted(ctx, UserID, cityID)
+	if err != nil {
+		return errx.ErrorInternal.Raise(
+			fmt.Errorf("failed to emit city admin deleted event, cause: %w", err),
 		)
 	}
 

@@ -7,15 +7,15 @@ import (
 
 	"github.com/chains-lab/cities-svc/internal"
 	"github.com/chains-lab/cities-svc/internal/data"
-	"github.com/chains-lab/cities-svc/internal/domain/services/admin"
 	"github.com/chains-lab/cities-svc/internal/domain/services/city"
-	"github.com/chains-lab/cities-svc/internal/domain/services/country"
-	"github.com/chains-lab/cities-svc/internal/domain/services/invite"
-	"github.com/chains-lab/cities-svc/internal/infra/jwtmanager"
-	"github.com/chains-lab/cities-svc/internal/infra/usrguesser"
+
+	"github.com/chains-lab/cities-svc/internal/domain/services/admin"
+
+	"github.com/chains-lab/cities-svc/internal/jwtmanager"
 	"github.com/chains-lab/cities-svc/internal/rest"
 	"github.com/chains-lab/cities-svc/internal/rest/controller"
 	"github.com/chains-lab/cities-svc/internal/rest/middlewares"
+	"github.com/chains-lab/cities-svc/internal/usrguesser"
 
 	"github.com/chains-lab/logium"
 )

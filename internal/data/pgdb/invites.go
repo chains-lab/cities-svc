@@ -10,7 +10,7 @@ import (
 	"github.com/google/uuid"
 )
 
-const invitesTable = "invites"
+const invitesTable = "invite"
 
 type Invite struct {
 	ID         uuid.UUID     `db:"id"`

@@ -33,9 +33,9 @@ func (a Service) ListAdmins(w http.ResponseWriter, r *http.Request) {
 
 	page, size := pagi.GetPagination(r)
 
-	govs, err := a.domain.moder.Filter(ctx, filters, page, size)
+	admins, err := a.domain.moder.Filter(ctx, filters, page, size)
 	if err != nil {
-		a.log.WithError(err).Error("failed to search govs")
+		a.log.WithError(err).Error("failed to search admins")
 		switch {
 		default:
 			ape.RenderErr(w, problems.InternalError())
@@ -44,5 +44,5 @@ func (a Service) ListAdmins(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ape.Render(w, http.StatusOK, responses.CityAdminsCollection(govs))
+	ape.Render(w, http.StatusOK, responses.CityAdminsCollection(admins))
 }

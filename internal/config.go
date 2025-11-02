@@ -51,7 +51,7 @@ type JWTConfig struct {
 	}
 	Invites struct {
 		SecretKey string `mapstructure:"secret_key"`
-	} `mapstructure:"admin-invites"`
+	} `mapstructure:"admin-invite"`
 }
 
 type SwaggerConfig struct {

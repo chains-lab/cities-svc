@@ -45,7 +45,7 @@ type Middlewares interface {
 
 	CityAdminMember(
 		UserCtxKey interface{},
-		allowedGovRoles map[string]bool,
+		AllowedAdminRoles map[string]bool,
 	) func(http.Handler) http.Handler
 }
 
@@ -57,12 +57,12 @@ func Run(ctx context.Context, cfg internal.Config, log logium.Logger, m Middlewa
 	})
 
 	cityMod := m.CityAdminMember(meta.UserCtxKey, map[string]bool{
-		enum.CityAdminRoleHead:      true,
+		enum.CityAdminRoleExecutive: true,
 		enum.CityAdminRoleModerator: true,
 	})
 
 	cityStuff := m.CityAdminMember(meta.UserCtxKey, map[string]bool{
-		enum.CityAdminRoleHead:      true,
+		enum.CityAdminRoleExecutive: true,
 		enum.CityAdminRoleModerator: true,
 		enum.CityAdminMember:        true,
 	})

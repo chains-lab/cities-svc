@@ -426,7 +426,7 @@ func TestSetCityStatus(t *testing.T) {
 		t.Errorf("expected city status 'deprecated', got '%s'", kyiv.Status)
 	}
 
-	_, err = s.domain.invites.Create(context.Background(), enum.CityAdminRoleHead, kyiv.ID, time.Hour)
+	_, err = s.domain.invites.Create(context.Background(), enum.CityGovRoleExecutive, kyiv.ID, time.Hour)
 	if !errors.Is(err, errx.ErrorCityIsNotSupported) {
 		t.Fatalf("expected error when creating mayor invite for deprecated city, got: %v", err)
 	}

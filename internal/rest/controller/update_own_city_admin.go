@@ -24,7 +24,7 @@ func (a Service) UpdateMyCityAdmin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	req, err := requests.UpdateOwnGov(r)
+	req, err := requests.UpdateOwnadmin(r)
 	if err != nil {
 		a.log.WithError(err).Error("failed to parse update own active admin request")
 		ape.RenderErr(w, problems.BadRequest(err)...)

@@ -14,7 +14,7 @@ import (
 )
 
 func (d *Database) CreateCityAdmin(ctx context.Context, cityMod models.CityAdmin) error {
-	return d.sql.cityMod.New().Insert(ctx, cityAdminModelToSchema(cityMod))
+	return d.sql.cityMod.New().Insert(ctx, CityAdminModelToSchema(cityMod))
 }
 
 func (d *Database) GetCityAdmin(ctx context.Context, filters admin.GetFilters) (models.CityAdmin, error) {
@@ -38,7 +38,7 @@ func (d *Database) GetCityAdmin(ctx context.Context, filters admin.GetFilters) (
 		return models.CityAdmin{}, err
 	}
 
-	return cityAdminSchemaToModel(row), nil
+	return CityAdminSchemaToModel(row), nil
 }
 
 func (d *Database) GetCityAdminByUserAndCityID(ctx context.Context, userID, cityID uuid.UUID) (models.CityAdmin, error) {
@@ -82,7 +82,7 @@ func (d *Database) FilterCityAdmins(
 
 	res := make([]models.CityAdmin, len(rows))
 	for i, r := range rows {
-		res[i] = cityAdminSchemaToModel(r)
+		res[i] = CityAdminSchemaToModel(r)
 	}
 
 	return models.CityAdminsCollection{
@@ -117,7 +117,7 @@ func (d *Database) DeleteCityAdmin(ctx context.Context, userID, cityID uuid.UUID
 	return d.sql.cityMod.New().FilterUserID(userID).FilterCityID(cityID).Delete(ctx)
 }
 
-func cityAdminSchemaToModel(s pgdb.CityAdmin) models.CityAdmin {
+func CityAdminSchemaToModel(s pgdb.CityAdmin) models.CityAdmin {
 	res := models.CityAdmin{
 		UserID:    s.UserID,
 		CityID:    s.CityID,
@@ -132,7 +132,7 @@ func cityAdminSchemaToModel(s pgdb.CityAdmin) models.CityAdmin {
 	return res
 }
 
-func cityAdminModelToSchema(m models.CityAdmin) pgdb.CityAdmin {
+func CityAdminModelToSchema(m models.CityAdmin) pgdb.CityAdmin {
 	s := pgdb.CityAdmin{
 		UserID:    m.UserID,
 		CityID:    m.CityID,

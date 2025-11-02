@@ -7,7 +7,7 @@ import (
 	"github.com/chains-lab/ape"
 	"github.com/chains-lab/ape/problems"
 	"github.com/chains-lab/cities-svc/internal/domain/errx"
-	"github.com/chains-lab/cities-svc/internal/domain/services/country"
+
 	"github.com/chains-lab/cities-svc/internal/rest/requests"
 	"github.com/chains-lab/cities-svc/internal/rest/responses"
 )

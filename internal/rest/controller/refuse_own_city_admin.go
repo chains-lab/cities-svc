@@ -24,7 +24,7 @@ func (a Service) RefuseMyCityAdmin(w http.ResponseWriter, r *http.Request) {
 		a.log.WithError(err).Error("failed to refuse own admin")
 		switch {
 		case errors.Is(err, errx.ErrorInitiatorIsNotCityAdmin):
-			ape.RenderErr(w, problems.Forbidden("no active city government for the user"))
+			ape.RenderErr(w, problems.Forbidden("no active city adminernment for the user"))
 		default:
 			ape.RenderErr(w, problems.InternalError())
 		}

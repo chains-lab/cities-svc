@@ -15,23 +15,23 @@ type GetFilters struct {
 	Role   *string
 }
 
-func (s Service) Get(ctx context.Context, filters GetFilters) (models.CityAdminWithUserData, error) {
-	res, err := s.db.GetCityAdmin(ctx, filters)
+func (s Service) Get(ctx context.Context, filters GetFilters) (models.CityAdminsWithUserData, error) {
+	res, err := s.db.GetAdmin(ctx, filters)
 	if err != nil {
-		return models.CityAdminWithUserData{}, errx.ErrorInternal.Raise(
+		return models.CityAdminsWithUserData{}, errx.ErrorInternal.Raise(
 			fmt.Errorf("failed to get city admin, cause: %w", err),
 		)
 	}
 
 	if res.IsNil() {
-		return models.CityAdminWithUserData{}, errx.ErrorCityAdminNotFound.Raise(
+		return models.CityAdminsWithUserData{}, errx.ErrorCityAdminNotFound.Raise(
 			fmt.Errorf("city admin not found"),
 		)
 	}
 
 	profiles, err := s.userGuesser.Guess(ctx, res.UserID)
 	if err != nil {
-		return models.CityAdminWithUserData{}, errx.ErrorInternal.Raise(
+		return models.CityAdminsWithUserData{}, errx.ErrorInternal.Raise(
 			fmt.Errorf("failed to guess city admin data, cause: %w", err),
 		)
 	}
@@ -39,25 +39,25 @@ func (s Service) Get(ctx context.Context, filters GetFilters) (models.CityAdminW
 	return res.AddProfileData(profiles[res.UserID]), nil
 }
 
-func (s Service) GetInitiator(ctx context.Context, initiatorID uuid.UUID) (models.CityAdminWithUserData, error) {
-	res, err := s.db.GetCityAdmin(ctx, GetFilters{
+func (s Service) GetInitiator(ctx context.Context, initiatorID uuid.UUID) (models.CityAdminsWithUserData, error) {
+	res, err := s.db.GetAdmin(ctx, GetFilters{
 		UserID: &initiatorID,
 	})
 	if err != nil {
-		return models.CityAdminWithUserData{}, errx.ErrorInternal.Raise(
+		return models.CityAdminsWithUserData{}, errx.ErrorInternal.Raise(
 			fmt.Errorf("failed to get city admin, cause: %w", err),
 		)
 	}
 
 	if res.IsNil() {
-		return models.CityAdminWithUserData{}, errx.ErrorInitiatorIsNotCityAdmin.Raise(
+		return models.CityAdminsWithUserData{}, errx.ErrorInitiatorIsNotCityAdmin.Raise(
 			fmt.Errorf("city admin not found"),
 		)
 	}
 
 	profiles, err := s.userGuesser.Guess(ctx, res.UserID)
 	if err != nil {
-		return models.CityAdminWithUserData{}, errx.ErrorInternal.Raise(
+		return models.CityAdminsWithUserData{}, errx.ErrorInternal.Raise(
 			fmt.Errorf("failed to guess city admin data, cause: %w", err),
 		)
 	}

@@ -10,7 +10,7 @@ import (
 	"github.com/google/uuid"
 )
 
-const cityAdminsTable = "city_admins"
+const CityAdminsTable = "city_admins"
 
 type CityAdmin struct {
 	UserID    uuid.UUID      `db:"user_id"`
@@ -44,11 +44,11 @@ func NewCityAdminsQ(db *sql.DB) CityAdminsQ {
 
 	return CityAdminsQ{
 		db:       db,
-		selector: b.Select(cols...).From(cityAdminsTable),
-		inserter: b.Insert(cityAdminsTable),
-		updater:  b.Update(cityAdminsTable),
-		deleter:  b.Delete(cityAdminsTable),
-		counter:  b.Select("COUNT(*) AS count").From(cityAdminsTable),
+		selector: b.Select(cols...).From(CityAdminsTable),
+		inserter: b.Insert(CityAdminsTable),
+		updater:  b.Update(CityAdminsTable),
+		deleter:  b.Delete(CityAdminsTable),
+		counter:  b.Select("COUNT(*) AS count").From(CityAdminsTable),
 	}
 }
 
@@ -72,7 +72,7 @@ func (q CityAdminsQ) Insert(ctx context.Context, in CityAdmin) error {
 
 	query, args, err := q.inserter.SetMap(values).ToSql()
 	if err != nil {
-		return fmt.Errorf("building insert query for %s: %w", cityAdminsTable, err)
+		return fmt.Errorf("building insert query for %s: %w", CityAdminsTable, err)
 	}
 
 	if tx, ok := TxFromCtx(ctx); ok {
@@ -87,7 +87,7 @@ func (q CityAdminsQ) Insert(ctx context.Context, in CityAdmin) error {
 func (q CityAdminsQ) Get(ctx context.Context) (CityAdmin, error) {
 	query, args, err := q.selector.Limit(1).ToSql()
 	if err != nil {
-		return CityAdmin{}, fmt.Errorf("building select query for %s: %w", cityAdminsTable, err)
+		return CityAdmin{}, fmt.Errorf("building select query for %s: %w", CityAdminsTable, err)
 	}
 
 	var m CityAdmin
@@ -111,7 +111,7 @@ func (q CityAdminsQ) Get(ctx context.Context) (CityAdmin, error) {
 func (q CityAdminsQ) Select(ctx context.Context) ([]CityAdmin, error) {
 	query, args, err := q.selector.ToSql()
 	if err != nil {
-		return nil, fmt.Errorf("building select query for %s: %w", cityAdminsTable, err)
+		return nil, fmt.Errorf("building select query for %s: %w", CityAdminsTable, err)
 	}
 
 	var rows *sql.Rows
@@ -148,7 +148,7 @@ func (q CityAdminsQ) Update(ctx context.Context, updatedAt time.Time) error {
 
 	query, args, err := q.updater.ToSql()
 	if err != nil {
-		return fmt.Errorf("building update query for %s: %w", cityAdminsTable, err)
+		return fmt.Errorf("building update query for %s: %w", CityAdminsTable, err)
 	}
 
 	if tx, ok := TxFromCtx(ctx); ok {
@@ -182,7 +182,7 @@ func (q CityAdminsQ) UpdateLabel(label sql.NullString) CityAdminsQ {
 func (q CityAdminsQ) Delete(ctx context.Context) error {
 	query, args, err := q.deleter.ToSql()
 	if err != nil {
-		return fmt.Errorf("building delete query for %s: %w", cityAdminsTable, err)
+		return fmt.Errorf("building delete query for %s: %w", CityAdminsTable, err)
 	}
 
 	if tx, ok := TxFromCtx(ctx); ok {
@@ -225,7 +225,7 @@ func (q CityAdminsQ) FilterCountryID(countryID uuid.UUID) CityAdminsQ {
 	sub := sq.
 		Select("1").
 		From(citiesTable + " c").
-		Where("c.id = " + cityAdminsTable + ".city_id").
+		Where("c.id = " + CityAdminsTable + ".city_id").
 		Where(sq.Eq{"c.country_id": countryID})
 
 	subSQL, subArgs, _ := sub.ToSql()
@@ -274,7 +274,7 @@ func (q CityAdminsQ) OrderByUpdatedAt(asc bool) CityAdminsQ {
 func (q CityAdminsQ) Count(ctx context.Context) (uint64, error) {
 	query, args, err := q.counter.ToSql()
 	if err != nil {
-		return 0, fmt.Errorf("building count query for %s: %w", cityAdminsTable, err)
+		return 0, fmt.Errorf("building count query for %s: %w", CityAdminsTable, err)
 	}
 
 	var n uint64

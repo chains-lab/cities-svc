@@ -52,7 +52,7 @@ components:
           $ref: '#/components/schemas/UpdateCityStatus_data'
       required:
       - data
-    UpdateOwnActiveGov:
+    UpdateOwnActiveadmin:
       properties:
         data:
           $ref: '#/components/schemas/UpdateOwnActiveGov_data'

@@ -5,11 +5,11 @@ import (
 	"github.com/chains-lab/cities-svc/resources"
 )
 
-func CityAdmin(m models.CityAdminWithUserData) resources.CityAdmin {
+func CityAdmin(m models.CityAdminsWithUserData) resources.CityAdmin {
 	return resources.CityAdmin{
 		Data: resources.CityAdminData{
 			Id:   m.UserID,
-			Type: resources.GovType,
+			Type: resources.adminType,
 			Attributes: resources.CityAdminAttributes{
 				CityId:    m.CityID,
 				Label:     m.Label,
@@ -34,9 +34,9 @@ func CityAdminsCollection(ms models.CityAdminsWithUserDataCollection) resources.
 	}
 
 	for _, m := range ms.Data {
-		gov := CityAdmin(m).Data
+		admin := CityAdmin(m).Data
 
-		resp.Data = append(resp.Data, gov)
+		resp.Data = append(resp.Data, admin)
 	}
 
 	return resp

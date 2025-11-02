@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"github.com/chains-lab/cities-svc/internal/domain/models"
-	"github.com/chains-lab/cities-svc/internal/domain/services/admin"
 	"github.com/chains-lab/cities-svc/internal/domain/services/city"
-	"github.com/chains-lab/cities-svc/internal/domain/services/country"
+
+	"github.com/chains-lab/cities-svc/internal/domain/services/admin"
 	"github.com/chains-lab/logium"
 	"github.com/google/uuid"
 	"github.com/paulmach/orb"
@@ -20,15 +20,15 @@ type CityModSvc interface {
 		page, size uint64,
 	) (models.CityAdminsWithUserDataCollection, error)
 
-	Get(ctx context.Context, filters admin.GetFilters) (models.CityAdminWithUserData, error)
-	GetInitiator(ctx context.Context, initiatorID uuid.UUID) (models.CityAdminWithUserData, error)
+	Get(ctx context.Context, filters admin.GetFilters) (models.CityAdminsWithUserData, error)
+	GetInitiator(ctx context.Context, initiatorID uuid.UUID) (models.CityAdminsWithUserData, error)
 
 	RefuseOwn(ctx context.Context, userID uuid.UUID) error
 
 	Delete(ctx context.Context, UserID, CityID uuid.UUID) error
 
-	UpdateOther(ctx context.Context, UserID uuid.UUID, params admin.UpdateParams) (models.CityAdminWithUserData, error)
-	UpdateOwn(ctx context.Context, userID uuid.UUID, params admin.UpdateParams) (models.CityAdminWithUserData, error)
+	UpdateOther(ctx context.Context, UserID uuid.UUID, params admin.UpdateParams) (models.CityAdminsWithUserData, error)
+	UpdateOwn(ctx context.Context, userID uuid.UUID, params admin.UpdateParams) (models.CityAdminsWithUserData, error)
 }
 
 type CitySvc interface {

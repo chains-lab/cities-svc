@@ -19,7 +19,7 @@ func (s Service) Filter(
 	filters FilterParams,
 	page, size uint64,
 ) (models.CityAdminsWithUserDataCollection, error) {
-	res, err := s.db.FilterCityAdmins(ctx, filters, page, size)
+	res, err := s.db.FilterAdmins(ctx, filters, page, size)
 	if err != nil {
 		return models.CityAdminsWithUserDataCollection{}, errx.ErrorInternal.Raise(
 			fmt.Errorf("failed to filter city admin, cause: %w", err),

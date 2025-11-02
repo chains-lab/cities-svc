@@ -26,7 +26,7 @@ func (a Service) GetMyCityAdmin(w http.ResponseWriter, r *http.Request) {
 
 		switch {
 		case errors.Is(err, errx.ErrorInitiatorIsNotCityAdmin):
-			ape.RenderErr(w, problems.Unauthorized("no active city government for the user"))
+			ape.RenderErr(w, problems.Unauthorized("no active city adminernment for the user"))
 		default:
 			ape.RenderErr(w, problems.InternalError())
 		}

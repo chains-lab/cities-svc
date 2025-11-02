@@ -30,7 +30,7 @@ func (a Service) GetCityAdmin(w http.ResponseWriter, r *http.Request) {
 		a.log.WithError(err).Error("failed to get admin")
 		switch {
 		case errors.Is(err, errx.ErrorCityAdminNotFound):
-			ape.RenderErr(w, problems.NotFound("city government not found"))
+			ape.RenderErr(w, problems.NotFound("city adminernment not found"))
 		default:
 			ape.RenderErr(w, problems.InternalError())
 		}

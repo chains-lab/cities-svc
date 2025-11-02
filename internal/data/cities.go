@@ -152,7 +152,7 @@ func (d *Database) UpdateCityStatus(ctx context.Context, id uuid.UUID, status st
 		Update(ctx, updatedAt)
 }
 
-func (d *Database) DeleteGovForCity(ctx context.Context, cityID uuid.UUID) error {
+func (d *Database) DeleteadminForCity(ctx context.Context, cityID uuid.UUID) error {
 	err := d.sql.cityMod.New().FilterCityID(cityID).Delete(ctx)
 	return err
 }

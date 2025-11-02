@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/chains-lab/cities-svc/internal/domain/enum"
 	"github.com/chains-lab/cities-svc/internal/domain/errx"
 	"github.com/chains-lab/cities-svc/internal/domain/models"
 	"github.com/google/uuid"
@@ -15,12 +14,14 @@ import (
 )
 
 type Service struct {
-	db database
+	db    database
+	event EventPublisher
 }
 
-func NewService(db database) Service {
+func NewService(db database, event EventPublisher) Service {
 	return Service{
-		db: db,
+		db:    db,
+		event: event,
 	}
 }
 
@@ -88,40 +89,41 @@ func validateName(name string) error {
 
 type database interface {
 	Transaction(ctx context.Context, fn func(ctx context.Context) error) error
-
-	GetCountryByID(ctx context.Context, id uuid.UUID) (models.Country, error)
+	GetCityStatusByID(ctx context.Context, ID string) (models.CityStatus, error)
 
 	CreateCity(ctx context.Context, m models.City) (models.City, error)
 
-	GetCityByID(ctx context.Context, id uuid.UUID) (models.City, error)
+	GetCityByID(ctx context.Context, ID uuid.UUID) (models.City, error)
 	GetCityBySlug(ctx context.Context, slug string) (models.City, error)
 	GetCityByRadius(ctx context.Context, point orb.Point, radius uint64) (models.City, error)
 
 	FilterCities(ctx context.Context, filter FilterParams, page, size uint64) (models.CitiesCollection, error)
 
-	UpdateCity(ctx context.Context, id uuid.UUID, m UpdateParams, updatedAt time.Time) error
-	UpdateCityStatus(ctx context.Context, id uuid.UUID, status string, updatedAt time.Time) error
+	UpdateCity(ctx context.Context, ID uuid.UUID, m UpdateParams, updatedAt time.Time) error
+	UpdateCityStatus(ctx context.Context, ID uuid.UUID, status string, updatedAt time.Time) error
 
-	DeleteGovForCity(ctx context.Context, cityID uuid.UUID) error
+	DeleteCityAdmins(ctx context.Context, cityID uuid.UUID) error
+	DeleteCityModerators(ctx context.Context, cityID uuid.UUID) error
 }
 
-func (s Service) CountryIsSupported(ctx context.Context, countryID uuid.UUID) error {
-	country, err := s.db.GetCountryByID(ctx, countryID)
+type EventPublisher interface {
+	CityCreated(ctx context.Context, city models.City) error
+	CityUpdated(ctx context.Context, city models.City) error
+}
+
+func (s Service) StatusAccessible(ctx context.Context, statusID string) (models.CityStatus, error) {
+	status, err := s.db.GetCityStatusByID(ctx, statusID)
 	if err != nil {
-		return errx.ErrorInternal.Raise(
-			fmt.Errorf("failed to get country by ID: %w", err),
-		)
-	}
-	if country.IsNil() {
-		return errx.ErrorCountryNotFound.Raise(
-			fmt.Errorf("country with ID %s not found", countryID),
-		)
-	}
-	if country.Status != enum.CountryStatusSupported {
-		return errx.ErrorCountryIsNotSupported.Raise(
-			fmt.Errorf("country with ID %s is not active", countryID),
+		return models.CityStatus{}, errx.ErrorInternal.Raise(
+			fmt.Errorf("failed to get city status by id: %s, cause: %w", statusID, err),
 		)
 	}
 
-	return nil
+	if status.IsNil() {
+		return models.CityStatus{}, errx.ErrorCityStatusNotFound.Raise(
+			fmt.Errorf("city status not found by id: %s", statusID),
+		)
+	}
+
+	return status, nil
 }

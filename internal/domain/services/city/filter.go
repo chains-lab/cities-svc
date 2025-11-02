@@ -11,9 +11,10 @@ import (
 )
 
 type FilterParams struct {
+	ID        []uuid.UUID
 	Name      *string
 	Status    *string
-	CountryID *uuid.UUID
+	CountryID *string
 
 	Location *FilterDistance
 }

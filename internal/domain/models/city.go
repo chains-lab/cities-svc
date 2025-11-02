@@ -9,13 +9,15 @@ import (
 
 type City struct {
 	ID        uuid.UUID
-	CountryID uuid.UUID
-	Point     orb.Point // [lon, lat]
+	CountryID string
 	Status    string
-	Name      string
-	Icon      *string
-	Slug      *string
-	Timezone  string
+
+	Name string
+	Icon *string
+	Slug *string
+
+	Timezone string
+	Point    orb.Point
 
 	CreatedAt time.Time
 	UpdatedAt time.Time

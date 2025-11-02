@@ -15,7 +15,7 @@ import (
 
 func (s Service) CityAdminMember(
 	userCtxKey interface{},
-	allowedGovRoles map[string]bool,
+	AllowedAdminRoles map[string]bool,
 ) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -48,7 +48,7 @@ func (s Service) CityAdminMember(
 				return
 			}
 
-			if !allowedGovRoles[*user.CityRole] {
+			if !AllowedAdminRoles[*user.CityRole] {
 				ape.RenderErr(w, problems.Forbidden("user city role not allowed"))
 				return
 			}

@@ -2,11 +2,8 @@ package admin
 
 import (
 	"context"
-	"fmt"
 	"time"
 
-	"github.com/chains-lab/cities-svc/internal/domain/enum"
-	"github.com/chains-lab/cities-svc/internal/domain/errx"
 	"github.com/chains-lab/cities-svc/internal/domain/models"
 	"github.com/google/uuid"
 )
@@ -14,53 +11,41 @@ import (
 type Service struct {
 	db          database
 	userGuesser UserGuesser
+	event       EventPublisher
 }
 
-func NewService(db database, userGuesser UserGuesser) Service {
+func NewService(db database, userGuesser UserGuesser, eventPub EventPublisher) Service {
 	return Service{
 		db:          db,
 		userGuesser: userGuesser,
+		event:       eventPub,
 	}
 }
 
 type database interface {
 	Transaction(ctx context.Context, fn func(ctx context.Context) error) error
 
-	CreateCityAdmin(ctx context.Context, input models.CityAdmin) error
-	GetCityAdmin(ctx context.Context, filters GetFilters) (models.CityAdmin, error)
-	FilterCityAdmins(ctx context.Context, filter FilterParams, page, size uint64) (models.CityAdminsCollection, error)
-	UpdateCityAdmin(ctx context.Context, userID uuid.UUID, params UpdateParams, updatedAt time.Time) error
-	DeleteCityAdmin(ctx context.Context, userID, cityID uuid.UUID) error
+	CreateAdmin(ctx context.Context, input models.CityAdmin) error
+	GetAdmin(ctx context.Context, filters GetFilters) (models.CityAdmin, error)
+	UpdateAdmin(ctx context.Context, userID uuid.UUID, params UpdateParams, updatedAt time.Time) error
+	DeleteAdmin(ctx context.Context, userID, cityID uuid.UUID) error
 
-	CreateInvite(ctx context.Context, input models.Invite) error
-	GetInvite(ctx context.Context, ID uuid.UUID) (models.Invite, error)
-	UpdateInviteStatus(ctx context.Context, inviteID, userID uuid.UUID, status string, now time.Time) error
+	FilterAdmins(ctx context.Context, filter FilterParams, page, size uint64) (models.CityAdminsCollection, error)
 
-	GetCountryByID(ctx context.Context, ID uuid.UUID) (models.Country, error)
-	GetCityByID(ctx context.Context, ID uuid.UUID) (models.City, error)
+	CreateInvite(ctx context.Context, input models.Invite) (models.Invite, error)
+	GetInvite(ctx context.Context, inviteID uuid.UUID) (models.Invite, error)
+	AnswerToInvite(ctx context.Context, inviteID uuid.UUID, answer string) error
+
+	ExistsGov(ctx context.Context, userID uuid.UUID) (bool, error)
+	GetCity(ctx context.Context, cityID uuid.UUID) (models.City, error)
+	GetCityStatus(ctx context.Context, cityID uuid.UUID) (models.CityStatus, error)
 }
 
 type UserGuesser interface {
 	Guess(ctx context.Context, userIDs ...uuid.UUID) (map[uuid.UUID]models.Profile, error)
 }
 
-func (s Service) CityIsOfficialSupport(ctx context.Context, cityID uuid.UUID) error {
-	ci, err := s.db.GetCityByID(ctx, cityID)
-	if err != nil {
-		return errx.ErrorInternal.Raise(
-			fmt.Errorf("get city: %w", err),
-		)
-	}
-	if ci.IsNil() {
-		return errx.ErrorCityNotFound.Raise(
-			fmt.Errorf("city not found"),
-		)
-	}
-	if ci.Status != enum.CityStatusOfficial {
-		return errx.ErrorCityIsNotSupported.Raise(
-			fmt.Errorf("city not supported"),
-		)
-	}
-
-	return nil
+type EventPublisher interface {
+	CityAdminCreated(ctx context.Context, admin models.CityAdmin) error
+	CityAdminDeleted(ctx context.Context, userID, cityID uuid.UUID) error
 }

@@ -19,17 +19,17 @@ type Service struct {
 	domain domain
 }
 
-func New(log logium.Logger, gov CityAdminSvc) Service {
+func New(log logium.Logger, admin CityAdminSvc) Service {
 	return Service{
 		log: log,
 		domain: domain{
-			admin: gov,
+			admin: admin,
 		},
 	}
 }
 
 type CityAdminSvc interface {
-	Get(ctx context.Context, filters admin.GetFilters) (models.CityAdminWithUserData, error)
+	Get(ctx context.Context, filters admin.GetFilters) (models.CityAdminsWithUserData, error)
 }
 
 func (s Service) Auth(userCtxKey interface{}, skUser string) func(http.Handler) http.Handler {
