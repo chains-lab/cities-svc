@@ -15,7 +15,7 @@ func newDecodeError(what string, err error) error {
 	}
 }
 
-func CreateInvite(r *http.Request) (req resources.CreateInvite, err error) {
+func CreateInvite(r *http.Request) (req resources.SentInvite, err error) {
 	if err = json.NewDecoder(r.Body).Decode(&req); err != nil {
 		err = newDecodeError("body", err)
 		return

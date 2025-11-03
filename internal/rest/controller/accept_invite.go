@@ -8,11 +8,11 @@ import (
 	"github.com/chains-lab/ape/problems"
 	"github.com/chains-lab/cities-svc/internal/domain/errx"
 	"github.com/chains-lab/cities-svc/internal/rest/meta"
+	"github.com/chains-lab/cities-svc/internal/rest/requests"
 	"github.com/chains-lab/cities-svc/internal/rest/responses"
-	"github.com/go-chi/chi/v5"
 )
 
-func (a Service) AcceptInvite(w http.ResponseWriter, r *http.Request) {
+func (a Service) AnswerInvite(w http.ResponseWriter, r *http.Request) {
 	initiator, err := meta.User(r.Context())
 	if err != nil {
 		a.log.WithError(err).Error("failed to get user from context")
@@ -21,9 +21,15 @@ func (a Service) AcceptInvite(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token := chi.URLParam(r, "token")
+	req, err := requests.AnswerInvite(r)
+	if err != nil {
+		a.log.WithError(err).Error("invalid answer invite request")
+		ape.RenderErr(w, problems.BadRequest(err)...)
 
-	res, err := a.domain.invite.Accept(r.Context(), initiator.ID, token)
+		return
+	}
+
+	res, err := a.domain.invite.Answer(r.Context(), req.Data.Id, initiator.ID, req.Data.Attributes.Answer)
 	if err != nil {
 		a.log.WithError(err).Error("failed to answer to invite")
 		switch {

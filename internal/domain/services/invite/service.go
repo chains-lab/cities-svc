@@ -3,7 +3,6 @@ package invite
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/chains-lab/cities-svc/internal/domain/enum"
 	"github.com/chains-lab/cities-svc/internal/domain/errx"
@@ -11,29 +10,15 @@ import (
 	"github.com/google/uuid"
 )
 
-type JwtManager interface {
-	CreateInviteToken(
-		inviteID uuid.UUID,
-		role string,
-		cityID uuid.UUID,
-		ExpiredAt time.Time,
-	) (string, error)
-
-	DecryptInviteToken(tokenStr string) (models.InviteTokenData, error)
-
-	HashInviteToken(tokenStr string) (string, error)
-	VerifyInviteToken(tokenStr, hashed string) error
-}
-
 type Service struct {
-	db  database
-	jwt JwtManager
+	db    database
+	event EventPublisher
 }
 
-func NewService(db database, jwt JwtManager) Service {
+func NewService(db database, event EventPublisher) Service {
 	return Service{
-		db:  db,
-		jwt: jwt,
+		db:    db,
+		event: event,
 	}
 }
 
@@ -41,16 +26,20 @@ type database interface {
 	Transaction(ctx context.Context, fn func(ctx context.Context) error) error
 
 	CreateCityAdmin(ctx context.Context, input models.CityAdmin) error
-	DeleteCityAdmin(ctx context.Context, userID, cityID uuid.UUID) error
 
 	GetCityAdminByUserAndCityID(ctx context.Context, userID, cityID uuid.UUID) (models.CityAdmin, error)
 	GetCityAdminByUserID(ctx context.Context, userID uuid.UUID) (models.CityAdmin, error)
 
 	CreateInvite(ctx context.Context, input models.Invite) error
 	GetInvite(ctx context.Context, ID uuid.UUID) (models.Invite, error)
-	UpdateInviteStatus(ctx context.Context, inviteID, userID uuid.UUID, status string, now time.Time) error
+	UpdateInviteStatus(ctx context.Context, inviteID, userID uuid.UUID, status string) error
 
 	GetCityByID(ctx context.Context, ID uuid.UUID) (models.City, error)
+}
+
+type EventPublisher interface {
+	PublishCityAdminCreated(ctx context.Context, admin models.CityAdmin) error
+	PublishInviteCreated(ctx context.Context, invite models.Invite) error
 }
 
 func (s Service) CityIsOfficialSupport(ctx context.Context, cityID uuid.UUID) error {

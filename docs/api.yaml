@@ -27,10 +27,8 @@ components:
 
     SentInvite:
       $ref: './spec/components/schemas/SentInvite.yaml'
-
-
-    CreateInvite:
-      $ref: './spec/components/schemas/CreateInvite.yaml'
+    AcceptInvite:
+      $ref: './spec/components/schemas/AcceptInvite.yaml'
 
     City:
       $ref: './spec/components/schemas/City.yaml'

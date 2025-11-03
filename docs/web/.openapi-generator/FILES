@@ -5,6 +5,9 @@ api/openapi.yaml
 api_test_.go
 client.go
 configuration.go
+docs/AcceptInvite.md
+docs/AcceptInviteData.md
+docs/AcceptInviteDataAttributes.md
 docs/CitiesCollection.md
 docs/City.md
 docs/CityAdmin.md
@@ -16,9 +19,6 @@ docs/CityData.md
 docs/CreateCity.md
 docs/CreateCityData.md
 docs/CreateCityDataAttributes.md
-docs/CreateInvite.md
-docs/CreateInviteData.md
-docs/CreateInviteDataAttributes.md
 docs/Errors.md
 docs/ErrorsErrorsInner.md
 docs/Invite.md
@@ -42,6 +42,9 @@ docs/UpdateOwnAdminDataAttributes.md
 git_push.sh
 go.mod
 go.sum
+model_accept_invite.go
+model_accept_invite_data.go
+model_accept_invite_data_attributes.go
 model_cities_collection.go
 model_city.go
 model_city_admin.go
@@ -53,9 +56,6 @@ model_city_data.go
 model_create_city.go
 model_create_city_data.go
 model_create_city_data_attributes.go
-model_create_invite.go
-model_create_invite_data.go
-model_create_invite_data_attributes.go
 model_errors.go
 model_errors_errors_inner.go
 model_invite.go

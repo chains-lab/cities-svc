@@ -50,14 +50,18 @@ type CitySvc interface {
 }
 
 type inviteSvc interface {
-	Create(
+	Sent(
 		ctx context.Context,
+		cityID, userID uuid.UUID,
 		role string,
-		cityID uuid.UUID,
 		duration time.Duration,
 	) (models.Invite, error)
 
-	Accept(ctx context.Context, userID uuid.UUID, token string) (models.Invite, error)
+	Answer(
+		ctx context.Context,
+		answerID, userID uuid.UUID,
+		answer string,
+	) (models.Invite, error)
 }
 
 type domain struct {

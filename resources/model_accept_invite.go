@@ -16,38 +16,38 @@ import (
 	"fmt"
 )
 
-// checks if the CreateInvite type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &CreateInvite{}
+// checks if the AcceptInvite type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &AcceptInvite{}
 
-// CreateInvite struct for CreateInvite
-type CreateInvite struct {
-	Data CreateInviteData `json:"data"`
+// AcceptInvite struct for AcceptInvite
+type AcceptInvite struct {
+	Data AcceptInviteData `json:"data"`
 }
 
-type _CreateInvite CreateInvite
+type _AcceptInvite AcceptInvite
 
-// NewCreateInvite instantiates a new CreateInvite object
+// NewAcceptInvite instantiates a new AcceptInvite object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCreateInvite(data CreateInviteData) *CreateInvite {
-	this := CreateInvite{}
+func NewAcceptInvite(data AcceptInviteData) *AcceptInvite {
+	this := AcceptInvite{}
 	this.Data = data
 	return &this
 }
 
-// NewCreateInviteWithDefaults instantiates a new CreateInvite object
+// NewAcceptInviteWithDefaults instantiates a new AcceptInvite object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewCreateInviteWithDefaults() *CreateInvite {
-	this := CreateInvite{}
+func NewAcceptInviteWithDefaults() *AcceptInvite {
+	this := AcceptInvite{}
 	return &this
 }
 
 // GetData returns the Data field value
-func (o *CreateInvite) GetData() CreateInviteData {
+func (o *AcceptInvite) GetData() AcceptInviteData {
 	if o == nil {
-		var ret CreateInviteData
+		var ret AcceptInviteData
 		return ret
 	}
 
@@ -56,7 +56,7 @@ func (o *CreateInvite) GetData() CreateInviteData {
 
 // GetDataOk returns a tuple with the Data field value
 // and a boolean to check if the value has been set.
-func (o *CreateInvite) GetDataOk() (*CreateInviteData, bool) {
+func (o *AcceptInvite) GetDataOk() (*AcceptInviteData, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -64,11 +64,11 @@ func (o *CreateInvite) GetDataOk() (*CreateInviteData, bool) {
 }
 
 // SetData sets field value
-func (o *CreateInvite) SetData(v CreateInviteData) {
+func (o *AcceptInvite) SetData(v AcceptInviteData) {
 	o.Data = v
 }
 
-func (o CreateInvite) MarshalJSON() ([]byte, error) {
+func (o AcceptInvite) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -76,13 +76,13 @@ func (o CreateInvite) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o CreateInvite) ToMap() (map[string]interface{}, error) {
+func (o AcceptInvite) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["data"] = o.Data
 	return toSerialize, nil
 }
 
-func (o *CreateInvite) UnmarshalJSON(data []byte) (err error) {
+func (o *AcceptInvite) UnmarshalJSON(data []byte) (err error) {
 	// This validates that all required properties are included in the JSON object
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
@@ -104,53 +104,53 @@ func (o *CreateInvite) UnmarshalJSON(data []byte) (err error) {
 		}
 	}
 
-	varCreateInvite := _CreateInvite{}
+	varAcceptInvite := _AcceptInvite{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varCreateInvite)
+	err = decoder.Decode(&varAcceptInvite)
 
 	if err != nil {
 		return err
 	}
 
-	*o = CreateInvite(varCreateInvite)
+	*o = AcceptInvite(varAcceptInvite)
 
 	return err
 }
 
-type NullableCreateInvite struct {
-	value *CreateInvite
+type NullableAcceptInvite struct {
+	value *AcceptInvite
 	isSet bool
 }
 
-func (v NullableCreateInvite) Get() *CreateInvite {
+func (v NullableAcceptInvite) Get() *AcceptInvite {
 	return v.value
 }
 
-func (v *NullableCreateInvite) Set(val *CreateInvite) {
+func (v *NullableAcceptInvite) Set(val *AcceptInvite) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableCreateInvite) IsSet() bool {
+func (v NullableAcceptInvite) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableCreateInvite) Unset() {
+func (v *NullableAcceptInvite) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableCreateInvite(val *CreateInvite) *NullableCreateInvite {
-	return &NullableCreateInvite{value: val, isSet: true}
+func NewNullableAcceptInvite(val *AcceptInvite) *NullableAcceptInvite {
+	return &NullableAcceptInvite{value: val, isSet: true}
 }
 
-func (v NullableCreateInvite) MarshalJSON() ([]byte, error) {
+func (v NullableAcceptInvite) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableCreateInvite) UnmarshalJSON(src []byte) error {
+func (v *NullableAcceptInvite) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

@@ -9,3 +9,5 @@ var ErrorInvalidInviteToken = ape.DeclareError("INVALID_INVITE_TOKEN")
 var ErrorInviteExpired = ape.DeclareError("INVITE_EXPIRED")
 
 var ErrorInviteAlreadyAnswered = ape.DeclareError("INVITE_ALREADY_ANSWERED")
+
+var ErrorInvalidInviteAnswer = ape.DeclareError("INVALID_INVITE_ANSWER")

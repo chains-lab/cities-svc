@@ -31,12 +31,12 @@ type database interface {
 	CreateCityAdmin(ctx context.Context, input models.CityAdmin) error
 	GetCityAdmin(ctx context.Context, filters GetFilters) (models.CityAdmin, error)
 	FilterCityAdmins(ctx context.Context, filter FilterParams, page, size uint64) (models.CityAdminsCollection, error)
-	UpdateCityAdmin(ctx context.Context, userID uuid.UUID, params UpdateParams, updatedAt time.Time) error
+	UpdateCityAdmin(ctx context.Context, userID uuid.UUID, params UpdateParams, updateAt time.Time) error
 	DeleteCityAdmin(ctx context.Context, userID, cityID uuid.UUID) error
 
 	CreateInvite(ctx context.Context, input models.Invite) error
 	GetInvite(ctx context.Context, ID uuid.UUID) (models.Invite, error)
-	UpdateInviteStatus(ctx context.Context, inviteID, userID uuid.UUID, status string, now time.Time) error
+	UpdateInviteStatus(ctx context.Context, inviteID, userID uuid.UUID, status string) error
 
 	GetCityByID(ctx context.Context, ID uuid.UUID) (models.City, error)
 }

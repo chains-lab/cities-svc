@@ -46,10 +46,10 @@ components:
           $ref: '#/components/schemas/SentInvite_data'
       required:
       - data
-    CreateInvite:
+    AcceptInvite:
       properties:
         data:
-          $ref: '#/components/schemas/CreateInvite_data'
+          $ref: '#/components/schemas/AcceptInvite_data'
       required:
       - data
     City:
@@ -368,12 +368,17 @@ components:
           description: ID of the city the invite is for
           format: uuid
           type: string
+        user_id:
+          description: ID of the user who was invited
+          format: uuid
+          type: string
         role:
           description: Role assigned to the invited user
           type: string
       required:
       - city_id
       - role
+      - user_id
     SentInvite_data:
       properties:
         id:
@@ -390,34 +395,31 @@ components:
       - attributes
       - id
       - type
-    CreateInvite_data_attributes:
+    AcceptInvite_data_attributes:
       properties:
-        user_id:
-          description: user id
+        answer:
+          description: "The answer to the invite, either 'accept' or 'decline'"
+          enum:
+          - accept
+          - decline
+          type: string
+      required:
+      - answer
+    AcceptInvite_data:
+      properties:
+        id:
+          description: invite id
           format: uuid
           type: string
-        role:
-          description: role of the user in this city
-          example: admin
-          type: string
-        label:
-          description: label for the user in this city
-          example: City Department of Transportation
-          type: string
-      required:
-      - label
-      - role
-      - user_id
-    CreateInvite_data:
-      properties:
         type:
           enum:
-          - create_gov
+          - invite
           type: string
         attributes:
-          $ref: '#/components/schemas/CreateInvite_data_attributes'
+          $ref: '#/components/schemas/AcceptInvite_data_attributes'
       required:
       - attributes
+      - id
       - type
     Invite_data_attributes:
       properties:
@@ -431,8 +433,9 @@ components:
           description: city id
           format: uuid
           type: string
-        token:
-          description: unique token for the invite
+        user_id:
+          description: user id
+          format: uuid
           type: string
         expires_at:
           description: timestamp when the invite will expire
@@ -448,7 +451,7 @@ components:
       - expires_at
       - role
       - status
-      - token
+      - user_id
     Invite_data:
       properties:
         id:

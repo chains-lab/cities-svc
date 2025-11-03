@@ -8,8 +8,8 @@ CREATE TYPE city_admins_roles AS ENUM (
 );
 
 CREATE TABLE city_admins (
-    user_id    UUID           PRIMARY KEY,
-    city_id    UUID           NOT NULL REFERENCES city(id) ON DELETE CASCADE,
+    user_id    UUID PRIMARY KEY,
+    city_id    UUID NOT NULL REFERENCES city(id) ON DELETE CASCADE,
     role       city_admins_roles NOT NULL,
     position   VARCHAR(255),
     label      VARCHAR(255),
@@ -23,21 +23,14 @@ CREATE TYPE invite_status AS ENUM (
 );
 
 CREATE TABLE invites (
-    id          UUID           PRIMARY KEY,
-    status      invite_status  NOT NULL DEFAULT 'sent',
-    role        city_admins_roles NOT NULL,
-    city_id     UUID           NOT NULL REFERENCES city(id) ON DELETE CASCADE,
-    token       VARCHAR        NOT NULL UNIQUE,
-    user_id     UUID,
-    answered_at TIMESTAMP,
-    expires_at  TIMESTAMP      NOT NULL,
-    created_at  TIMESTAMP      NOT NULL DEFAULT (now() AT TIME ZONE 'UTC'),
+    id      UUID              PRIMARY KEY,
+    user_id UUID              NOT NULL,
+    city_id UUID              NOT NULL REFERENCES city(id) ON DELETE CASCADE,
+    status  invite_status     NOT NULL DEFAULT 'sent',
+    role    city_admins_roles NOT NULL,
 
-    CONSTRAINT invite_status_answered_ck CHECK (
-        (status = 'sent' AND answered_at IS NULL)
-            OR
-        (status = 'accepted' AND answered_at IS NOT NULL)
-    )
+    expires_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'UTC'),
 );
 
 -- +migrate Down

@@ -83,6 +83,9 @@ Class | Method | HTTP request | Description
 
 ## Documentation For Models
 
+ - [AcceptInvite](docs/AcceptInvite.md)
+ - [AcceptInviteData](docs/AcceptInviteData.md)
+ - [AcceptInviteDataAttributes](docs/AcceptInviteDataAttributes.md)
  - [CitiesCollection](docs/CitiesCollection.md)
  - [City](docs/City.md)
  - [CityAdmin](docs/CityAdmin.md)
@@ -94,9 +97,6 @@ Class | Method | HTTP request | Description
  - [CreateCity](docs/CreateCity.md)
  - [CreateCityData](docs/CreateCityData.md)
  - [CreateCityDataAttributes](docs/CreateCityDataAttributes.md)
- - [CreateInvite](docs/CreateInvite.md)
- - [CreateInviteData](docs/CreateInviteData.md)
- - [CreateInviteDataAttributes](docs/CreateInviteDataAttributes.md)
  - [Errors](docs/Errors.md)
  - [ErrorsErrorsInner](docs/ErrorsErrorsInner.md)
  - [Invite](docs/Invite.md)

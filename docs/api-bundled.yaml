@@ -174,16 +174,21 @@ components:
               type: object
               required:
                 - city_id
+                - user_id
                 - role
               properties:
                 city_id:
                   type: string
                   format: uuid
                   description: ID of the city the invite is for
+                user_id:
+                  type: string
+                  format: uuid
+                  description: ID of the user who was invited
                 role:
                   type: string
                   description: Role assigned to the invited user
-    CreateInvite:
+    AcceptInvite:
       type: object
       required:
         - data
@@ -191,32 +196,29 @@ components:
         data:
           type: object
           required:
+            - id
             - type
             - attributes
           properties:
+            id:
+              type: string
+              format: uuid
+              description: invite id
             type:
               type: string
               enum:
-                - create_gov
+                - invite
             attributes:
               type: object
               required:
-                - user_id
-                - role
-                - label
+                - answer
               properties:
-                user_id:
+                answer:
                   type: string
-                  format: uuid
-                  description: user id
-                role:
-                  type: string
-                  description: role of the user in this city
-                  example: admin
-                label:
-                  type: string
-                  description: label for the user in this city
-                  example: City Department of Transportation
+                  enum:
+                    - accept
+                    - decline
+                  description: 'The answer to the invite, either ''accept'' or ''decline'''
     City:
       type: object
       required:
@@ -394,7 +396,7 @@ components:
                 - status
                 - role
                 - city_id
-                - token
+                - user_id
                 - expires_at
                 - created_at
               properties:
@@ -408,9 +410,10 @@ components:
                   type: string
                   format: uuid
                   description: city id
-                token:
+                user_id:
                   type: string
-                  description: unique token for the invite
+                  format: uuid
+                  description: user id
                 expires_at:
                   type: string
                   format: date-time

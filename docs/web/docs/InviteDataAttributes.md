@@ -7,7 +7,7 @@ Name | Type | Description | Notes
 **Status** | **string** | status of the invite | 
 **Role** | **string** | role of the user in this city | 
 **CityId** | [**uuid.UUID**](uuid.UUID.md) | city id | 
-**Token** | **string** | unique token for the invite | 
+**UserId** | [**uuid.UUID**](uuid.UUID.md) | user id | 
 **ExpiresAt** | **time.Time** | timestamp when the invite will expire | 
 **CreatedAt** | **time.Time** | timestamp when the invite was created | 
 
@@ -15,7 +15,7 @@ Name | Type | Description | Notes
 
 ### NewInviteDataAttributes
 
-`func NewInviteDataAttributes(status string, role string, cityId uuid.UUID, token string, expiresAt time.Time, createdAt time.Time, ) *InviteDataAttributes`
+`func NewInviteDataAttributes(status string, role string, cityId uuid.UUID, userId uuid.UUID, expiresAt time.Time, createdAt time.Time, ) *InviteDataAttributes`
 
 NewInviteDataAttributes instantiates a new InviteDataAttributes object
 This constructor will assign default values to properties that have it defined,
@@ -90,24 +90,24 @@ and a boolean to check if the value has been set.
 SetCityId sets CityId field to given value.
 
 
-### GetToken
+### GetUserId
 
-`func (o *InviteDataAttributes) GetToken() string`
+`func (o *InviteDataAttributes) GetUserId() uuid.UUID`
 
-GetToken returns the Token field if non-nil, zero value otherwise.
+GetUserId returns the UserId field if non-nil, zero value otherwise.
 
-### GetTokenOk
+### GetUserIdOk
 
-`func (o *InviteDataAttributes) GetTokenOk() (*string, bool)`
+`func (o *InviteDataAttributes) GetUserIdOk() (*uuid.UUID, bool)`
 
-GetTokenOk returns a tuple with the Token field if it's non-nil, zero value otherwise
+GetUserIdOk returns a tuple with the UserId field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetToken
+### SetUserId
 
-`func (o *InviteDataAttributes) SetToken(v string)`
+`func (o *InviteDataAttributes) SetUserId(v uuid.UUID)`
 
-SetToken sets Token field to given value.
+SetUserId sets UserId field to given value.
 
 
 ### GetExpiresAt

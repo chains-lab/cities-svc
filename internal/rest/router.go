@@ -23,8 +23,8 @@ type Handlers interface {
 
 	GetCityBySlug(w http.ResponseWriter, r *http.Request)
 	ListAdmins(w http.ResponseWriter, r *http.Request)
-	CreateInvite(w http.ResponseWriter, r *http.Request)
-	AcceptInvite(w http.ResponseWriter, r *http.Request)
+	SentInvite(w http.ResponseWriter, r *http.Request)
+	AnswerInvite(w http.ResponseWriter, r *http.Request)
 	GetCityAdmin(w http.ResponseWriter, r *http.Request)
 	DeleteCityAdmin(w http.ResponseWriter, r *http.Request)
 
@@ -82,8 +82,8 @@ func Run(ctx context.Context, cfg internal.Config, log logium.Logger, m Middlewa
 						r.Get("/", h.ListAdmins)
 
 						r.With(auth).Route("/invite", func(r chi.Router) {
-							r.With(cityMod).Post("/", h.CreateInvite)
-							r.Post("/{token}", h.AcceptInvite)
+							r.With(cityMod).Post("/", h.SentInvite)
+							r.Post("/", h.AnswerInvite)
 						})
 
 						r.With(auth, cityStuff).Route("/me", func(r chi.Router) {
