@@ -6,8 +6,9 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Username** | **string** | username of the user | 
 **CityId** | [**uuid.UUID**](uuid.UUID.md) | city id | 
-**Role** | **string** | role of the user in this city | 
 **Avatar** | Pointer to **string** | optional avatar url for the user in this city | [optional] 
+**Role** | **string** | role of the user in this city | 
+**Position** | Pointer to **string** | optional position for the user in this city | [optional] 
 **Label** | Pointer to **string** | optional label for the user in this city | [optional] 
 **CreatedAt** | **time.Time** | record creation date | 
 **UpdatedAt** | **time.Time** | last update date | 
@@ -71,26 +72,6 @@ and a boolean to check if the value has been set.
 SetCityId sets CityId field to given value.
 
 
-### GetRole
-
-`func (o *CityAdminAttributes) GetRole() string`
-
-GetRole returns the Role field if non-nil, zero value otherwise.
-
-### GetRoleOk
-
-`func (o *CityAdminAttributes) GetRoleOk() (*string, bool)`
-
-GetRoleOk returns a tuple with the Role field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetRole
-
-`func (o *CityAdminAttributes) SetRole(v string)`
-
-SetRole sets Role field to given value.
-
-
 ### GetAvatar
 
 `func (o *CityAdminAttributes) GetAvatar() string`
@@ -115,6 +96,51 @@ SetAvatar sets Avatar field to given value.
 `func (o *CityAdminAttributes) HasAvatar() bool`
 
 HasAvatar returns a boolean if a field has been set.
+
+### GetRole
+
+`func (o *CityAdminAttributes) GetRole() string`
+
+GetRole returns the Role field if non-nil, zero value otherwise.
+
+### GetRoleOk
+
+`func (o *CityAdminAttributes) GetRoleOk() (*string, bool)`
+
+GetRoleOk returns a tuple with the Role field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetRole
+
+`func (o *CityAdminAttributes) SetRole(v string)`
+
+SetRole sets Role field to given value.
+
+
+### GetPosition
+
+`func (o *CityAdminAttributes) GetPosition() string`
+
+GetPosition returns the Position field if non-nil, zero value otherwise.
+
+### GetPositionOk
+
+`func (o *CityAdminAttributes) GetPositionOk() (*string, bool)`
+
+GetPositionOk returns a tuple with the Position field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetPosition
+
+`func (o *CityAdminAttributes) SetPosition(v string)`
+
+SetPosition sets Position field to given value.
+
+### HasPosition
+
+`func (o *CityAdminAttributes) HasPosition() bool`
+
+HasPosition returns a boolean if a field has been set.
 
 ### GetLabel
 

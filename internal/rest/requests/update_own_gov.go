@@ -8,7 +8,7 @@ import (
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 )
 
-func UpdateOwnGov(r *http.Request) (req resources.UpdateOwnActiveGov, err error) {
+func UpdateOwnAdmin(r *http.Request) (req resources.UpdateOwnAdmin, err error) {
 	if err = json.NewDecoder(r.Body).Decode(&req); err != nil {
 		err = newDecodeError("body", err)
 		return

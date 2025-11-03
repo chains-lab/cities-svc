@@ -13,7 +13,7 @@ import (
 )
 
 type CreateParams struct {
-	CountryID uuid.UUID
+	CountryID string
 	Name      string
 	Timezone  string
 	Point     orb.Point

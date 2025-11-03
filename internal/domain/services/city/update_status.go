@@ -28,25 +28,15 @@ func (s Service) UpdateStatus(ctx context.Context, cityID uuid.UUID, status stri
 		switch status {
 
 		case enum.CityStatusOfficial:
-			cou, err := s.getCountryByID(ctx, ci.CountryID)
+			err = s.CountryIsSupported(ctx, ci.CountryID)
 			if err != nil {
 				return err
-			}
-			if cou.Status != enum.CountryStatusSupported {
-				return errx.ErrorCountryIsNotSupported.Raise(
-					fmt.Errorf("%s is not supported", ci.CountryID),
-				)
 			}
 
 		case enum.CityStatusCommunity:
-			cou, err := s.getCountryByID(ctx, ci.CountryID)
+			err = s.CountryIsSupported(ctx, ci.CountryID)
 			if err != nil {
 				return err
-			}
-			if cou.Status != enum.CountryStatusSupported {
-				return errx.ErrorCountryIsNotSupported.Raise(
-					fmt.Errorf("%s is not supported", ci.CountryID),
-				)
 			}
 
 			err = s.db.DeleteGovForCity(ctx, ci.ID)
@@ -63,6 +53,13 @@ func (s Service) UpdateStatus(ctx context.Context, cityID uuid.UUID, status stri
 					fmt.Errorf("failed to delete city status, cause: %w", err),
 				)
 			}
+		}
+
+		err = s.event.PublishCityUpdated(ctx, ci)
+		if err != nil {
+			return errx.ErrorInternal.Raise(
+				fmt.Errorf("failed to publish city updated event, cause: %w", err),
+			)
 		}
 
 		err = s.db.UpdateCityStatus(ctx, cityID, status, now)
@@ -83,21 +80,4 @@ func (s Service) UpdateStatus(ctx context.Context, cityID uuid.UUID, status stri
 	}
 
 	return ci, nil
-}
-
-func (s Service) getCountryByID(ctx context.Context, ID uuid.UUID) (models.Country, error) {
-	country, err := s.db.GetCountryByID(ctx, ID)
-	if err != nil {
-		return models.Country{}, errx.ErrorInternal.Raise(
-			fmt.Errorf("failed to get country by id %s, cause: %w", ID, err),
-		)
-	}
-
-	if country.IsNil() {
-		return models.Country{}, errx.ErrorCountryNotFound.Raise(
-			fmt.Errorf("country not found %s", ID),
-		)
-	}
-
-	return country, nil
 }

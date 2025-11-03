@@ -13,7 +13,7 @@ import (
 )
 
 type UpdateParams struct {
-	CountryID *uuid.UUID
+	CountryID *string
 	Point     *orb.Point
 	Name      *string
 	Icon      *string

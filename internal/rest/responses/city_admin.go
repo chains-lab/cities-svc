@@ -8,16 +8,16 @@ import (
 func CityAdmin(m models.CityAdminWithUserData) resources.CityAdmin {
 	return resources.CityAdmin{
 		Data: resources.CityAdminData{
-			Id:   m.UserID,
+			Id:   m.Data.UserID,
 			Type: resources.GovType,
 			Attributes: resources.CityAdminAttributes{
-				CityId:    m.CityID,
-				Label:     m.Label,
+				CityId:    m.Data.CityID,
+				Label:     m.Data.Label,
 				Username:  m.Username,
 				Avatar:    m.Avatar,
-				Role:      m.Role,
-				CreatedAt: m.CreatedAt,
-				UpdatedAt: m.UpdatedAt,
+				Role:      m.Data.Role,
+				CreatedAt: m.Data.CreatedAt,
+				UpdatedAt: m.Data.UpdatedAt,
 			},
 		},
 	}

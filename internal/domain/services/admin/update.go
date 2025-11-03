@@ -11,7 +11,8 @@ import (
 )
 
 type UpdateParams struct {
-	Label *string
+	Label    *string
+	Position *string
 }
 
 func (s Service) UpdateOther(ctx context.Context, UserID uuid.UUID, params UpdateParams) (models.CityAdminWithUserData, error) {
@@ -24,13 +25,20 @@ func (s Service) UpdateOther(ctx context.Context, UserID uuid.UUID, params Updat
 
 	now := time.Now().UTC()
 	if params.Label != nil {
-		res.Label = params.Label
+		res.Data.Label = params.Label
 	}
 
 	err = s.db.UpdateCityAdmin(ctx, UserID, params, now)
 	if err != nil {
 		return models.CityAdminWithUserData{}, errx.ErrorInternal.Raise(
 			fmt.Errorf("failed to update city initiator, cause: %w", err),
+		)
+	}
+
+	err = s.event.PublishCityAdminUpdated(ctx, res.Data)
+	if err != nil {
+		return models.CityAdminWithUserData{}, errx.ErrorInternal.Raise(
+			fmt.Errorf("failed to publish city admin updated event, cause: %w", err),
 		)
 	}
 
@@ -45,7 +53,7 @@ func (s Service) UpdateOwn(ctx context.Context, userID uuid.UUID, params UpdateP
 
 	now := time.Now().UTC()
 	if params.Label != nil {
-		res.Label = params.Label
+		res.Data.Label = params.Label
 	}
 
 	err = s.db.UpdateCityAdmin(ctx, userID, params, now)
@@ -54,6 +62,13 @@ func (s Service) UpdateOwn(ctx context.Context, userID uuid.UUID, params UpdateP
 			fmt.Errorf("failed to update city admin, cause: %w", err),
 		)
 	}
-	
+
+	err = s.event.PublishCityAdminUpdated(ctx, res.Data)
+	if err != nil {
+		return models.CityAdminWithUserData{}, errx.ErrorInternal.Raise(
+			fmt.Errorf("failed to publish city admin updated event, cause: %w", err),
+		)
+	}
+
 	return res, nil
 }

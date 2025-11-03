@@ -10,7 +10,6 @@ required:
 properties:
   country_id:
     type: string
-    format: uuid
     description: "country id"
   point:
     $ref: './Point.yaml'

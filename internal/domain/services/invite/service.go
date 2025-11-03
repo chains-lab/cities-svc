@@ -50,7 +50,6 @@ type database interface {
 	GetInvite(ctx context.Context, ID uuid.UUID) (models.Invite, error)
 	UpdateInviteStatus(ctx context.Context, inviteID, userID uuid.UUID, status string, now time.Time) error
 
-	GetCountryByID(ctx context.Context, ID uuid.UUID) (models.Country, error)
 	GetCityByID(ctx context.Context, ID uuid.UUID) (models.City, error)
 }
 

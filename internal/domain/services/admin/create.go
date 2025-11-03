@@ -43,5 +43,12 @@ func (s Service) Create(ctx context.Context, userID, cityID uuid.UUID, role stri
 		)
 	}
 
+	err = s.event.PublishCityAdminCreated(ctx, res)
+	if err != nil {
+		return models.CityAdminWithUserData{}, errx.ErrorInternal.Raise(
+			fmt.Errorf("failed to publish city admin created event, cause: %w", err),
+		)
+	}
+
 	return res.AddProfileData(profiles[res.UserID]), nil
 }

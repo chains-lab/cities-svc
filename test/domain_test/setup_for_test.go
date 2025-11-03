@@ -12,7 +12,7 @@ import (
 	"github.com/chains-lab/cities-svc/internal/domain/models"
 	"github.com/chains-lab/cities-svc/internal/domain/services/admin"
 	"github.com/chains-lab/cities-svc/internal/domain/services/city"
-	"github.com/chains-lab/cities-svc/internal/domain/services/country"
+
 	"github.com/chains-lab/cities-svc/internal/domain/services/invite"
 	"github.com/chains-lab/cities-svc/internal/infra/jwtmanager"
 	"github.com/chains-lab/cities-svc/internal/infra/usrguesser"

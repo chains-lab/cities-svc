@@ -15,12 +15,6 @@ import (
 )
 
 type Handlers interface {
-	CreateCountry(w http.ResponseWriter, r *http.Request)
-	ListCountries(w http.ResponseWriter, r *http.Request)
-	GetCountry(w http.ResponseWriter, r *http.Request)
-	UpdateCountry(w http.ResponseWriter, r *http.Request)
-	UpdateCountryStatus(w http.ResponseWriter, r *http.Request)
-
 	ListCities(w http.ResponseWriter, r *http.Request)
 	CreateCity(w http.ResponseWriter, r *http.Request)
 	GetCity(w http.ResponseWriter, r *http.Request)
@@ -71,22 +65,6 @@ func Run(ctx context.Context, cfg internal.Config, log logium.Logger, m Middlewa
 
 	r.Route("/cities-svc/", func(r chi.Router) {
 		r.Route("/v1", func(r chi.Router) {
-			r.Route("/countries", func(r chi.Router) {
-				r.With(auth, sysadmin).Post("/", h.CreateCountry)
-
-				r.Get("/", h.ListCountries)
-
-				r.Route("/{country_id}", func(r chi.Router) {
-					r.Get("/", h.GetCountry)
-
-					r.Group(func(r chi.Router) {
-						r.Use(auth, sysadmin)
-						r.Put("/", h.UpdateCountry)
-						r.Put("/status", h.UpdateCountryStatus)
-					})
-				})
-			})
-
 			r.Get("/city/{slug}", h.GetCityBySlug)
 
 			r.Route("/cities", func(r chi.Router) {

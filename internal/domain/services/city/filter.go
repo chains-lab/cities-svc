@@ -6,14 +6,13 @@ import (
 
 	"github.com/chains-lab/cities-svc/internal/domain/errx"
 	"github.com/chains-lab/cities-svc/internal/domain/models"
-	"github.com/google/uuid"
 	"github.com/paulmach/orb"
 )
 
 type FilterParams struct {
 	Name      *string
 	Status    *string
-	CountryID *uuid.UUID
+	CountryID *string
 
 	Location *FilterDistance
 }

@@ -16,6 +16,7 @@ type CityAdmin struct {
 	UserID    uuid.UUID      `db:"user_id"`
 	CityID    uuid.UUID      `db:"city_id"`
 	Role      string         `db:"role"`
+	Position  sql.NullString `db:"position"`
 	Label     sql.NullString `db:"label"`
 	CreatedAt time.Time      `db:"created_at"`
 	UpdatedAt time.Time      `db:"updated_at"`
@@ -37,6 +38,7 @@ func NewCityAdminsQ(db *sql.DB) CityAdminsQ {
 		"user_id",
 		"city_id",
 		"role",
+		"position",
 		"label",
 		"created_at",
 		"updated_at",
@@ -59,6 +61,9 @@ func (q CityAdminsQ) Insert(ctx context.Context, in CityAdmin) error {
 		"user_id": in.UserID,
 		"city_id": in.CityID,
 		"role":    in.Role,
+	}
+	if in.Position.Valid {
+		values["position"] = in.Position
 	}
 	if in.Label.Valid {
 		values["label"] = in.Label
@@ -101,6 +106,7 @@ func (q CityAdminsQ) Get(ctx context.Context) (CityAdmin, error) {
 		&m.UserID,
 		&m.CityID,
 		&m.Role,
+		&m.Position,
 		&m.Label,
 		&m.CreatedAt,
 		&m.UpdatedAt,
@@ -132,6 +138,7 @@ func (q CityAdminsQ) Select(ctx context.Context) ([]CityAdmin, error) {
 			&m.UserID,
 			&m.CityID,
 			&m.Role,
+			&m.Position,
 			&m.Label,
 			&m.CreatedAt,
 			&m.UpdatedAt,
@@ -171,6 +178,11 @@ func (q CityAdminsQ) UpdateStatus(status string) CityAdminsQ {
 
 func (q CityAdminsQ) UpdateRole(role string) CityAdminsQ {
 	q.updater = q.updater.Set("role", role)
+	return q
+}
+
+func (q CityAdminsQ) UpdatePosition(position sql.NullString) CityAdminsQ {
+	q.updater = q.updater.Set("position", position)
 	return q
 }
 
@@ -217,7 +229,8 @@ func (q CityAdminsQ) FilterRole(role ...string) CityAdminsQ {
 	return q
 }
 
-func (q CityAdminsQ) FilterCountryID(countryID uuid.UUID) CityAdminsQ {
+// FilterCountryID deprecated: this method is commented out and should not be used.
+func (q CityAdminsQ) FilterCountryID(countryID string) CityAdminsQ {
 	join := fmt.Sprintf("LEFT JOIN %s c ON c.id = cg.city_id", citiesTable)
 	q.selector = q.selector.LeftJoin(join).Where(sq.Eq{"c.country_id": countryID})
 	q.counter = q.counter.LeftJoin(join).Where(sq.Eq{"c.country_id": countryID})
@@ -241,6 +254,14 @@ func (q CityAdminsQ) FilterLabelLike(label string) CityAdminsQ {
 	q.deleter = q.deleter.Where("label ILIKE ?", "%"+label+"%")
 	q.updater = q.updater.Where("label ILIKE ?", "%"+label+"%")
 	q.counter = q.counter.Where("label ILIKE ?", "%"+label+"%")
+	return q
+}
+
+func (q CityAdminsQ) FilterPositionLike(position string) CityAdminsQ {
+	q.selector = q.selector.Where("position ILIKE ?", "%"+position+"%")
+	q.deleter = q.deleter.Where("position ILIKE ?", "%"+position+"%")
+	q.updater = q.updater.Where("position ILIKE ?", "%"+position+"%")
+	q.counter = q.counter.Where("position ILIKE ?", "%"+position+"%")
 	return q
 }
 

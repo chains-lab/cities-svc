@@ -24,5 +24,12 @@ func (s Service) Delete(ctx context.Context, UserID, cityID uuid.UUID) error {
 		)
 	}
 
+	err = s.event.PublishCityAdminDeleted(ctx, cityID, UserID)
+	if err != nil {
+		return errx.ErrorInternal.Raise(
+			fmt.Errorf("failed to publish city admin deleted event, cause: %w", err),
+		)
+	}
+
 	return nil
 }

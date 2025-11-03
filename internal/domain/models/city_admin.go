@@ -11,6 +11,7 @@ type CityAdmin struct {
 	CityID    uuid.UUID
 	Role      string
 	Label     *string
+	Position  *string
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
@@ -27,30 +28,20 @@ type CityAdminsCollection struct {
 }
 
 type CityAdminWithUserData struct {
-	UserID    uuid.UUID `json:"user_id"`
-	Username  string    `json:"username"`
-	Avatar    *string   `json:"avatar"`
-	CityID    uuid.UUID `json:"city_id"`
-	Role      string    `json:"role"`
-	Label     *string   `json:"label"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	Data     CityAdmin
+	Username string  `json:"username"`
+	Avatar   *string `json:"avatar"`
 }
 
 func (a CityAdminWithUserData) IsNil() bool {
-	return a.UserID == uuid.Nil
+	return a.Data.UserID == uuid.Nil
 }
 
 func (a CityAdmin) AddProfileData(profile Profile) CityAdminWithUserData {
 	return CityAdminWithUserData{
-		UserID:    a.UserID,
-		Username:  profile.Username,
-		Avatar:    profile.Avatar,
-		CityID:    a.CityID,
-		Role:      a.Role,
-		Label:     a.Label,
-		CreatedAt: a.CreatedAt,
-		UpdatedAt: a.UpdatedAt,
+		Data:     a,
+		Username: profile.Username,
+		Avatar:   profile.Avatar,
 	}
 }
 

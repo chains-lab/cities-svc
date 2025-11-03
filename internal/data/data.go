@@ -16,24 +16,21 @@ func (d *Database) Transaction(ctx context.Context, fn func(ctx context.Context)
 }
 
 type SqlDB struct {
-	cities    pgdb.CitiesQ
-	countries pgdb.CountriesQ
-	invites   pgdb.InvitesQ
-	cityMod   pgdb.CityAdminsQ
+	cities  pgdb.CitiesQ
+	invites pgdb.InvitesQ
+	cityMod pgdb.CityAdminsQ
 }
 
 func NewDatabase(db *sql.DB) *Database {
 	citySql := pgdb.NewCitiesQ(db)
-	countrySql := pgdb.NewCountriesQ(db)
 	inviteSql := pgdb.NewInvitesQ(db)
 	cityModSql := pgdb.NewCityAdminsQ(db)
 
 	return &Database{
 		sql: SqlDB{
-			cities:    citySql,
-			countries: countrySql,
-			invites:   inviteSql,
-			cityMod:   cityModSql,
+			cities:  citySql,
+			invites: inviteSql,
+			cityMod: cityModSql,
 		},
 	}
 }

@@ -13,12 +13,15 @@ properties:
     type: string
     format: uuid
     description: "city id"
-  role:
-    type: string
-    description: "role of the user in this city"
   avatar:
     type: string
     description: "optional avatar url for the user in this city"
+  role:
+    type: string
+    description: "role of the user in this city"
+  position:
+    type: string
+    description: "optional position for the user in this city"
   label:
     type: string
     description: "optional label for the user in this city"

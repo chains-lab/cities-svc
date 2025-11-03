@@ -11,6 +11,7 @@ CREATE TABLE city_admins (
     user_id    UUID           PRIMARY KEY,
     city_id    UUID           NOT NULL REFERENCES city(id) ON DELETE CASCADE,
     role       city_admins_roles NOT NULL,
+    position   VARCHAR(255),
     label      VARCHAR(255),
     created_at TIMESTAMP      NOT NULL DEFAULT (now() AT TIME ZONE 'UTC'),
     updated_at TIMESTAMP      NOT NULL DEFAULT (now() AT TIME ZONE 'UTC')

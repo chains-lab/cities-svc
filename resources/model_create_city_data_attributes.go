@@ -12,7 +12,6 @@ package resources
 
 import (
 	"encoding/json"
-	"github.com/google/uuid"
 	"bytes"
 	"fmt"
 )
@@ -23,7 +22,7 @@ var _ MappedNullable = &CreateCityDataAttributes{}
 // CreateCityDataAttributes struct for CreateCityDataAttributes
 type CreateCityDataAttributes struct {
 	// country id
-	CountryId uuid.UUID `json:"country_id"`
+	CountryId string `json:"country_id"`
 	// city name
 	Name string `json:"name"`
 	Point Point `json:"point"`
@@ -37,7 +36,7 @@ type _CreateCityDataAttributes CreateCityDataAttributes
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCreateCityDataAttributes(countryId uuid.UUID, name string, point Point, timezone string) *CreateCityDataAttributes {
+func NewCreateCityDataAttributes(countryId string, name string, point Point, timezone string) *CreateCityDataAttributes {
 	this := CreateCityDataAttributes{}
 	this.CountryId = countryId
 	this.Name = name
@@ -55,9 +54,9 @@ func NewCreateCityDataAttributesWithDefaults() *CreateCityDataAttributes {
 }
 
 // GetCountryId returns the CountryId field value
-func (o *CreateCityDataAttributes) GetCountryId() uuid.UUID {
+func (o *CreateCityDataAttributes) GetCountryId() string {
 	if o == nil {
-		var ret uuid.UUID
+		var ret string
 		return ret
 	}
 
@@ -66,7 +65,7 @@ func (o *CreateCityDataAttributes) GetCountryId() uuid.UUID {
 
 // GetCountryIdOk returns a tuple with the CountryId field value
 // and a boolean to check if the value has been set.
-func (o *CreateCityDataAttributes) GetCountryIdOk() (*uuid.UUID, bool) {
+func (o *CreateCityDataAttributes) GetCountryIdOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -74,7 +73,7 @@ func (o *CreateCityDataAttributes) GetCountryIdOk() (*uuid.UUID, bool) {
 }
 
 // SetCountryId sets field value
-func (o *CreateCityDataAttributes) SetCountryId(v uuid.UUID) {
+func (o *CreateCityDataAttributes) SetCountryId(v string) {
 	o.CountryId = v
 }
 

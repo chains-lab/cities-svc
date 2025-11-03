@@ -7,7 +7,7 @@ import (
 	"github.com/chains-lab/cities-svc/internal/domain/models"
 	"github.com/chains-lab/cities-svc/internal/domain/services/admin"
 	"github.com/chains-lab/cities-svc/internal/domain/services/city"
-	"github.com/chains-lab/cities-svc/internal/domain/services/country"
+
 	"github.com/chains-lab/logium"
 	"github.com/google/uuid"
 	"github.com/paulmach/orb"
@@ -49,23 +49,6 @@ type CitySvc interface {
 	Update(ctx context.Context, cityID uuid.UUID, params city.UpdateParams) (models.City, error)
 }
 
-type CountrySvc interface {
-	Create(ctx context.Context, name string) (models.Country, error)
-
-	GetByID(ctx context.Context, ID uuid.UUID) (models.Country, error)
-	GetByName(ctx context.Context, name string) (models.Country, error)
-
-	Filter(
-		ctx context.Context,
-		filters country.FilterParams,
-		page, size uint64,
-	) (models.CountriesCollection, error)
-
-	UpdateStatus(ctx context.Context, countryID uuid.UUID, status string) (models.Country, error)
-
-	Update(ctx context.Context, ID uuid.UUID, params country.UpdateParams) (models.Country, error)
-}
-
 type inviteSvc interface {
 	Create(
 		ctx context.Context,
@@ -78,10 +61,9 @@ type inviteSvc interface {
 }
 
 type domain struct {
-	moder   CityModSvc
-	city    CitySvc
-	country CountrySvc
-	invite  inviteSvc
+	moder  CityModSvc
+	city   CitySvc
+	invite inviteSvc
 }
 
 type Service struct {
@@ -89,14 +71,13 @@ type Service struct {
 	log    logium.Logger
 }
 
-func New(log logium.Logger, country CountrySvc, city CitySvc, cityMod CityModSvc, invSvc inviteSvc) Service {
+func New(log logium.Logger, city CitySvc, cityMod CityModSvc, invSvc inviteSvc) Service {
 	return Service{
 		log: log,
 		domain: domain{
-			country: country,
-			city:    city,
-			moder:   cityMod,
-			invite:  invSvc,
+			city:   city,
+			moder:  cityMod,
+			invite: invSvc,
 		},
 	}
 }

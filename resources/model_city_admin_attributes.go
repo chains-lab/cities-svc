@@ -27,10 +27,12 @@ type CityAdminAttributes struct {
 	Username string `json:"username"`
 	// city id
 	CityId uuid.UUID `json:"city_id"`
-	// role of the user in this city
-	Role string `json:"role"`
 	// optional avatar url for the user in this city
 	Avatar *string `json:"avatar,omitempty"`
+	// role of the user in this city
+	Role string `json:"role"`
+	// optional position for the user in this city
+	Position *string `json:"position,omitempty"`
 	// optional label for the user in this city
 	Label *string `json:"label,omitempty"`
 	// record creation date
@@ -111,30 +113,6 @@ func (o *CityAdminAttributes) SetCityId(v uuid.UUID) {
 	o.CityId = v
 }
 
-// GetRole returns the Role field value
-func (o *CityAdminAttributes) GetRole() string {
-	if o == nil {
-		var ret string
-		return ret
-	}
-
-	return o.Role
-}
-
-// GetRoleOk returns a tuple with the Role field value
-// and a boolean to check if the value has been set.
-func (o *CityAdminAttributes) GetRoleOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.Role, true
-}
-
-// SetRole sets field value
-func (o *CityAdminAttributes) SetRole(v string) {
-	o.Role = v
-}
-
 // GetAvatar returns the Avatar field value if set, zero value otherwise.
 func (o *CityAdminAttributes) GetAvatar() string {
 	if o == nil || IsNil(o.Avatar) {
@@ -165,6 +143,62 @@ func (o *CityAdminAttributes) HasAvatar() bool {
 // SetAvatar gets a reference to the given string and assigns it to the Avatar field.
 func (o *CityAdminAttributes) SetAvatar(v string) {
 	o.Avatar = &v
+}
+
+// GetRole returns the Role field value
+func (o *CityAdminAttributes) GetRole() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.Role
+}
+
+// GetRoleOk returns a tuple with the Role field value
+// and a boolean to check if the value has been set.
+func (o *CityAdminAttributes) GetRoleOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Role, true
+}
+
+// SetRole sets field value
+func (o *CityAdminAttributes) SetRole(v string) {
+	o.Role = v
+}
+
+// GetPosition returns the Position field value if set, zero value otherwise.
+func (o *CityAdminAttributes) GetPosition() string {
+	if o == nil || IsNil(o.Position) {
+		var ret string
+		return ret
+	}
+	return *o.Position
+}
+
+// GetPositionOk returns a tuple with the Position field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *CityAdminAttributes) GetPositionOk() (*string, bool) {
+	if o == nil || IsNil(o.Position) {
+		return nil, false
+	}
+	return o.Position, true
+}
+
+// HasPosition returns a boolean if a field has been set.
+func (o *CityAdminAttributes) HasPosition() bool {
+	if o != nil && !IsNil(o.Position) {
+		return true
+	}
+
+	return false
+}
+
+// SetPosition gets a reference to the given string and assigns it to the Position field.
+func (o *CityAdminAttributes) SetPosition(v string) {
+	o.Position = &v
 }
 
 // GetLabel returns the Label field value if set, zero value otherwise.
@@ -259,9 +293,12 @@ func (o CityAdminAttributes) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["username"] = o.Username
 	toSerialize["city_id"] = o.CityId
-	toSerialize["role"] = o.Role
 	if !IsNil(o.Avatar) {
 		toSerialize["avatar"] = o.Avatar
+	}
+	toSerialize["role"] = o.Role
+	if !IsNil(o.Position) {
+		toSerialize["position"] = o.Position
 	}
 	if !IsNil(o.Label) {
 		toSerialize["label"] = o.Label

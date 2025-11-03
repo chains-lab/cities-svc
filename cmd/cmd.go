@@ -9,7 +9,8 @@ import (
 	"github.com/chains-lab/cities-svc/internal/data"
 	"github.com/chains-lab/cities-svc/internal/domain/services/admin"
 	"github.com/chains-lab/cities-svc/internal/domain/services/city"
-	"github.com/chains-lab/cities-svc/internal/domain/services/country"
+	"github.com/chains-lab/cities-svc/internal/event/publisher"
+
 	"github.com/chains-lab/cities-svc/internal/domain/services/invite"
 	"github.com/chains-lab/cities-svc/internal/infra/jwtmanager"
 	"github.com/chains-lab/cities-svc/internal/infra/usrguesser"
@@ -39,12 +40,13 @@ func StartServices(ctx context.Context, cfg internal.Config, log logium.Logger, 
 	jwtInviteManager := jwtmanager.NewManager(cfg)
 	userGuesser := usrguesser.NewService(cfg.Profile.Url, nil)
 
-	citySvc := city.NewService(database)
-	countrySvc := country.NewService(database)
-	cityModerSvc := admin.NewService(database, userGuesser)
+	eventPublish := publisher.New(cfg.Kafka.Broker)
+
+	citySvc := city.NewService(database, eventPublish)
+	cityModerSvc := admin.NewService(database, userGuesser, eventPublish)
 	inviteSvc := invite.NewService(database, jwtInviteManager)
 
-	ctrl := controller.New(log, countrySvc, citySvc, cityModerSvc, inviteSvc)
+	ctrl := controller.New(log, citySvc, cityModerSvc, inviteSvc)
 	mdlv := middlewares.New(log, cityModerSvc)
 
 	run(func() { rest.Run(ctx, cfg, log, mdlv, ctrl) })

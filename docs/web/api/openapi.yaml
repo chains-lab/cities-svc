@@ -16,24 +16,6 @@ paths:
       - Test
 components:
   schemas:
-    CreateCountry:
-      properties:
-        data:
-          $ref: '#/components/schemas/CreateCountry_data'
-      required:
-      - data
-    UpdateCountry:
-      properties:
-        data:
-          $ref: '#/components/schemas/UpdateCountry_data'
-      required:
-      - data
-    UpdateCountryStatus:
-      properties:
-        data:
-          $ref: '#/components/schemas/UpdateCountryStatus_data'
-      required:
-      - data
     CreateCity:
       properties:
         data:
@@ -52,10 +34,10 @@ components:
           $ref: '#/components/schemas/UpdateCityStatus_data'
       required:
       - data
-    UpdateOwnActiveGov:
+    UpdateOwnAdmin:
       properties:
         data:
-          $ref: '#/components/schemas/UpdateOwnActiveGov_data'
+          $ref: '#/components/schemas/UpdateOwnAdmin_data'
       required:
       - data
     SentInvite:
@@ -70,63 +52,6 @@ components:
           $ref: '#/components/schemas/CreateInvite_data'
       required:
       - data
-    Country:
-      properties:
-        data:
-          $ref: '#/components/schemas/CountryData'
-      required:
-      - data
-    CountryData:
-      properties:
-        id:
-          description: country id
-          format: uuid
-          type: string
-        type:
-          enum:
-          - country
-          type: string
-        attributes:
-          $ref: '#/components/schemas/CountryAttributes'
-      required:
-      - attributes
-      - id
-      - type
-    CountryAttributes:
-      properties:
-        name:
-          description: country name
-          type: string
-        status:
-          description: country status
-          enum:
-          - active
-          - inactive
-          type: string
-        created_at:
-          description: creation date
-          format: date-time
-          type: string
-        updated_at:
-          description: last update date
-          format: date-time
-          type: string
-      required:
-      - created_at
-      - name
-      - status
-      - updated_at
-    CountriesCollection:
-      properties:
-        data:
-          items:
-            $ref: '#/components/schemas/CountryData'
-          type: array
-        links:
-          $ref: '#/components/schemas/PaginationData'
-      required:
-      - data
-      - links
     City:
       properties:
         data:
@@ -153,7 +78,6 @@ components:
       properties:
         country_id:
           description: country id
-          format: uuid
           type: string
         point:
           $ref: '#/components/schemas/Point'
@@ -234,11 +158,14 @@ components:
           description: city id
           format: uuid
           type: string
+        avatar:
+          description: optional avatar url for the user in this city
+          type: string
         role:
           description: role of the user in this city
           type: string
-        avatar:
-          description: optional avatar url for the user in this city
+        position:
+          description: optional position for the user in this city
           type: string
         label:
           description: optional label for the user in this city
@@ -319,73 +246,10 @@ components:
       required:
       - latitude
       - longitude
-    CreateCountry_data_attributes:
-      properties:
-        name:
-          description: city name
-          type: string
-      required:
-      - name
-    CreateCountry_data:
-      properties:
-        type:
-          enum:
-          - create_country
-          type: string
-        attributes:
-          $ref: '#/components/schemas/CreateCountry_data_attributes'
-      required:
-      - attributes
-      - type
-    UpdateCountry_data_attributes:
-      properties:
-        name:
-          description: city name
-          type: string
-    UpdateCountry_data:
-      properties:
-        id:
-          description: country id
-          format: uuid
-          type: string
-        type:
-          enum:
-          - update_country
-          type: string
-        attributes:
-          $ref: '#/components/schemas/UpdateCountry_data_attributes'
-      required:
-      - attributes
-      - id
-      - type
-    UpdateCountryStatus_data_attributes:
-      properties:
-        status:
-          description: new country status
-          type: string
-      required:
-      - status
-    UpdateCountryStatus_data:
-      properties:
-        id:
-          description: country id
-          format: uuid
-          type: string
-        type:
-          enum:
-          - update_country_status
-          type: string
-        attributes:
-          $ref: '#/components/schemas/UpdateCountryStatus_data_attributes'
-      required:
-      - attributes
-      - id
-      - type
     CreateCity_data_attributes:
       properties:
         country_id:
           description: country id
-          format: uuid
           type: string
         name:
           description: city name
@@ -474,12 +338,15 @@ components:
       - attributes
       - id
       - type
-    UpdateOwnActiveGov_data_attributes:
+    UpdateOwnAdmin_data_attributes:
       properties:
         label:
           description: optional label for the user in this city
           type: string
-    UpdateOwnActiveGov_data:
+        position:
+          description: optional position for the user in this city
+          type: string
+    UpdateOwnAdmin_data:
       properties:
         id:
           description: user id
@@ -487,10 +354,10 @@ components:
           type: string
         type:
           enum:
-          - update_own_gov
+          - city_admin
           type: string
         attributes:
-          $ref: '#/components/schemas/UpdateOwnActiveGov_data_attributes'
+          $ref: '#/components/schemas/UpdateOwnAdmin_data_attributes'
       required:
       - attributes
       - id

@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/chains-lab/cities-svc/internal/domain/enum"
 	"github.com/chains-lab/cities-svc/internal/domain/errx"
 	"github.com/chains-lab/cities-svc/internal/domain/models"
 	"github.com/google/uuid"
@@ -15,12 +14,14 @@ import (
 )
 
 type Service struct {
-	db database
+	db    database
+	event event
 }
 
-func NewService(db database) Service {
+func NewService(db database, event event) Service {
 	return Service{
-		db: db,
+		db:    db,
+		event: event,
 	}
 }
 
@@ -89,8 +90,6 @@ func validateName(name string) error {
 type database interface {
 	Transaction(ctx context.Context, fn func(ctx context.Context) error) error
 
-	GetCountryByID(ctx context.Context, id uuid.UUID) (models.Country, error)
-
 	CreateCity(ctx context.Context, m models.City) (models.City, error)
 
 	GetCityByID(ctx context.Context, id uuid.UUID) (models.City, error)
@@ -105,23 +104,11 @@ type database interface {
 	DeleteGovForCity(ctx context.Context, cityID uuid.UUID) error
 }
 
-func (s Service) CountryIsSupported(ctx context.Context, countryID uuid.UUID) error {
-	country, err := s.db.GetCountryByID(ctx, countryID)
-	if err != nil {
-		return errx.ErrorInternal.Raise(
-			fmt.Errorf("failed to get country by ID: %w", err),
-		)
-	}
-	if country.IsNil() {
-		return errx.ErrorCountryNotFound.Raise(
-			fmt.Errorf("country with ID %s not found", countryID),
-		)
-	}
-	if country.Status != enum.CountryStatusSupported {
-		return errx.ErrorCountryIsNotSupported.Raise(
-			fmt.Errorf("country with ID %s is not active", countryID),
-		)
-	}
+type event interface {
+	PublishCityCreated(ctx context.Context, city models.City) error
+	PublishCityUpdated(ctx context.Context, city models.City) error
+}
 
+func (s Service) CountryIsSupported(ctx context.Context, countryID string) error {
 	return nil
 }

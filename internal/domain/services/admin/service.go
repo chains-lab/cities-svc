@@ -14,12 +14,14 @@ import (
 type Service struct {
 	db          database
 	userGuesser UserGuesser
+	event       EventPublisher
 }
 
-func NewService(db database, userGuesser UserGuesser) Service {
+func NewService(db database, userGuesser UserGuesser, event EventPublisher) Service {
 	return Service{
 		db:          db,
 		userGuesser: userGuesser,
+		event:       event,
 	}
 }
 
@@ -36,12 +38,27 @@ type database interface {
 	GetInvite(ctx context.Context, ID uuid.UUID) (models.Invite, error)
 	UpdateInviteStatus(ctx context.Context, inviteID, userID uuid.UUID, status string, now time.Time) error
 
-	GetCountryByID(ctx context.Context, ID uuid.UUID) (models.Country, error)
 	GetCityByID(ctx context.Context, ID uuid.UUID) (models.City, error)
 }
 
 type UserGuesser interface {
 	Guess(ctx context.Context, userIDs ...uuid.UUID) (map[uuid.UUID]models.Profile, error)
+}
+
+type EventPublisher interface {
+	PublishCityAdminCreated(
+		ctx context.Context,
+		admin models.CityAdmin,
+	) error
+	PublishCityAdminUpdated(
+		ctx context.Context,
+		admin models.CityAdmin,
+	) error
+	PublishCityAdminDeleted(
+		ctx context.Context,
+		cityID uuid.UUID,
+		userID uuid.UUID,
+	) error
 }
 
 func (s Service) CityIsOfficialSupport(ctx context.Context, cityID uuid.UUID) error {

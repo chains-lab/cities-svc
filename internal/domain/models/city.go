@@ -9,7 +9,7 @@ import (
 
 type City struct {
 	ID        uuid.UUID
-	CountryID uuid.UUID
+	CountryID string
 	Point     orb.Point // [lon, lat]
 	Status    string
 	Name      string

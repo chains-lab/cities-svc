@@ -2,21 +2,6 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS postgis;
 
-CREATE TYPE country_statuses AS ENUM (
-    'supported',
-    'deprecated',
-    'unsupported'
-);
-
-CREATE TABLE countries (
-    id         UUID             PRIMARY KEY NOT NULL,
-    name       VARCHAR(255)     NOT NULL UNIQUE,
-    status     country_statuses NOT NULL,
-
-    created_at TIMESTAMP        NOT NULL DEFAULT (now() AT TIME ZONE 'UTC'),
-    updated_at TIMESTAMP        NOT NULL DEFAULT (now() AT TIME ZONE 'UTC')
-);
-
 CREATE TYPE city_statuses AS ENUM (
     'official',
     'community',
@@ -25,7 +10,7 @@ CREATE TYPE city_statuses AS ENUM (
 
 CREATE TABLE city (
     id         UUID                  PRIMARY KEY NOT NULL,
-    country_id UUID                  NOT NULL REFERENCES countries(id) ON DELETE CASCADE,
+    country_id VARCHAR(255)          NOT NULL,
     point      geography(Point,4326) NOT NULL, -- lon/lat
     status     city_statuses         NOT NULL,
     name       VARCHAR(255)          NOT NULL, -- default name in English
