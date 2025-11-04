@@ -13,15 +13,13 @@ import (
 const invitesTable = "invite"
 
 type Invite struct {
-	ID         uuid.UUID     `db:"id"`
-	Status     string        `db:"status"`
-	Role       string        `db:"role"`
-	CityID     uuid.UUID     `db:"city_id"`
-	Token      string        `db:"token"`
-	UserID     uuid.NullUUID `db:"user_id"`
-	AnsweredAt sql.NullTime  `db:"answered_at"`
-	ExpiresAt  time.Time     `db:"expires_at"`
-	CreatedAt  time.Time     `db:"created_at"`
+	ID        uuid.UUID `db:"id"`
+	UserID    uuid.UUID `db:"user_id"`
+	CityID    uuid.UUID `db:"city_id"`
+	Status    string    `db:"status"`
+	Role      string    `db:"role"`
+	ExpiresAt time.Time `db:"expires_at"`
+	CreatedAt time.Time `db:"created_at"`
 }
 
 type InvitesQ struct {
@@ -40,9 +38,7 @@ func NewInvitesQ(db *sql.DB) InvitesQ {
 		"status",
 		"role",
 		"city_id",
-		"token",
 		"user_id",
-		"answered_at",
 		"expires_at",
 		"created_at",
 	}
@@ -64,15 +60,8 @@ func (q InvitesQ) Insert(ctx context.Context, in Invite) error {
 		"status":     in.Status,
 		"role":       in.Role,
 		"city_id":    in.CityID,
-		"token":      in.Token,
-		"expires_at": in.ExpiresAt,
-	}
-
-	if in.UserID.Valid {
-		values["user_id"] = in.UserID
-	}
-	if in.AnsweredAt.Valid {
-		values["answered_at"] = in.AnsweredAt
+		"user_id":    in.UserID,    // NOT NULL
+		"expires_at": in.ExpiresAt, // NOT NULL
 	}
 	if !in.CreatedAt.IsZero() {
 		values["created_at"] = in.CreatedAt
@@ -105,30 +94,17 @@ func (q InvitesQ) Get(ctx context.Context) (Invite, error) {
 	}
 
 	var m Invite
-	var userID uuid.NullUUID
-	var answeredAt sql.NullTime
-
 	if err := row.Scan(
 		&m.ID,
 		&m.Status,
 		&m.Role,
 		&m.CityID,
-		&m.Token,
-		&userID,
-		&answeredAt,
+		&m.UserID,
 		&m.ExpiresAt,
 		&m.CreatedAt,
 	); err != nil {
 		return Invite{}, err
 	}
-
-	if userID.Valid {
-		m.UserID = userID
-	}
-	if answeredAt.Valid {
-		m.AnsweredAt = answeredAt
-	}
-
 	return m, nil
 }
 
@@ -152,26 +128,16 @@ func (q InvitesQ) Select(ctx context.Context) ([]Invite, error) {
 	var out []Invite
 	for rows.Next() {
 		var m Invite
-		var userID uuid.NullUUID
-		var answeredAt sql.NullTime
 		if err := rows.Scan(
 			&m.ID,
 			&m.Status,
 			&m.Role,
 			&m.CityID,
-			&m.Token,
-			&userID,
-			&answeredAt,
+			&m.UserID,
 			&m.ExpiresAt,
 			&m.CreatedAt,
 		); err != nil {
 			return nil, err
-		}
-		if userID.Valid {
-			m.UserID = userID
-		}
-		if answeredAt.Valid {
-			m.AnsweredAt = answeredAt
 		}
 		out = append(out, m)
 	}
@@ -202,8 +168,8 @@ func (q InvitesQ) UpdateUserID(userID uuid.UUID) InvitesQ {
 	return q
 }
 
-func (q InvitesQ) UpdateAnsweredAt(answeredAt time.Time) InvitesQ {
-	q.updater = q.updater.Set("answered_at", answeredAt)
+func (q InvitesQ) UpdateRole(role string) InvitesQ {
+	q.updater = q.updater.Set("role", role)
 	return q
 }
 
@@ -260,14 +226,6 @@ func (q InvitesQ) FilterRole(role ...string) InvitesQ {
 	return q
 }
 
-func (q InvitesQ) FilterToken(token string) InvitesQ {
-	q.selector = q.selector.Where(sq.Eq{"token": token})
-	q.updater = q.updater.Where(sq.Eq{"token": token})
-	q.deleter = q.deleter.Where(sq.Eq{"token": token})
-	q.counter = q.counter.Where(sq.Eq{"token": token})
-	return q
-}
-
 func (q InvitesQ) FilterExpiresBefore(t time.Time) InvitesQ {
 	q.selector = q.selector.Where(sq.LtOrEq{"expires_at": t})
 	q.updater = q.updater.Where(sq.LtOrEq{"expires_at": t})
@@ -281,21 +239,6 @@ func (q InvitesQ) FilterExpiresAfter(t time.Time) InvitesQ {
 	q.updater = q.updater.Where(sq.Gt{"expires_at": t})
 	q.deleter = q.deleter.Where(sq.Gt{"expires_at": t})
 	q.counter = q.counter.Where(sq.Gt{"expires_at": t})
-	return q
-}
-
-func (q InvitesQ) FilterAnswered(answered bool) InvitesQ {
-	if answered {
-		q.selector = q.selector.Where("answered_at IS NOT NULL")
-		q.updater = q.updater.Where("answered_at IS NOT NULL")
-		q.deleter = q.deleter.Where("answered_at IS NOT NULL")
-		q.counter = q.counter.Where("answered_at IS NOT NULL")
-	} else {
-		q.selector = q.selector.Where("answered_at IS NULL")
-		q.updater = q.updater.Where("answered_at IS NULL")
-		q.deleter = q.deleter.Where("answered_at IS NULL")
-		q.counter = q.counter.Where("answered_at IS NULL")
-	}
 	return q
 }
 
@@ -325,15 +268,6 @@ func (q InvitesQ) OrderByCreatedAt(asc bool) InvitesQ {
 		dir = "DESC"
 	}
 	q.selector = q.selector.OrderBy("created_at " + dir)
-	return q
-}
-
-func (q InvitesQ) OrderByUpdatedAt(asc bool) InvitesQ {
-	dir := "ASC"
-	if !asc {
-		dir = "DESC"
-	}
-	q.selector = q.selector.OrderBy("updated_at " + dir)
 	return q
 }
 

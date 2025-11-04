@@ -83,6 +83,9 @@ Class | Method | HTTP request | Description
 
 ## Documentation For Models
 
+ - [AcceptInvite](docs/AcceptInvite.md)
+ - [AcceptInviteData](docs/AcceptInviteData.md)
+ - [AcceptInviteDataAttributes](docs/AcceptInviteDataAttributes.md)
  - [CitiesCollection](docs/CitiesCollection.md)
  - [City](docs/City.md)
  - [CityAdmin](docs/CityAdmin.md)
@@ -91,19 +94,9 @@ Class | Method | HTTP request | Description
  - [CityAdminsCollection](docs/CityAdminsCollection.md)
  - [CityAttributes](docs/CityAttributes.md)
  - [CityData](docs/CityData.md)
- - [CountriesCollection](docs/CountriesCollection.md)
- - [Country](docs/Country.md)
- - [CountryAttributes](docs/CountryAttributes.md)
- - [CountryData](docs/CountryData.md)
  - [CreateCity](docs/CreateCity.md)
  - [CreateCityData](docs/CreateCityData.md)
  - [CreateCityDataAttributes](docs/CreateCityDataAttributes.md)
- - [CreateCountry](docs/CreateCountry.md)
- - [CreateCountryData](docs/CreateCountryData.md)
- - [CreateCountryDataAttributes](docs/CreateCountryDataAttributes.md)
- - [CreateInvite](docs/CreateInvite.md)
- - [CreateInviteData](docs/CreateInviteData.md)
- - [CreateInviteDataAttributes](docs/CreateInviteDataAttributes.md)
  - [Errors](docs/Errors.md)
  - [ErrorsErrorsInner](docs/ErrorsErrorsInner.md)
  - [Invite](docs/Invite.md)
@@ -120,15 +113,9 @@ Class | Method | HTTP request | Description
  - [UpdateCityStatus](docs/UpdateCityStatus.md)
  - [UpdateCityStatusData](docs/UpdateCityStatusData.md)
  - [UpdateCityStatusDataAttributes](docs/UpdateCityStatusDataAttributes.md)
- - [UpdateCountry](docs/UpdateCountry.md)
- - [UpdateCountryData](docs/UpdateCountryData.md)
- - [UpdateCountryDataAttributes](docs/UpdateCountryDataAttributes.md)
- - [UpdateCountryStatus](docs/UpdateCountryStatus.md)
- - [UpdateCountryStatusData](docs/UpdateCountryStatusData.md)
- - [UpdateCountryStatusDataAttributes](docs/UpdateCountryStatusDataAttributes.md)
- - [UpdateOwnActiveGov](docs/UpdateOwnActiveGov.md)
- - [UpdateOwnActiveGovData](docs/UpdateOwnActiveGovData.md)
- - [UpdateOwnActiveGovDataAttributes](docs/UpdateOwnActiveGovDataAttributes.md)
+ - [UpdateOwnAdmin](docs/UpdateOwnAdmin.md)
+ - [UpdateOwnAdminData](docs/UpdateOwnAdminData.md)
+ - [UpdateOwnAdminDataAttributes](docs/UpdateOwnAdminDataAttributes.md)
 
 
 ## Documentation For Authorization

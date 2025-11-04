@@ -20,12 +20,17 @@ properties:
         type: object
         required:
           - city_id
+          - user_id
           - role
         properties:
           city_id:
             type: string
             format: uuid
             description: "ID of the city the invite is for"
+          user_id:
+            type: string
+            format: uuid
+            description: "ID of the user who was invited"
           role:
             type: string
             description: "Role assigned to the invited user"

@@ -24,6 +24,8 @@ var _ MappedNullable = &SentInviteDataAttributes{}
 type SentInviteDataAttributes struct {
 	// ID of the city the invite is for
 	CityId uuid.UUID `json:"city_id"`
+	// ID of the user who was invited
+	UserId uuid.UUID `json:"user_id"`
 	// Role assigned to the invited user
 	Role string `json:"role"`
 }
@@ -34,9 +36,10 @@ type _SentInviteDataAttributes SentInviteDataAttributes
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewSentInviteDataAttributes(cityId uuid.UUID, role string) *SentInviteDataAttributes {
+func NewSentInviteDataAttributes(cityId uuid.UUID, userId uuid.UUID, role string) *SentInviteDataAttributes {
 	this := SentInviteDataAttributes{}
 	this.CityId = cityId
+	this.UserId = userId
 	this.Role = role
 	return &this
 }
@@ -71,6 +74,30 @@ func (o *SentInviteDataAttributes) GetCityIdOk() (*uuid.UUID, bool) {
 // SetCityId sets field value
 func (o *SentInviteDataAttributes) SetCityId(v uuid.UUID) {
 	o.CityId = v
+}
+
+// GetUserId returns the UserId field value
+func (o *SentInviteDataAttributes) GetUserId() uuid.UUID {
+	if o == nil {
+		var ret uuid.UUID
+		return ret
+	}
+
+	return o.UserId
+}
+
+// GetUserIdOk returns a tuple with the UserId field value
+// and a boolean to check if the value has been set.
+func (o *SentInviteDataAttributes) GetUserIdOk() (*uuid.UUID, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.UserId, true
+}
+
+// SetUserId sets field value
+func (o *SentInviteDataAttributes) SetUserId(v uuid.UUID) {
+	o.UserId = v
 }
 
 // GetRole returns the Role field value
@@ -108,6 +135,7 @@ func (o SentInviteDataAttributes) MarshalJSON() ([]byte, error) {
 func (o SentInviteDataAttributes) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["city_id"] = o.CityId
+	toSerialize["user_id"] = o.UserId
 	toSerialize["role"] = o.Role
 	return toSerialize, nil
 }
@@ -118,6 +146,7 @@ func (o *SentInviteDataAttributes) UnmarshalJSON(data []byte) (err error) {
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
 		"city_id",
+		"user_id",
 		"role",
 	}
 

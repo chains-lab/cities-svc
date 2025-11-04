@@ -109,6 +109,14 @@ func (d *Database) UpdateCityAdmin(
 			q.UpdateLabel(sql.NullString{String: *params.Label, Valid: true})
 		}
 	}
+	if params.Position != nil {
+		switch *params.Position {
+		case "":
+			q.UpdatePosition(sql.NullString{Valid: false})
+		default:
+			q.UpdatePosition(sql.NullString{String: *params.Position, Valid: true})
+		}
+	}
 
 	return q.Update(ctx, updatedAt)
 }
@@ -128,6 +136,9 @@ func CityAdminSchemaToModel(s pgdb.CityAdmin) models.CityAdmin {
 	if !s.Label.Valid {
 		res.Label = &s.Label.String
 	}
+	if !s.Position.Valid {
+		res.Position = &s.Position.String
+	}
 
 	return res
 }
@@ -142,6 +153,9 @@ func CityAdminModelToSchema(m models.CityAdmin) pgdb.CityAdmin {
 	}
 	if m.Label != nil {
 		s.Label = sql.NullString{String: *m.Label, Valid: true}
+	}
+	if m.Position != nil {
+		s.Position = sql.NullString{String: *m.Position, Valid: true}
 	}
 
 	return s

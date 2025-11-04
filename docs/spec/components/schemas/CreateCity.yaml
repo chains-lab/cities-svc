@@ -21,7 +21,6 @@ properties:
         properties:
           country_id:
             type: string
-            format: uuid
             description: "country id"
           name:
             type: string

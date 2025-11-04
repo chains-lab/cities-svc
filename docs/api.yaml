@@ -16,39 +16,19 @@ paths:
 
 components:
   schemas:
-    #requests
-    CreateCountry:
-      $ref: './spec/components/schemas/CreateCountry.yaml'
-    UpdateCountry:
-      $ref: './spec/components/schemas/UpdateCountry.yaml'
-    UpdateCountryStatus:
-      $ref: './spec/components/schemas/UpdateCountryStatus.yaml'
-
     CreateCity:
       $ref: './spec/components/schemas/CreateCity.yaml'
     UpdateCity:
       $ref: './spec/components/schemas/UpdateCity.yaml'
     UpdateCityStatus:
       $ref: './spec/components/schemas/UpdateCityStatus.yaml'
-    UpdateOwnActiveadmin:
-      $ref: './spec/components/schemas/UpdateOwnadmin.yaml'
+    UpdateOwnAdmin:
+      $ref: './spec/components/schemas/UpdateOwnAdmin.yaml'
 
     SentInvite:
       $ref: './spec/components/schemas/SentInvite.yaml'
-
-
-    CreateInvite:
-      $ref: './spec/components/schemas/CreateInvite.yaml'
-
-    #responses
-    Country:
-      $ref: './spec/components/schemas/Country.yaml'
-    CountryData:
-      $ref: './spec/components/schemas/CountryData.yaml'
-    CountryAttributes:
-      $ref: './spec/components/schemas/CountryAttributes.yaml'
-    CountriesCollection:
-      $ref: './spec/components/schemas/CountriesCollection.yaml'
+    AcceptInvite:
+      $ref: './spec/components/schemas/AcceptInvite.yaml'
 
     City:
       $ref: './spec/components/schemas/City.yaml'

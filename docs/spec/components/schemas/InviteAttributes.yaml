@@ -3,7 +3,7 @@ required:
   - status
   - role
   - city_id
-  - token
+  - user_id
   - expires_at
   - created_at
 properties:
@@ -17,9 +17,10 @@ properties:
     type: string
     format: uuid
     description: "city id"
-  token:
+  user_id:
     type: string
-    description: "unique token for the invite"
+    format: uuid
+    description: "user id"
   expires_at:
     type: string
     format: date-time

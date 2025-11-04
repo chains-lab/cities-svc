@@ -14,83 +14,6 @@ paths:
           description: successfully
 components:
   schemas:
-    CreateCountry:
-      type: object
-      required:
-        - data
-      properties:
-        data:
-          type: object
-          required:
-            - type
-            - attributes
-          properties:
-            type:
-              type: string
-              enum:
-                - create_country
-            attributes:
-              type: object
-              required:
-                - name
-              properties:
-                name:
-                  type: string
-                  description: city name
-    UpdateCountry:
-      type: object
-      required:
-        - data
-      properties:
-        data:
-          type: object
-          required:
-            - id
-            - type
-            - attributes
-          properties:
-            id:
-              type: string
-              format: uuid
-              description: country id
-            type:
-              type: string
-              enum:
-                - update_country
-            attributes:
-              type: object
-              properties:
-                name:
-                  type: string
-                  description: city name
-    UpdateCountryStatus:
-      type: object
-      required:
-        - data
-      properties:
-        data:
-          type: object
-          required:
-            - id
-            - type
-            - attributes
-          properties:
-            id:
-              type: string
-              format: uuid
-              description: country id
-            type:
-              type: string
-              enum:
-                - update_country_status
-            attributes:
-              type: object
-              required:
-                - status
-              properties:
-                status:
-                  type: string
-                  description: new country status
     CreateCity:
       type: object
       required:
@@ -116,7 +39,6 @@ components:
               properties:
                 country_id:
                   type: string
-                  format: uuid
                   description: country id
                 name:
                   type: string
@@ -199,7 +121,7 @@ components:
                 status:
                   type: string
                   description: new city status
-    UpdateOwnActiveGov:
+    UpdateOwnAdmin:
       type: object
       required:
         - data
@@ -218,13 +140,16 @@ components:
             type:
               type: string
               enum:
-                - update_own_gov
+                - city_admin
             attributes:
               type: object
               properties:
                 label:
                   type: string
                   description: optional label for the user in this city
+                position:
+                  type: string
+                  description: optional position for the user in this city
     SentInvite:
       type: object
       required:
@@ -249,16 +174,21 @@ components:
               type: object
               required:
                 - city_id
+                - user_id
                 - role
               properties:
                 city_id:
                   type: string
                   format: uuid
                   description: ID of the city the invite is for
+                user_id:
+                  type: string
+                  format: uuid
+                  description: ID of the user who was invited
                 role:
                   type: string
                   description: Role assigned to the invited user
-    CreateInvite:
+    AcceptInvite:
       type: object
       required:
         - data
@@ -266,93 +196,29 @@ components:
         data:
           type: object
           required:
+            - id
             - type
             - attributes
           properties:
+            id:
+              type: string
+              format: uuid
+              description: invite id
             type:
               type: string
               enum:
-                - create_gov
+                - invite
             attributes:
               type: object
               required:
-                - user_id
-                - role
-                - label
+                - answer
               properties:
-                user_id:
+                answer:
                   type: string
-                  format: uuid
-                  description: user id
-                role:
-                  type: string
-                  description: role of the user in this city
-                  example: admin
-                label:
-                  type: string
-                  description: label for the user in this city
-                  example: City Department of Transportation
-    Country:
-      type: object
-      required:
-        - data
-      properties:
-        data:
-          $ref: '#/components/schemas/CountryData'
-    CountryData:
-      type: object
-      required:
-        - id
-        - type
-        - attributes
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: country id
-        type:
-          type: string
-          enum:
-            - country
-        attributes:
-          $ref: '#/components/schemas/CountryAttributes'
-    CountryAttributes:
-      type: object
-      required:
-        - name
-        - status
-        - created_at
-        - updated_at
-      properties:
-        name:
-          type: string
-          description: country name
-        status:
-          type: string
-          enum:
-            - active
-            - inactive
-          description: country status
-        created_at:
-          type: string
-          format: date-time
-          description: creation date
-        updated_at:
-          type: string
-          format: date-time
-          description: last update date
-    CountriesCollection:
-      type: object
-      required:
-        - data
-        - links
-      properties:
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/CountryData'
-        links:
-          $ref: '#/components/schemas/PaginationData'
+                  enum:
+                    - accept
+                    - decline
+                  description: 'The answer to the invite, either ''accept'' or ''decline'''
     City:
       type: object
       required:
@@ -390,7 +256,6 @@ components:
       properties:
         country_id:
           type: string
-          format: uuid
           description: country id
         point:
           $ref: '#/components/schemas/Point'
@@ -473,12 +338,15 @@ components:
           type: string
           format: uuid
           description: city id
-        role:
-          type: string
-          description: role of the user in this city
         avatar:
           type: string
           description: optional avatar url for the user in this city
+        role:
+          type: string
+          description: role of the user in this city
+        position:
+          type: string
+          description: optional position for the user in this city
         label:
           type: string
           description: optional label for the user in this city
@@ -528,7 +396,7 @@ components:
                 - status
                 - role
                 - city_id
-                - token
+                - user_id
                 - expires_at
                 - created_at
               properties:
@@ -542,9 +410,10 @@ components:
                   type: string
                   format: uuid
                   description: city id
-                token:
+                user_id:
                   type: string
-                  description: unique token for the invite
+                  format: uuid
+                  description: user id
                 expires_at:
                   type: string
                   format: date-time

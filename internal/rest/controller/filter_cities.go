@@ -14,7 +14,6 @@ import (
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 
 	"github.com/chains-lab/restkit/pagi"
-	"github.com/google/uuid"
 	"github.com/paulmach/orb"
 )
 
@@ -32,15 +31,9 @@ func (a Service) ListCities(w http.ResponseWriter, r *http.Request) {
 		filters.Status = &[]string{sts}[0]
 	}
 
-	if cid := strings.TrimSpace(q.Get("country_id")); cid != "" {
-		id, err := uuid.Parse(cid)
-		if err != nil {
-			ape.RenderErr(w, problems.BadRequest(validation.Errors{
-				"country_id": fmt.Errorf("invalid uuid: %w", err),
-			})...)
-			return
-		}
-		filters.CountryID = &id
+	if q.Get("country_id") != "" {
+		countryID := q.Get("country_id")
+		filters.CountryID = &countryID
 	}
 
 	latStr, lonStr := q.Get("lat"), q.Get("lon")

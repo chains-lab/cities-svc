@@ -15,10 +15,10 @@ import (
 
 type Service struct {
 	db    database
-	event EventPublisher
+	event event
 }
 
-func NewService(db database, event EventPublisher) Service {
+func NewService(db database, event event) Service {
 	return Service{
 		db:    db,
 		event: event,
@@ -89,41 +89,26 @@ func validateName(name string) error {
 
 type database interface {
 	Transaction(ctx context.Context, fn func(ctx context.Context) error) error
-	GetCityStatusByID(ctx context.Context, ID string) (models.CityStatus, error)
 
 	CreateCity(ctx context.Context, m models.City) (models.City, error)
 
-	GetCityByID(ctx context.Context, ID uuid.UUID) (models.City, error)
+	GetCityByID(ctx context.Context, id uuid.UUID) (models.City, error)
 	GetCityBySlug(ctx context.Context, slug string) (models.City, error)
 	GetCityByRadius(ctx context.Context, point orb.Point, radius uint64) (models.City, error)
 
 	FilterCities(ctx context.Context, filter FilterParams, page, size uint64) (models.CitiesCollection, error)
 
-	UpdateCity(ctx context.Context, ID uuid.UUID, m UpdateParams, updatedAt time.Time) error
-	UpdateCityStatus(ctx context.Context, ID uuid.UUID, status string, updatedAt time.Time) error
+	UpdateCity(ctx context.Context, id uuid.UUID, m UpdateParams, updatedAt time.Time) error
+	UpdateCityStatus(ctx context.Context, id uuid.UUID, status string, updatedAt time.Time) error
 
-	DeleteCityAdmins(ctx context.Context, cityID uuid.UUID) error
-	DeleteCityModerators(ctx context.Context, cityID uuid.UUID) error
+	DeleteGovForCity(ctx context.Context, cityID uuid.UUID) error
 }
 
-type EventPublisher interface {
-	CityCreated(ctx context.Context, city models.City) error
-	CityUpdated(ctx context.Context, city models.City) error
+type event interface {
+	PublishCityCreated(ctx context.Context, city models.City) error
+	PublishCityUpdated(ctx context.Context, city models.City) error
 }
 
-func (s Service) StatusAccessible(ctx context.Context, statusID string) (models.CityStatus, error) {
-	status, err := s.db.GetCityStatusByID(ctx, statusID)
-	if err != nil {
-		return models.CityStatus{}, errx.ErrorInternal.Raise(
-			fmt.Errorf("failed to get city status by id: %s, cause: %w", statusID, err),
-		)
-	}
-
-	if status.IsNil() {
-		return models.CityStatus{}, errx.ErrorCityStatusNotFound.Raise(
-			fmt.Errorf("city status not found by id: %s", statusID),
-		)
-	}
-
-	return status, nil
+func (s Service) CountryIsSupported(ctx context.Context, countryID string) error {
+	return nil
 }

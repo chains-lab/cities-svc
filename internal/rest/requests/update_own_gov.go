@@ -8,7 +8,7 @@ import (
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 )
 
-func UpdateOwnadmin(r *http.Request) (req resources.UpdateOwnActiveadmin, err error) {
+func UpdateOwnAdmin(r *http.Request) (req resources.UpdateOwnAdmin, err error) {
 	if err = json.NewDecoder(r.Body).Decode(&req); err != nil {
 		err = newDecodeError("body", err)
 		return
@@ -16,7 +16,7 @@ func UpdateOwnadmin(r *http.Request) (req resources.UpdateOwnActiveadmin, err er
 
 	errs := validation.Errors{
 		"data/id":         validation.Validate(req.Data.Id, validation.Required),
-		"data/type":       validation.Validate(req.Data.Type, validation.Required, validation.In(resources.UpdateOwnadminType)),
+		"data/type":       validation.Validate(req.Data.Type, validation.Required, validation.In(resources.UpdateOwnGovType)),
 		"data/attributes": validation.Validate(req.Data.Attributes, validation.Required),
 	}
 	return req, errs.Filter()

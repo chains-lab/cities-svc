@@ -10,8 +10,8 @@ type CityAdmin struct {
 	UserID    uuid.UUID
 	CityID    uuid.UUID
 	Role      string
-	Position  *string
 	Label     *string
+	Position  *string
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
@@ -27,41 +27,33 @@ type CityAdminsCollection struct {
 	Total uint64      `json:"total"`
 }
 
-type CityAdminsWithUserData struct {
-	Username string    `json:"username"`
-	Avatar   *string   `json:"avatar"`
-	Admin    CityAdmin `json:"admin"`
+type CityAdminWithUserData struct {
+	Data     CityAdmin
+	Username string  `json:"username"`
+	Avatar   *string `json:"avatar"`
 }
 
-func (a CityAdminsWithUserData) IsNil() bool {
-	return a.Admin.UserID == uuid.Nil
+func (a CityAdminWithUserData) IsNil() bool {
+	return a.Data.UserID == uuid.Nil
 }
 
-func (a CityAdmin) AddProfileData(profile Profile) CityAdminsWithUserData {
-	return CityAdminsWithUserData{
+func (a CityAdmin) AddProfileData(profile Profile) CityAdminWithUserData {
+	return CityAdminWithUserData{
+		Data:     a,
 		Username: profile.Username,
 		Avatar:   profile.Avatar,
-		Admin: CityAdmin{
-			UserID:    a.UserID,
-			CityID:    a.CityID,
-			Role:      a.Role,
-			Label:     a.Label,
-			Position:  a.Position,
-			CreatedAt: a.CreatedAt,
-			UpdatedAt: a.UpdatedAt,
-		},
 	}
 }
 
 type CityAdminsWithUserDataCollection struct {
-	Data  []CityAdminsWithUserData `json:"data"`
-	Page  uint64                   `json:"page"`
-	Size  uint64                   `json:"size"`
-	Total uint64                   `json:"total"`
+	Data  []CityAdminWithUserData `json:"data"`
+	Page  uint64                  `json:"page"`
+	Size  uint64                  `json:"size"`
+	Total uint64                  `json:"total"`
 }
 
 func (c CityAdminsCollection) AddProfileData(profiles map[uuid.UUID]Profile) CityAdminsWithUserDataCollection {
-	employees := make([]CityAdminsWithUserData, 0, len(c.Data))
+	employees := make([]CityAdminWithUserData, 0, len(c.Data))
 	for _, emp := range c.Data {
 		empWithProfile := emp.AddProfileData(profiles[emp.UserID])
 		employees = append(employees, empWithProfile)

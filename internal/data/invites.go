@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"time"
 
 	"github.com/chains-lab/cities-svc/internal/data/pgdb"
 	"github.com/chains-lab/cities-svc/internal/domain/models"
@@ -29,12 +28,11 @@ func (d *Database) GetInvite(ctx context.Context, ID uuid.UUID) (models.Invite, 
 	return inviteSchemaToModel(row), nil
 }
 
-func (d *Database) UpdateInviteStatus(ctx context.Context, inviteID uuid.UUID, userID uuid.UUID, status string, answeredAt time.Time) error {
+func (d *Database) UpdateInviteStatus(ctx context.Context, inviteID uuid.UUID, userID uuid.UUID, status string) error {
 	err := d.sql.invites.New().
 		FilterID(inviteID).
 		UpdateStatus(status).
 		UpdateUserID(userID).
-		UpdateAnsweredAt(answeredAt).
 		Update(ctx)
 	return err
 }
@@ -45,15 +43,9 @@ func inviteSchemaToModel(s pgdb.Invite) models.Invite {
 		Status:    s.Status,
 		Role:      s.Role,
 		CityID:    s.CityID,
-		Token:     s.Token,
+		UserID:    s.UserID,
 		CreatedAt: s.CreatedAt,
 		ExpiresAt: s.ExpiresAt,
-	}
-	if s.UserID.Valid {
-		res.UserID = &s.UserID.UUID
-	}
-	if s.AnsweredAt.Valid {
-		res.AnsweredAt = &s.AnsweredAt.Time
 	}
 
 	return res
@@ -65,15 +57,10 @@ func modelToInviteSchema(m models.Invite) pgdb.Invite {
 		Status:    m.Status,
 		Role:      m.Role,
 		CityID:    m.CityID,
-		Token:     m.Token,
+		UserID:    m.UserID,
 		ExpiresAt: m.ExpiresAt,
 		CreatedAt: m.CreatedAt,
 	}
-	if m.UserID != nil {
-		res.UserID = uuid.NullUUID{UUID: *m.UserID, Valid: true}
-	}
-	if m.AnsweredAt != nil {
-		res.AnsweredAt = sql.NullTime{Time: *m.AnsweredAt, Valid: true}
-	}
+
 	return res
 }

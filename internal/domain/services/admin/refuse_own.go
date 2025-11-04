@@ -14,17 +14,17 @@ func (s Service) RefuseOwn(ctx context.Context, userID uuid.UUID) error {
 		return err
 	}
 
-	err = s.db.DeleteAdmin(ctx, userID, mod.Admin.CityID)
+	err = s.db.DeleteCityAdmin(ctx, userID, mod.Data.CityID)
 	if err != nil {
 		return errx.ErrorInternal.Raise(
 			fmt.Errorf("failed to delete city admin, cause: %w", err),
 		)
 	}
 
-	err = s.event.CityAdminDeleted(ctx, userID, mod.Admin.CityID)
+	err = s.event.PublishCityAdminDeleted(ctx, mod.Data.CityID, userID)
 	if err != nil {
 		return errx.ErrorInternal.Raise(
-			fmt.Errorf("failed to emit city admin deleted event, cause: %w", err),
+			fmt.Errorf("failed to publish city admin deleted event, cause: %w", err),
 		)
 	}
 

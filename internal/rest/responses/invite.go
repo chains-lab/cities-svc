@@ -13,8 +13,8 @@ func Invite(m models.Invite) resources.Invite {
 			Attributes: resources.InviteDataAttributes{
 				Status:    m.Status,
 				Role:      m.Role,
-				Token:     m.Token,
 				CityId:    m.CityID,
+				UserId:    m.UserID,
 				ExpiresAt: m.ExpiresAt,
 				CreatedAt: m.CreatedAt,
 			},

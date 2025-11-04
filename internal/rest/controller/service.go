@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"github.com/chains-lab/cities-svc/internal/domain/models"
+	"github.com/chains-lab/cities-svc/internal/domain/services/admin"
 	"github.com/chains-lab/cities-svc/internal/domain/services/city"
 
-	"github.com/chains-lab/cities-svc/internal/domain/services/admin"
 	"github.com/chains-lab/logium"
 	"github.com/google/uuid"
 	"github.com/paulmach/orb"
@@ -20,15 +20,15 @@ type CityModSvc interface {
 		page, size uint64,
 	) (models.CityAdminsWithUserDataCollection, error)
 
-	Get(ctx context.Context, filters admin.GetFilters) (models.CityAdminsWithUserData, error)
-	GetInitiator(ctx context.Context, initiatorID uuid.UUID) (models.CityAdminsWithUserData, error)
+	Get(ctx context.Context, filters admin.GetFilters) (models.CityAdminWithUserData, error)
+	GetInitiator(ctx context.Context, initiatorID uuid.UUID) (models.CityAdminWithUserData, error)
 
 	RefuseOwn(ctx context.Context, userID uuid.UUID) error
 
 	Delete(ctx context.Context, UserID, CityID uuid.UUID) error
 
-	UpdateOther(ctx context.Context, UserID uuid.UUID, params admin.UpdateParams) (models.CityAdminsWithUserData, error)
-	UpdateOwn(ctx context.Context, userID uuid.UUID, params admin.UpdateParams) (models.CityAdminsWithUserData, error)
+	UpdateOther(ctx context.Context, UserID uuid.UUID, params admin.UpdateParams) (models.CityAdminWithUserData, error)
+	UpdateOwn(ctx context.Context, userID uuid.UUID, params admin.UpdateParams) (models.CityAdminWithUserData, error)
 }
 
 type CitySvc interface {
@@ -49,39 +49,25 @@ type CitySvc interface {
 	Update(ctx context.Context, cityID uuid.UUID, params city.UpdateParams) (models.City, error)
 }
 
-type CountrySvc interface {
-	Create(ctx context.Context, name string) (models.Country, error)
-
-	GetByID(ctx context.Context, ID uuid.UUID) (models.Country, error)
-	GetByName(ctx context.Context, name string) (models.Country, error)
-
-	Filter(
-		ctx context.Context,
-		filters country.FilterParams,
-		page, size uint64,
-	) (models.CountriesCollection, error)
-
-	UpdateStatus(ctx context.Context, countryID uuid.UUID, status string) (models.Country, error)
-
-	Update(ctx context.Context, ID uuid.UUID, params country.UpdateParams) (models.Country, error)
-}
-
 type inviteSvc interface {
-	Create(
+	Sent(
 		ctx context.Context,
+		cityID, userID uuid.UUID,
 		role string,
-		cityID uuid.UUID,
 		duration time.Duration,
 	) (models.Invite, error)
 
-	Accept(ctx context.Context, userID uuid.UUID, token string) (models.Invite, error)
+	Answer(
+		ctx context.Context,
+		answerID, userID uuid.UUID,
+		answer string,
+	) (models.Invite, error)
 }
 
 type domain struct {
-	moder   CityModSvc
-	city    CitySvc
-	country CountrySvc
-	invite  inviteSvc
+	moder  CityModSvc
+	city   CitySvc
+	invite inviteSvc
 }
 
 type Service struct {
@@ -89,14 +75,13 @@ type Service struct {
 	log    logium.Logger
 }
 
-func New(log logium.Logger, country CountrySvc, city CitySvc, cityMod CityModSvc, invSvc inviteSvc) Service {
+func New(log logium.Logger, city CitySvc, cityMod CityModSvc, invSvc inviteSvc) Service {
 	return Service{
 		log: log,
 		domain: domain{
-			country: country,
-			city:    city,
-			moder:   cityMod,
-			invite:  invSvc,
+			city:   city,
+			moder:  cityMod,
+			invite: invSvc,
 		},
 	}
 }

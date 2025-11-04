@@ -13,11 +13,12 @@ import (
 )
 
 type UpdateParams struct {
-	Name     *string
-	Icon     *string
-	Slug     *string
-	Timezone *string
-	Point    *orb.Point
+	CountryID *string
+	Point     *orb.Point
+	Name      *string
+	Icon      *string
+	Slug      *string
+	Timezone  *string
 }
 
 func (s Service) Update(ctx context.Context, cityID uuid.UUID, params UpdateParams) (models.City, error) {
@@ -46,9 +47,6 @@ func (s Service) Update(ctx context.Context, cityID uuid.UUID, params UpdatePara
 
 	if params.Slug != nil {
 		err = validateSlug(*params.Slug)
-		if err != nil {
-			return models.City{}, err
-		}
 
 		_, err = s.GetBySlug(ctx, *params.Slug)
 		if err != nil && !errors.Is(err, errx.ErrorCityNotFound) {
@@ -81,66 +79,5 @@ func (s Service) Update(ctx context.Context, cityID uuid.UUID, params UpdatePara
 		)
 	}
 
-	err = s.event.CityUpdated(ctx, city)
-	if err != nil {
-		return models.City{}, errx.ErrorInternal.Raise(
-			fmt.Errorf("failed to publish city status updated event, cause: %w", err),
-		)
-	}
-
 	return city, nil
-}
-
-func (s Service) UpdateStatus(ctx context.Context, cityID uuid.UUID, statusID string) (models.City, error) {
-	now := time.Now().UTC()
-
-	ci, err := s.GetByID(ctx, cityID)
-	if err != nil {
-		return models.City{}, err
-	}
-
-	status, err := s.StatusAccessible(ctx, statusID)
-	if err != nil {
-		return models.City{}, err
-	}
-	if !status.Accessible {
-		return models.City{}, errx.ErrorCityStatusNotAccessible.Raise(
-			fmt.Errorf("city status %s is not allowed for mods", statusID),
-		)
-	}
-
-	txErr := s.db.Transaction(ctx, func(ctx context.Context) error {
-		if !status.AllowedAdmin {
-			err := s.db.DeleteCityAdmins(ctx, cityID)
-			if err != nil {
-				return errx.ErrorInternal.Raise(
-					fmt.Errorf("failed to update city adminernments status, cause: %w", err),
-				)
-			}
-		}
-
-		err = s.db.UpdateCityStatus(ctx, cityID, statusID, now)
-		if err != nil {
-			return errx.ErrorInternal.Raise(
-				fmt.Errorf("failed to update city status, cause: %w", err),
-			)
-		}
-
-		return nil
-	})
-	if txErr != nil {
-		return models.City{}, txErr
-	}
-
-	ci.Status = statusID
-	ci.UpdatedAt = now
-
-	err = s.event.CityUpdated(ctx, ci)
-	if err != nil {
-		return models.City{}, errx.ErrorInternal.Raise(
-			fmt.Errorf("failed to publish city status updated event, cause: %w", err),
-		)
-	}
-
-	return ci, nil
 }

@@ -16,7 +16,7 @@ const citiesTable = "city"
 
 type City struct {
 	ID        uuid.UUID
-	CountryID uuid.UUID
+	CountryID string
 	Point     orb.Point // [lon, lat]
 	Status    string
 	Name      string
@@ -183,7 +183,7 @@ func (q CitiesQ) Update(ctx context.Context, updatedAt time.Time) error {
 	return err
 }
 
-func (q CitiesQ) UpdateCountryID(countryID uuid.UUID) CitiesQ {
+func (q CitiesQ) UpdateCountryID(countryID string) CitiesQ {
 	q.updater = q.updater.Set("country_id", countryID)
 	return q
 }
@@ -250,7 +250,7 @@ func (q CitiesQ) FilterID(id uuid.UUID) CitiesQ {
 	return q
 }
 
-func (q CitiesQ) FilterCountryID(countryID ...uuid.UUID) CitiesQ {
+func (q CitiesQ) FilterCountryID(countryID ...string) CitiesQ {
 	q.selector = q.selector.Where(sq.Eq{"country_id": countryID})
 	q.counter = q.counter.Where(sq.Eq{"country_id": countryID})
 	q.updater = q.updater.Where(sq.Eq{"country_id": countryID})

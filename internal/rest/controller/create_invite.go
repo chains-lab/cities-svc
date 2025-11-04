@@ -17,7 +17,7 @@ import (
 	"github.com/chains-lab/cities-svc/internal/domain/errx"
 )
 
-func (a Service) CreateInvite(w http.ResponseWriter, r *http.Request) {
+func (a Service) SentInvite(w http.ResponseWriter, r *http.Request) {
 	initiator, err := meta.User(r.Context())
 	if err != nil {
 		a.log.WithError(err).Error("failed to get user from context")
@@ -44,7 +44,7 @@ func (a Service) CreateInvite(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	inv, err := a.domain.invite.Create(r.Context(), req.Data.Attributes.Role, CityID, 24*time.Hour)
+	inv, err := a.domain.invite.Sent(r.Context(), CityID, req.Data.Attributes.UserId, req.Data.Attributes.Role, 24*time.Hour)
 	if err != nil {
 		a.log.WithError(err).Error("failed to create city moder")
 		switch {
