@@ -20,8 +20,8 @@ type City struct {
 	Point     orb.Point // [lon, lat]
 	Status    string
 	Name      string
-	Icon      sql.NullString // was string, now nullable
-	Slug      sql.NullString // was string, now nullable
+	Icon      *string
+	Slug      *string
 	Timezone  string
 
 	CreatedAt time.Time
@@ -88,30 +88,22 @@ func scanCityRow(scanner interface{ Scan(dest ...any) error }) (City, error) {
 }
 
 func (q CitiesQ) Insert(ctx context.Context, in City) error {
-	var icon any
-	if in.Icon.Valid {
-		icon = in.Icon.String
-	} else {
-		icon = nil
-	}
-	var slug any
-	if in.Slug.Valid {
-		slug = in.Slug.String
-	} else {
-		slug = nil
-	}
-
 	vals := map[string]any{
 		"id":         in.ID,
 		"country_id": in.CountryID,
 		"point":      sq.Expr("ST_SetSRID(ST_MakePoint(?, ?), 4326)::geography", in.Point[0], in.Point[1]),
 		"status":     in.Status,
 		"name":       in.Name,
-		"icon":       icon, // may be NULL
-		"slug":       slug, // may be NULL
 		"timezone":   in.Timezone,
 		"created_at": in.CreatedAt,
 		"updated_at": in.UpdatedAt,
+	}
+
+	if in.Icon != nil {
+		vals["icon"] = *in.Icon
+	}
+	if in.Slug != nil {
+		vals["slug"] = *in.Slug
 	}
 
 	qry, args, err := q.inserter.SetMap(vals).ToSql()

@@ -26,9 +26,10 @@ type database interface {
 	Transaction(ctx context.Context, fn func(ctx context.Context) error) error
 
 	CreateCityAdmin(ctx context.Context, input models.CityAdmin) error
-
-	GetCityAdminByUserAndCityID(ctx context.Context, userID, cityID uuid.UUID) (models.CityAdmin, error)
 	GetCityAdminByUserID(ctx context.Context, userID uuid.UUID) (models.CityAdmin, error)
+	GetCityAdminWithFilter(ctx context.Context, userID, cityID *uuid.UUID, role *string) (models.CityAdmin, error)
+	GetCityAdmins(ctx context.Context, cityID uuid.UUID, roles ...string) (models.CityAdminsCollection, error)
+	DeleteCityAdmin(ctx context.Context, userID, cityID uuid.UUID) error
 
 	CreateInvite(ctx context.Context, input models.Invite) error
 	GetInvite(ctx context.Context, ID uuid.UUID) (models.Invite, error)
@@ -38,27 +39,69 @@ type database interface {
 }
 
 type EventPublisher interface {
-	PublishCityAdminCreated(ctx context.Context, admin models.CityAdmin) error
-	PublishInviteCreated(ctx context.Context, invite models.Invite) error
+	PublishInviteCreated(
+		ctx context.Context,
+		invite models.Invite,
+		city models.City,
+		recipients []uuid.UUID,
+	) error
+
+	PublishInviteAccepted(
+		ctx context.Context,
+		invite models.Invite,
+		city models.City,
+		cityAdmin models.CityAdmin,
+		recipients []uuid.UUID,
+	) error
+
+	PublishInviteDeclined(
+		ctx context.Context,
+		invite models.Invite,
+		city models.City,
+		recipients []uuid.UUID,
+	) error
+
+	PublishCityAdminCreated(
+		ctx context.Context,
+		cityAdmin models.CityAdmin,
+		city models.City,
+		recipients []uuid.UUID,
+	) error
 }
 
-func (s Service) CityIsOfficialSupport(ctx context.Context, cityID uuid.UUID) error {
+func (s Service) getOfficiality(ctx context.Context, cityID uuid.UUID) (models.City, error) {
 	ci, err := s.db.GetCityByID(ctx, cityID)
 	if err != nil {
-		return errx.ErrorInternal.Raise(
+		return models.City{}, errx.ErrorInternal.Raise(
 			fmt.Errorf("get city: %w", err),
 		)
 	}
 	if ci.IsNil() {
-		return errx.ErrorCityNotFound.Raise(
+		return models.City{}, errx.ErrorCityNotFound.Raise(
 			fmt.Errorf("city not found"),
 		)
 	}
 	if ci.Status != enum.CityStatusOfficial {
-		return errx.ErrorCityIsNotSupported.Raise(
+		return models.City{}, errx.ErrorCityIsNotSupported.Raise(
 			fmt.Errorf("city not supported"),
 		)
 	}
 
-	return nil
+	return ci, nil
+}
+
+func (s Service) getCity(ctx context.Context, cityID uuid.UUID) (models.City, error) {
+	ci, err := s.db.GetCityByID(ctx, cityID)
+	if err != nil {
+		return models.City{}, errx.ErrorInternal.Raise(
+			fmt.Errorf("get city: %w", err),
+		)
+	}
+	if ci.IsNil() {
+		return models.City{}, errx.ErrorCityNotFound.Raise(
+			fmt.Errorf("city not found"),
+		)
+	}
+
+	return ci, nil
 }

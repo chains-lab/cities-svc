@@ -1,4 +1,4 @@
-package data
+package repo
 
 import (
 	"context"
@@ -6,18 +6,18 @@ import (
 	"errors"
 	"time"
 
-	"github.com/chains-lab/cities-svc/internal/data/pgdb"
 	"github.com/chains-lab/cities-svc/internal/domain/models"
 	"github.com/chains-lab/cities-svc/internal/domain/services/city"
+	"github.com/chains-lab/cities-svc/internal/repo/pgdb"
 	"github.com/chains-lab/restkit/pagi"
 	"github.com/google/uuid"
 	"github.com/paulmach/orb"
 )
 
-func (d *Database) CreateCity(ctx context.Context, m models.City) (models.City, error) {
+func (r *Repo) CreateCity(ctx context.Context, m models.City) (models.City, error) {
 	schema := cityModelToSchema(m)
 
-	err := d.sql.cities.New().Insert(ctx, schema)
+	err := r.sql.cities.New().Insert(ctx, schema)
 	if err != nil {
 		return models.City{}, err
 	}
@@ -25,8 +25,8 @@ func (d *Database) CreateCity(ctx context.Context, m models.City) (models.City, 
 	return citySchemaToModel(schema), nil
 }
 
-func (d *Database) GetCityByID(ctx context.Context, id uuid.UUID) (models.City, error) {
-	row, err := d.sql.cities.New().FilterID(id).Get(ctx)
+func (r *Repo) GetCityByID(ctx context.Context, id uuid.UUID) (models.City, error) {
+	row, err := r.sql.cities.New().FilterID(id).Get(ctx)
 	switch {
 	case errors.Is(err, sql.ErrNoRows):
 		return models.City{}, nil
@@ -37,8 +37,8 @@ func (d *Database) GetCityByID(ctx context.Context, id uuid.UUID) (models.City, 
 	return citySchemaToModel(row), nil
 }
 
-func (d *Database) GetCityBySlug(ctx context.Context, slug string) (models.City, error) {
-	row, err := d.sql.cities.New().FilterSlug(slug).Get(ctx)
+func (r *Repo) GetCityBySlug(ctx context.Context, slug string) (models.City, error) {
+	row, err := r.sql.cities.New().FilterSlug(slug).Get(ctx)
 	switch {
 	case errors.Is(err, sql.ErrNoRows):
 		return models.City{}, nil
@@ -49,8 +49,8 @@ func (d *Database) GetCityBySlug(ctx context.Context, slug string) (models.City,
 	return citySchemaToModel(row), nil
 }
 
-func (d *Database) GetCityByRadius(ctx context.Context, point orb.Point, radius uint64) (models.City, error) {
-	row, err := d.sql.cities.New().FilterWithinRadiusMeters(point, radius).Get(ctx)
+func (r *Repo) GetCityByRadius(ctx context.Context, point orb.Point, radius uint64) (models.City, error) {
+	row, err := r.sql.cities.New().FilterWithinRadiusMeters(point, radius).Get(ctx)
 	switch {
 	case errors.Is(err, sql.ErrNoRows):
 		return models.City{}, nil
@@ -61,14 +61,14 @@ func (d *Database) GetCityByRadius(ctx context.Context, point orb.Point, radius 
 	return citySchemaToModel(row), nil
 }
 
-func (d *Database) FilterCities(
+func (r *Repo) FilterCities(
 	ctx context.Context,
 	filter city.FilterParams,
 	page, size uint64,
 ) (models.CitiesCollection, error) {
 	limit, offset := pagi.PagConvert(page, size)
 
-	query := d.sql.cities.New()
+	query := r.sql.cities.New()
 
 	if filter.CountryID != nil {
 		query.FilterCountryID(*filter.CountryID)
@@ -106,13 +106,13 @@ func (d *Database) FilterCities(
 	}, nil
 }
 
-func (d *Database) UpdateCity(
+func (r *Repo) UpdateCity(
 	ctx context.Context,
 	cityID uuid.UUID,
 	params city.UpdateParams,
 	updatedAt time.Time,
 ) error {
-	query := d.sql.cities.New().FilterID(cityID)
+	query := r.sql.cities.New().FilterID(cityID)
 
 	if params.Name != nil {
 		query = query.UpdateName(*params.Name)
@@ -145,15 +145,15 @@ func (d *Database) UpdateCity(
 	return nil
 }
 
-func (d *Database) UpdateCityStatus(ctx context.Context, id uuid.UUID, status string, updatedAt time.Time) error {
-	return d.sql.cities.New().
+func (r *Repo) UpdateCityStatus(ctx context.Context, id uuid.UUID, status string, updatedAt time.Time) error {
+	return r.sql.cities.New().
 		FilterID(id).
 		UpdateStatus(status).
 		Update(ctx, updatedAt)
 }
 
-func (d *Database) DeleteadminForCity(ctx context.Context, cityID uuid.UUID) error {
-	err := d.sql.cityMod.New().FilterCityID(cityID).Delete(ctx)
+func (r *Repo) DeleteadminForCity(ctx context.Context, cityID uuid.UUID) error {
+	err := r.sql.cityAdmin.New().FilterCityID(cityID).Delete(ctx)
 	return err
 }
 
@@ -164,16 +164,10 @@ func citySchemaToModel(s pgdb.City) models.City {
 		Point:     s.Point,
 		Status:    s.Status,
 		Name:      s.Name,
+		Icon:      s.Icon,
 		Timezone:  s.Timezone,
 		CreatedAt: s.CreatedAt,
 		UpdatedAt: s.UpdatedAt,
-	}
-
-	if s.Icon.Valid {
-		res.Icon = &s.Icon.String
-	}
-	if s.Slug.Valid {
-		res.Slug = &s.Slug.String
 	}
 
 	return res
@@ -186,22 +180,11 @@ func cityModelToSchema(m models.City) pgdb.City {
 		Point:     m.Point,
 		Status:    m.Status,
 		Name:      m.Name,
+		Icon:      m.Icon,
+		Slug:      m.Slug,
 		Timezone:  m.Timezone,
 		CreatedAt: m.CreatedAt,
 		UpdatedAt: m.UpdatedAt,
-	}
-
-	if m.Icon != nil {
-		res.Icon = sql.NullString{
-			String: *m.Icon,
-			Valid:  true,
-		}
-	}
-	if m.Slug != nil {
-		res.Slug = sql.NullString{
-			String: *m.Slug,
-			Valid:  true,
-		}
 	}
 
 	return res

@@ -2,35 +2,21 @@ package publisher
 
 import (
 	"context"
-	"errors"
+	"log"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/segmentio/kafka-go"
 )
 
 type Service struct {
-	addr   string
-	writer *kafka.Writer
+	addr string
 }
 
 func New(addr string) *Service {
 	return &Service{
 		addr: addr,
-		writer: &kafka.Writer{
-			Addr:         kafka.TCP(addr),
-			Balancer:     &kafka.Hash{},
-			RequiredAcks: kafka.RequireAll,
-			Compression:  kafka.Snappy,
-			BatchTimeout: 50 * time.Millisecond,
-		},
 	}
-}
-
-func (s *Service) Close() error {
-	if s.writer != nil {
-		return s.writer.Close()
-	}
-	return nil
 }
 
 type Envelope interface {
@@ -40,7 +26,7 @@ type Envelope interface {
 	EventTime() time.Time
 }
 
-func (s *Service) publish(
+func (s Service) publish(
 	ctx context.Context,
 	topic, key string,
 	envelope Envelope,
@@ -51,37 +37,34 @@ func (s *Service) publish(
 		return err
 	}
 
+	writer := kafka.Writer{
+		Addr:         kafka.TCP(s.addr),
+		Topic:        topic,
+		Balancer:     &kafka.LeastBytes{},
+		RequiredAcks: kafka.RequireAll,
+		Compression:  kafka.Snappy,
+		BatchTimeout: 50 * time.Millisecond,
+	}
+	defer func() {
+		if err := writer.Close(); err != nil {
+			log.Printf("kafka: close publisher: %v", err)
+		}
+	}()
+
 	msg := kafka.Message{
-		Topic: topic,
 		Key:   []byte(key),
 		Value: body,
 		Time:  envelope.EventTime(),
 		Headers: append(headers,
 			kafka.Header{Key: "event_type", Value: []byte(envelope.EventType())},
 			kafka.Header{Key: "event_version", Value: []byte(envelope.EventVersion())},
-			kafka.Header{Key: "content-type", Value: []byte("application/json")},
+			kafka.Header{Key: "content_type", Value: []byte("application/json")},
 		),
 	}
 
-	if _, ok := ctx.Deadline(); !ok {
-		var cancel context.CancelFunc
-		ctx, cancel = context.WithTimeout(ctx, 5*time.Second)
-		defer cancel()
-	}
+	return writer.WriteMessages(ctx, msg)
+}
 
-	var lastErr error
-	backoff := 100 * time.Millisecond
-	for i := 0; i < 3; i++ {
-		if err = s.writer.WriteMessages(ctx, msg); err == nil {
-			return nil
-		}
-		lastErr = err
-		if errors.Is(ctx.Err(), context.Canceled) || errors.Is(ctx.Err(), context.DeadlineExceeded) {
-			break
-		}
-		time.Sleep(backoff)
-		backoff *= 2
-	}
-
-	return lastErr
+type PayloadRecipients struct {
+	Users []uuid.UUID `json:"users"`
 }

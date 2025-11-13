@@ -397,6 +397,7 @@ components:
                 - role
                 - city_id
                 - user_id
+                - initiator_id
                 - expires_at
                 - created_at
               properties:
@@ -414,6 +415,10 @@ components:
                   type: string
                   format: uuid
                   description: user id
+                initiator_id:
+                  type: string
+                  format: uuid
+                  description: id of the user who initiated the invite
                 expires_at:
                   type: string
                   format: date-time

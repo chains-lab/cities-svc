@@ -15,52 +15,36 @@ type GetFilters struct {
 	Role   *string
 }
 
-func (s Service) Get(ctx context.Context, filters GetFilters) (models.CityAdminsWithUserData, error) {
-	res, err := s.db.GetAdmin(ctx, filters)
+func (s Service) Get(ctx context.Context, filters GetFilters) (models.CityAdmin, error) {
+	res, err := s.db.GetCityAdminWithFilter(ctx, filters.UserID, filters.CityID, filters.Role)
 	if err != nil {
-		return models.CityAdminsWithUserData{}, errx.ErrorInternal.Raise(
+		return models.CityAdmin{}, errx.ErrorInternal.Raise(
 			fmt.Errorf("failed to get city admin, cause: %w", err),
 		)
 	}
 
 	if res.IsNil() {
-		return models.CityAdminsWithUserData{}, errx.ErrorCityAdminNotFound.Raise(
+		return models.CityAdmin{}, errx.ErrorCityAdminNotFound.Raise(
 			fmt.Errorf("city admin not found"),
 		)
 	}
 
-	profiles, err := s.userGuesser.Guess(ctx, res.UserID)
-	if err != nil {
-		return models.CityAdminsWithUserData{}, errx.ErrorInternal.Raise(
-			fmt.Errorf("failed to guess city admin data, cause: %w", err),
-		)
-	}
-
-	return res.AddProfileData(profiles[res.UserID]), nil
+	return res, nil
 }
 
-func (s Service) GetInitiator(ctx context.Context, initiatorID uuid.UUID) (models.CityAdminsWithUserData, error) {
-	res, err := s.db.GetAdmin(ctx, GetFilters{
-		UserID: &initiatorID,
-	})
+func (s Service) GetInitiator(ctx context.Context, initiatorID uuid.UUID) (models.CityAdmin, error) {
+	res, err := s.db.GetCityAdminByUserID(ctx, initiatorID)
 	if err != nil {
-		return models.CityAdminsWithUserData{}, errx.ErrorInternal.Raise(
+		return models.CityAdmin{}, errx.ErrorInternal.Raise(
 			fmt.Errorf("failed to get city admin, cause: %w", err),
 		)
 	}
 
 	if res.IsNil() {
-		return models.CityAdminsWithUserData{}, errx.ErrorInitiatorIsNotCityAdmin.Raise(
+		return models.CityAdmin{}, errx.ErrorInitiatorIsNotCityAdmin.Raise(
 			fmt.Errorf("city admin not found"),
 		)
 	}
 
-	profiles, err := s.userGuesser.Guess(ctx, res.UserID)
-	if err != nil {
-		return models.CityAdminsWithUserData{}, errx.ErrorInternal.Raise(
-			fmt.Errorf("failed to guess city admin data, cause: %w", err),
-		)
-	}
-
-	return res.AddProfileData(profiles[res.UserID]), nil
+	return res, nil
 }

@@ -6,11 +6,10 @@ import (
 	"sync"
 
 	"github.com/chains-lab/cities-svc/internal"
-	"github.com/chains-lab/cities-svc/internal/data"
 	"github.com/chains-lab/cities-svc/internal/domain/services/admin"
 	"github.com/chains-lab/cities-svc/internal/domain/services/city"
-	"github.com/chains-lab/cities-svc/internal/event/publisher"
-	"github.com/chains-lab/cities-svc/internal/usrguesser"
+	"github.com/chains-lab/cities-svc/internal/events/publisher"
+	"github.com/chains-lab/cities-svc/internal/repo"
 
 	"github.com/chains-lab/cities-svc/internal/domain/services/invite"
 	"github.com/chains-lab/cities-svc/internal/rest"
@@ -34,18 +33,16 @@ func StartServices(ctx context.Context, cfg internal.Config, log logium.Logger, 
 		log.Fatal("failed to connect to database", "error", err)
 	}
 
-	database := data.NewDatabase(pg)
-
-	userGuesser := usrguesser.NewService(cfg.Profile.Url, nil)
+	database := repo.NewDatabase(pg)
 
 	eventPublish := publisher.New(cfg.Kafka.Broker)
 
 	citySvc := city.NewService(database, eventPublish)
-	cityModerSvc := admin.NewService(database, userGuesser, eventPublish)
+	cityAdminSvc := admin.NewService(database, eventPublish)
 	inviteSvc := invite.NewService(database, eventPublish)
 
-	ctrl := controller.New(log, citySvc, cityModerSvc, inviteSvc)
-	mdlv := middlewares.New(log, cityModerSvc)
+	ctrl := controller.New(log, citySvc, cityAdminSvc, inviteSvc)
+	mdlv := middlewares.New(log, cityAdminSvc)
 
 	run(func() { rest.Run(ctx, cfg, log, mdlv, ctrl) })
 }

@@ -12,16 +12,14 @@ import (
 )
 
 type Service struct {
-	db          database
-	userGuesser UserGuesser
-	event       EventPublisher
+	db    database
+	event EventPublisher
 }
 
-func NewService(db database, userGuesser UserGuesser, event EventPublisher) Service {
+func NewService(db database, event EventPublisher) Service {
 	return Service{
-		db:          db,
-		userGuesser: userGuesser,
-		event:       event,
+		db:    db,
+		event: event,
 	}
 }
 
@@ -29,7 +27,8 @@ type database interface {
 	Transaction(ctx context.Context, fn func(ctx context.Context) error) error
 
 	CreateCityAdmin(ctx context.Context, input models.CityAdmin) error
-	GetCityAdmin(ctx context.Context, filters GetFilters) (models.CityAdmin, error)
+	GetCityAdminByUserID(ctx context.Context, userID uuid.UUID) (models.CityAdmin, error)
+	GetCityAdminWithFilter(ctx context.Context, userID, cityID *uuid.UUID, role *string) (models.CityAdmin, error)
 	FilterCityAdmins(ctx context.Context, filter FilterParams, page, size uint64) (models.CityAdminsCollection, error)
 	UpdateCityAdmin(ctx context.Context, userID uuid.UUID, params UpdateParams, updateAt time.Time) error
 	DeleteCityAdmin(ctx context.Context, userID, cityID uuid.UUID) error
@@ -38,46 +37,51 @@ type database interface {
 	GetInvite(ctx context.Context, ID uuid.UUID) (models.Invite, error)
 	UpdateInviteStatus(ctx context.Context, inviteID, userID uuid.UUID, status string) error
 
-	GetCityByID(ctx context.Context, ID uuid.UUID) (models.City, error)
-}
+	GetCityAdmins(ctx context.Context, cityID uuid.UUID, roles ...string) (models.CityAdminsCollection, error)
 
-type UserGuesser interface {
-	Guess(ctx context.Context, userIDs ...uuid.UUID) (map[uuid.UUID]models.Profile, error)
+	GetCityByID(ctx context.Context, ID uuid.UUID) (models.City, error)
 }
 
 type EventPublisher interface {
 	PublishCityAdminCreated(
 		ctx context.Context,
 		admin models.CityAdmin,
+		city models.City,
+		recipients []uuid.UUID,
 	) error
+
 	PublishCityAdminUpdated(
 		ctx context.Context,
 		admin models.CityAdmin,
+		city models.City,
+		recipients []uuid.UUID,
 	) error
+
 	PublishCityAdminDeleted(
 		ctx context.Context,
-		cityID uuid.UUID,
-		userID uuid.UUID,
+		admin models.CityAdmin,
+		city models.City,
+		recipients []uuid.UUID,
 	) error
 }
 
-func (s Service) CityIsOfficialSupport(ctx context.Context, cityID uuid.UUID) error {
+func (s Service) getSupportedCity(ctx context.Context, cityID uuid.UUID) (models.City, error) {
 	ci, err := s.db.GetCityByID(ctx, cityID)
 	if err != nil {
-		return errx.ErrorInternal.Raise(
+		return models.City{}, errx.ErrorInternal.Raise(
 			fmt.Errorf("get city: %w", err),
 		)
 	}
 	if ci.IsNil() {
-		return errx.ErrorCityNotFound.Raise(
+		return models.City{}, errx.ErrorCityNotFound.Raise(
 			fmt.Errorf("city not found"),
 		)
 	}
-	if ci.Status != enum.CityStatusOfficial {
-		return errx.ErrorCityIsNotSupported.Raise(
+	if ci.Status != enum.CityStatusSupported {
+		return models.City{}, errx.ErrorCityIsNotSupported.Raise(
 			fmt.Errorf("city not supported"),
 		)
 	}
 
-	return nil
+	return ci, nil
 }

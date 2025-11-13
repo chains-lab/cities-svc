@@ -18,25 +18,13 @@ func (s Service) Filter(
 	ctx context.Context,
 	filters FilterParams,
 	page, size uint64,
-) (models.CityAdminsWithUserDataCollection, error) {
-	res, err := s.db.FilterAdmins(ctx, filters, page, size)
+) (models.CityAdminsCollection, error) {
+	res, err := s.db.FilterCityAdmins(ctx, filters, page, size)
 	if err != nil {
-		return models.CityAdminsWithUserDataCollection{}, errx.ErrorInternal.Raise(
+		return models.CityAdminsCollection{}, errx.ErrorInternal.Raise(
 			fmt.Errorf("failed to filter city admin, cause: %w", err),
 		)
 	}
 
-	userIDs := make([]uuid.UUID, 0, len(res.Data))
-	for _, emp := range res.Data {
-		userIDs = append(userIDs, emp.UserID)
-	}
-
-	profiles, err := s.userGuesser.Guess(ctx, userIDs...)
-	if err != nil {
-		return models.CityAdminsWithUserDataCollection{}, errx.ErrorInternal.Raise(
-			fmt.Errorf("failed to guess city admins profiles, cause: %w", err),
-		)
-	}
-
-	return res.AddProfileData(profiles), err
+	return res, err
 }

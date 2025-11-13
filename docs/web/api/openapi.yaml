@@ -19,43 +19,43 @@ components:
     CreateCity:
       properties:
         data:
-          $ref: '#/components/schemas/CreateCity_data'
+          $ref: "#/components/schemas/CreateCity_data"
       required:
       - data
     UpdateCity:
       properties:
         data:
-          $ref: '#/components/schemas/UpdateCity_data'
+          $ref: "#/components/schemas/UpdateCity_data"
       required:
       - data
     UpdateCityStatus:
       properties:
         data:
-          $ref: '#/components/schemas/UpdateCityStatus_data'
+          $ref: "#/components/schemas/UpdateCityStatus_data"
       required:
       - data
     UpdateOwnAdmin:
       properties:
         data:
-          $ref: '#/components/schemas/UpdateOwnAdmin_data'
+          $ref: "#/components/schemas/UpdateOwnAdmin_data"
       required:
       - data
     SentInvite:
       properties:
         data:
-          $ref: '#/components/schemas/SentInvite_data'
+          $ref: "#/components/schemas/SentInvite_data"
       required:
       - data
     AcceptInvite:
       properties:
         data:
-          $ref: '#/components/schemas/AcceptInvite_data'
+          $ref: "#/components/schemas/AcceptInvite_data"
       required:
       - data
     City:
       properties:
         data:
-          $ref: '#/components/schemas/CityData'
+          $ref: "#/components/schemas/CityData"
       required:
       - data
     CityData:
@@ -69,7 +69,7 @@ components:
           - city
           type: string
         attributes:
-          $ref: '#/components/schemas/CityAttributes'
+          $ref: "#/components/schemas/CityAttributes"
       required:
       - attributes
       - id
@@ -80,7 +80,7 @@ components:
           description: country id
           type: string
         point:
-          $ref: '#/components/schemas/Point'
+          $ref: "#/components/schemas/Point"
         status:
           description: city status
           enum:
@@ -120,17 +120,17 @@ components:
       properties:
         data:
           items:
-            $ref: '#/components/schemas/CityData'
+            $ref: "#/components/schemas/CityData"
           type: array
         links:
-          $ref: '#/components/schemas/PaginationData'
+          $ref: "#/components/schemas/PaginationData"
       required:
       - data
       - links
     CityAdmin:
       properties:
         data:
-          $ref: '#/components/schemas/CityAdminData'
+          $ref: "#/components/schemas/CityAdminData"
       required:
       - data
     CityAdminData:
@@ -144,7 +144,7 @@ components:
           - city_moderator
           type: string
         attributes:
-          $ref: '#/components/schemas/CityAdminAttributes'
+          $ref: "#/components/schemas/CityAdminAttributes"
       required:
       - attributes
       - id
@@ -188,17 +188,17 @@ components:
       properties:
         data:
           items:
-            $ref: '#/components/schemas/CityAdminData'
+            $ref: "#/components/schemas/CityAdminData"
           type: array
         links:
-          $ref: '#/components/schemas/PaginationData'
+          $ref: "#/components/schemas/PaginationData"
       required:
       - data
       - links
     Invite:
       properties:
         data:
-          $ref: '#/components/schemas/Invite_data'
+          $ref: "#/components/schemas/Invite_data"
       required:
       - data
     Errors:
@@ -207,7 +207,7 @@ components:
         errors:
           description: Non empty array of errors occurred during request processing
           items:
-            $ref: '#/components/schemas/Errors_errors_inner'
+            $ref: "#/components/schemas/Errors_errors_inner"
           type: array
       required:
       - errors
@@ -255,7 +255,7 @@ components:
           description: city name
           type: string
         point:
-          $ref: '#/components/schemas/Point'
+          $ref: "#/components/schemas/Point"
         timezone:
           description: city timezone
           example: Europe/Berlin
@@ -272,14 +272,14 @@ components:
           - create_city
           type: string
         attributes:
-          $ref: '#/components/schemas/CreateCity_data_attributes'
+          $ref: "#/components/schemas/CreateCity_data_attributes"
       required:
       - attributes
       - type
     UpdateCity_data_attributes:
       properties:
         point:
-          $ref: '#/components/schemas/Point'
+          $ref: "#/components/schemas/Point"
         status:
           description: city status
           enum:
@@ -310,7 +310,7 @@ components:
           - update_city
           type: string
         attributes:
-          $ref: '#/components/schemas/UpdateCity_data_attributes'
+          $ref: "#/components/schemas/UpdateCity_data_attributes"
       required:
       - attributes
       - id
@@ -333,7 +333,7 @@ components:
           - update_city
           type: string
         attributes:
-          $ref: '#/components/schemas/UpdateCityStatus_data_attributes'
+          $ref: "#/components/schemas/UpdateCityStatus_data_attributes"
       required:
       - attributes
       - id
@@ -357,7 +357,7 @@ components:
           - city_admin
           type: string
         attributes:
-          $ref: '#/components/schemas/UpdateOwnAdmin_data_attributes'
+          $ref: "#/components/schemas/UpdateOwnAdmin_data_attributes"
       required:
       - attributes
       - id
@@ -390,7 +390,7 @@ components:
           - sent_invite
           type: string
         attributes:
-          $ref: '#/components/schemas/SentInvite_data_attributes'
+          $ref: "#/components/schemas/SentInvite_data_attributes"
       required:
       - attributes
       - id
@@ -416,7 +416,7 @@ components:
           - invite
           type: string
         attributes:
-          $ref: '#/components/schemas/AcceptInvite_data_attributes'
+          $ref: "#/components/schemas/AcceptInvite_data_attributes"
       required:
       - attributes
       - id
@@ -437,6 +437,10 @@ components:
           description: user id
           format: uuid
           type: string
+        initiator_id:
+          description: id of the user who initiated the invite
+          format: uuid
+          type: string
         expires_at:
           description: timestamp when the invite will expire
           format: date-time
@@ -449,6 +453,7 @@ components:
       - city_id
       - created_at
       - expires_at
+      - initiator_id
       - role
       - status
       - user_id
@@ -463,7 +468,7 @@ components:
           - invite_city_gov
           type: string
         attributes:
-          $ref: '#/components/schemas/Invite_data_attributes'
+          $ref: "#/components/schemas/Invite_data_attributes"
       required:
       - attributes
       - id

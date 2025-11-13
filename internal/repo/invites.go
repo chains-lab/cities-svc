@@ -1,23 +1,23 @@
-package data
+package repo
 
 import (
 	"context"
 	"database/sql"
 	"errors"
 
-	"github.com/chains-lab/cities-svc/internal/data/pgdb"
 	"github.com/chains-lab/cities-svc/internal/domain/models"
+	"github.com/chains-lab/cities-svc/internal/repo/pgdb"
 	"github.com/google/uuid"
 )
 
-func (d *Database) CreateInvite(ctx context.Context, input models.Invite) error {
+func (r *Repo) CreateInvite(ctx context.Context, input models.Invite) error {
 	schema := modelToInviteSchema(input)
 
-	return d.sql.invites.New().Insert(ctx, schema)
+	return r.sql.invites.New().Insert(ctx, schema)
 }
 
-func (d *Database) GetInvite(ctx context.Context, ID uuid.UUID) (models.Invite, error) {
-	row, err := d.sql.invites.New().FilterID(ID).Get(ctx)
+func (r *Repo) GetInvite(ctx context.Context, ID uuid.UUID) (models.Invite, error) {
+	row, err := r.sql.invites.New().FilterID(ID).Get(ctx)
 	switch {
 	case errors.Is(err, sql.ErrNoRows):
 		return models.Invite{}, err
@@ -28,8 +28,8 @@ func (d *Database) GetInvite(ctx context.Context, ID uuid.UUID) (models.Invite, 
 	return inviteSchemaToModel(row), nil
 }
 
-func (d *Database) UpdateInviteStatus(ctx context.Context, inviteID uuid.UUID, userID uuid.UUID, status string) error {
-	err := d.sql.invites.New().
+func (r *Repo) UpdateInviteStatus(ctx context.Context, inviteID uuid.UUID, userID uuid.UUID, status string) error {
+	err := r.sql.invites.New().
 		FilterID(inviteID).
 		UpdateStatus(status).
 		UpdateUserID(userID).

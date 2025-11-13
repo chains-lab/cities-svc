@@ -87,9 +87,9 @@ func TestCreateCityInUnsupportedCountry(t *testing.T) {
 	ctx := context.Background()
 
 	usa := CreateAndActivateCountry(s, t, "USA")
-	usa, err = s.domain.country.UpdateStatus(ctx, usa.ID, enum.CountryStatusDeprecated)
+	usa, err = s.domain.country.UpdateStatus(ctx, usa.ID, enum.CountryStatusUnsupported)
 	if err != nil {
-		t.Fatalf("SetCountryStatusDeprecated: %v", err)
+		t.Fatalf("SetCountryStatusUnsupported: %v", err)
 	}
 
 	_, err = s.domain.city.Create(ctx, city.CreateParams{
@@ -418,17 +418,17 @@ func TestSetCityStatus(t *testing.T) {
 		t.Errorf("expected city status 'official', got '%s'", kyiv.Status)
 	}
 
-	kyiv, err = s.domain.city.UpdateStatus(ctx, kyiv.ID, enum.CityStatusDeprecated)
+	kyiv, err = s.domain.city.UpdateStatus(ctx, kyiv.ID, enum.CityStatusUnsupported)
 	if err != nil {
-		t.Fatalf("SetCityStatusDeprecated: %v", err)
+		t.Fatalf("SetCityStatusUnsupported: %v", err)
 	}
-	if kyiv.Status != enum.CityStatusDeprecated {
-		t.Errorf("expected city status 'deprecated', got '%s'", kyiv.Status)
+	if kyiv.Status != enum.CityStatusUnsupported {
+		t.Errorf("expected city status 'Unsupported', got '%s'", kyiv.Status)
 	}
 
 	_, err = s.domain.invites.Create(context.Background(), enum.CityGovRoleExecutive, kyiv.ID, time.Hour)
 	if !errors.Is(err, errx.ErrorCityIsNotSupported) {
-		t.Fatalf("expected error when creating mayor invite for deprecated city, got: %v", err)
+		t.Fatalf("expected error when creating mayor invite for Unsupported city, got: %v", err)
 	}
 }
 
@@ -445,32 +445,32 @@ func TestSetCityStatusInUnsupportedCountry(t *testing.T) {
 	kyiv := CreateCity(s, t, ukr.ID, "Kyiv")
 	lviv := CreateCity(s, t, ukr.ID, "Lviv")
 
-	ukr, err = s.domain.country.UpdateStatus(ctx, ukr.ID, enum.CountryStatusDeprecated)
+	ukr, err = s.domain.country.UpdateStatus(ctx, ukr.ID, enum.CountryStatusUnsupported)
 	if err != nil {
-		t.Fatalf("SetCountryStatusDeprecated: %v", err)
+		t.Fatalf("SetCountryStatusUnsupported: %v", err)
 	}
-	if ukr.Status != enum.CountryStatusDeprecated {
-		t.Errorf("expected country status 'deprecated', got '%s'", ukr.Status)
+	if ukr.Status != enum.CountryStatusUnsupported {
+		t.Errorf("expected country status 'Unsupported', got '%s'", ukr.Status)
 	}
 
 	kyiv, err = s.domain.city.GetByID(ctx, kyiv.ID)
 	if err != nil {
 		t.Fatalf("GetByID: %v", err)
 	}
-	if kyiv.Status != enum.CityStatusDeprecated {
-		t.Errorf("expected city status 'deprecated' after country deprecated, got '%s'", kyiv.Status)
+	if kyiv.Status != enum.CityStatusUnsupported {
+		t.Errorf("expected city status 'Unsupported' after country Unsupported, got '%s'", kyiv.Status)
 	}
 	lviv, err = s.domain.city.GetByID(ctx, lviv.ID)
 	if err != nil {
 		t.Fatalf("GetByID: %v", err)
 	}
-	if lviv.Status != enum.CityStatusDeprecated {
-		t.Errorf("expected city status 'deprecated' after country deprecated, got '%s'", lviv.Status)
+	if lviv.Status != enum.CityStatusUnsupported {
+		t.Errorf("expected city status 'Unsupported' after country Unsupported, got '%s'", lviv.Status)
 	}
 
 	_, err = s.domain.city.UpdateStatus(ctx, kyiv.ID, enum.CityStatusOfficial)
 	if !errors.Is(err, errx.ErrorCountryIsNotSupported) {
-		t.Fatalf("expected error when setting city status in deprecated country, got: %v", err)
+		t.Fatalf("expected error when setting city status in Unsupported country, got: %v", err)
 	}
 
 	ukr, err = s.domain.country.UpdateStatus(ctx, ukr.ID, enum.CountryStatusSupported)
@@ -485,15 +485,15 @@ func TestSetCityStatusInUnsupportedCountry(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetByID: %v", err)
 	}
-	if kyiv.Status != enum.CityStatusDeprecated {
-		t.Errorf("expected city status 'deprecated' after country supported, got '%s'", kyiv.Status)
+	if kyiv.Status != enum.CityStatusUnsupported {
+		t.Errorf("expected city status 'Unsupported' after country supported, got '%s'", kyiv.Status)
 	}
 	lviv, err = s.domain.city.GetByID(ctx, lviv.ID)
 	if err != nil {
 		t.Fatalf("GetByID: %v", err)
 	}
-	if lviv.Status != enum.CityStatusDeprecated {
-		t.Errorf("expected city status 'deprecated' after country supported, got '%s'", lviv.Status)
+	if lviv.Status != enum.CityStatusUnsupported {
+		t.Errorf("expected city status 'Unsupported' after country supported, got '%s'", lviv.Status)
 	}
 
 	kyiv, err = s.domain.city.UpdateStatus(ctx, kyiv.ID, enum.CityStatusOfficial)

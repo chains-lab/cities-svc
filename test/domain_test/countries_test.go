@@ -68,12 +68,12 @@ func TestCountries(t *testing.T) {
 	if ukr.Status != enum.CountryStatusUnsupported {
 		t.Errorf("expected country status 'unsuported', got '%s'", ukr.Status)
 	}
-	ukr, err = s.domain.country.UpdateStatus(ctx, ukr.ID, enum.CountryStatusDeprecated)
+	ukr, err = s.domain.country.UpdateStatus(ctx, ukr.ID, enum.CountryStatusUnsupported)
 	if err != nil {
-		t.Fatalf("SetCountryStatusDeprecated: %v", err)
+		t.Fatalf("SetCountryStatusUnsupported: %v", err)
 	}
-	if ukr.Status != enum.CountryStatusDeprecated {
-		t.Errorf("expected country status 'deprecated', got '%s'", ukr.Status)
+	if ukr.Status != enum.CountryStatusUnsupported {
+		t.Errorf("expected country status 'Unsupported', got '%s'", ukr.Status)
 	}
 
 	ukr, err = s.domain.country.UpdateStatus(ctx, ukr.ID, enum.CountryStatusSupported)
@@ -84,12 +84,12 @@ func TestCountries(t *testing.T) {
 		t.Errorf("expected country status 'supported', got '%s'", ukr.Status)
 	}
 
-	usa, err = s.domain.country.UpdateStatus(ctx, usa.ID, enum.CountryStatusDeprecated)
+	usa, err = s.domain.country.UpdateStatus(ctx, usa.ID, enum.CountryStatusUnsupported)
 	if err != nil {
-		t.Fatalf("SetCountryStatusDeprecated: %v", err)
+		t.Fatalf("SetCountryStatusUnsupported: %v", err)
 	}
-	if usa.Status != enum.CountryStatusDeprecated {
-		t.Errorf("expected country status 'deprecated', got '%s'", usa.Status)
+	if usa.Status != enum.CountryStatusUnsupported {
+		t.Errorf("expected country status 'Unsupported', got '%s'", usa.Status)
 	}
 
 	usa, err = s.domain.country.UpdateStatus(ctx, usa.ID, enum.CountryStatusSupported)

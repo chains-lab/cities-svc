@@ -29,7 +29,7 @@ func New(log logium.Logger, admin CityAdminSvc) Service {
 }
 
 type CityAdminSvc interface {
-	Get(ctx context.Context, filters admin.GetFilters) (models.CityAdminsWithUserData, error)
+	Get(ctx context.Context, filters admin.GetFilters) (models.CityAdmin, error)
 }
 
 func (s Service) Auth(userCtxKey interface{}, skUser string) func(http.Handler) http.Handler {

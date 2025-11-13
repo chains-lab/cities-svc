@@ -51,14 +51,14 @@ func Run(ctx context.Context, cfg internal.Config, log logium.Logger, m Middlewa
 	})
 
 	cityMod := m.CityAdminMember(meta.UserCtxKey, map[string]bool{
-		enum.CityAdminRoleExecutive: true,
+		enum.CityAdminRoleMember:    true,
 		enum.CityAdminRoleModerator: true,
 	})
 
 	cityStuff := m.CityAdminMember(meta.UserCtxKey, map[string]bool{
-		enum.CityAdminRoleExecutive: true,
+		enum.CityAdminRoleMember:    true,
 		enum.CityAdminRoleModerator: true,
-		enum.CityAdminMember:        true,
+		enum.CityAdminRoleMember:    true,
 	})
 
 	r := chi.NewRouter()

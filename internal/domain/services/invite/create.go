@@ -11,7 +11,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (s Service) Sent(
+func (s Service) Create(
 	ctx context.Context,
 	cityID, userID uuid.UUID,
 	role string,
@@ -25,7 +25,8 @@ func (s Service) Sent(
 		return models.Invite{}, errx.ErrorInvalidCityAdminRole.Raise(err)
 	}
 
-	if err = s.CityIsOfficialSupport(ctx, cityID); err != nil {
+	city, err := s.getOfficiality(ctx, cityID)
+	if err != nil {
 		return models.Invite{}, err
 	}
 
@@ -46,10 +47,17 @@ func (s Service) Sent(
 		)
 	}
 
-	err = s.event.PublishInviteCreated(ctx, invite)
+	admins, err := s.db.GetCityAdmins(ctx, cityID, enum.CityAdminRoleModerator)
 	if err != nil {
 		return models.Invite{}, errx.ErrorInternal.Raise(
-			fmt.Errorf("failed to publish invite created event, cause: %w", err),
+			fmt.Errorf("failed to get city admins for city %s, cause: %w", cityID, err),
+		)
+	}
+
+	err = s.event.PublishInviteCreated(ctx, invite, city, admins.GetUserIDs())
+	if err != nil {
+		return models.Invite{}, errx.ErrorInternal.Raise(
+			fmt.Errorf("failed to publish invite created events, cause: %w", err),
 		)
 	}
 

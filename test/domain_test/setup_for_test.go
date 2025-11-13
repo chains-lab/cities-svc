@@ -8,10 +8,10 @@ import (
 	"time"
 
 	"github.com/chains-lab/cities-svc/internal"
-	"github.com/chains-lab/cities-svc/internal/data"
 	"github.com/chains-lab/cities-svc/internal/domain/models"
 	"github.com/chains-lab/cities-svc/internal/domain/services/admin"
 	"github.com/chains-lab/cities-svc/internal/domain/services/city"
+	"github.com/chains-lab/cities-svc/internal/repo"
 	"github.com/chains-lab/cities-svc/internal/usrguesser"
 
 	"github.com/chains-lab/cities-svc/internal/domain/services/invite"
@@ -26,17 +26,17 @@ type CityModSvc interface {
 		ctx context.Context,
 		filters admin.FilterParams,
 		page, size uint64,
-	) (models.CityAdminsWithUserDataCollection, error)
+	) (models.CityAdminCollection, error)
 
-	Get(ctx context.Context, filters admin.GetFilters) (models.CityAdminWithUserData, error)
-	GetInitiator(ctx context.Context, initiatorID uuid.UUID) (models.CityAdminWithUserData, error)
+	Get(ctx context.Context, filters admin.GetFilters) (models.CityAdmin, error)
+	GetInitiator(ctx context.Context, initiatorID uuid.UUID) (models.CityAdmin, error)
 
 	RefuseOwn(ctx context.Context, userID uuid.UUID) error
 
 	Delete(ctx context.Context, UserID, CityID uuid.UUID) error
 
-	UpdateOther(ctx context.Context, UserID uuid.UUID, params admin.UpdateParams) (models.CityAdminWithUserData, error)
-	UpdateOwn(ctx context.Context, userID uuid.UUID, params admin.UpdateParams) (models.CityAdminWithUserData, error)
+	UpdateOther(ctx context.Context, UserID uuid.UUID, params admin.UpdateParams) (models.CityAdmin, error)
+	UpdateOwn(ctx context.Context, userID uuid.UUID, params admin.UpdateParams) (models.CityAdmin, error)
 }
 
 type CitySvc interface {
@@ -122,7 +122,7 @@ func newSetup(t *testing.T) (Setup, error) {
 		log.Fatal("failed to connect to database", "error", err)
 	}
 
-	database := data.NewDatabase(pg)
+	database := repo.NewDatabase(pg)
 
 	jwtInviteManager := jwtmanager.NewManager(cfg)
 	userGuesser := usrguesser.NewService(cfg.Profile.Url, nil)

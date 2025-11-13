@@ -31,6 +31,8 @@ type InviteDataAttributes struct {
 	CityId uuid.UUID `json:"city_id"`
 	// user id
 	UserId uuid.UUID `json:"user_id"`
+	// id of the user who initiated the invite
+	InitiatorId uuid.UUID `json:"initiator_id"`
 	// timestamp when the invite will expire
 	ExpiresAt time.Time `json:"expires_at"`
 	// timestamp when the invite was created
@@ -43,12 +45,13 @@ type _InviteDataAttributes InviteDataAttributes
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewInviteDataAttributes(status string, role string, cityId uuid.UUID, userId uuid.UUID, expiresAt time.Time, createdAt time.Time) *InviteDataAttributes {
+func NewInviteDataAttributes(status string, role string, cityId uuid.UUID, userId uuid.UUID, initiatorId uuid.UUID, expiresAt time.Time, createdAt time.Time) *InviteDataAttributes {
 	this := InviteDataAttributes{}
 	this.Status = status
 	this.Role = role
 	this.CityId = cityId
 	this.UserId = userId
+	this.InitiatorId = initiatorId
 	this.ExpiresAt = expiresAt
 	this.CreatedAt = createdAt
 	return &this
@@ -158,6 +161,30 @@ func (o *InviteDataAttributes) SetUserId(v uuid.UUID) {
 	o.UserId = v
 }
 
+// GetInitiatorId returns the InitiatorId field value
+func (o *InviteDataAttributes) GetInitiatorId() uuid.UUID {
+	if o == nil {
+		var ret uuid.UUID
+		return ret
+	}
+
+	return o.InitiatorId
+}
+
+// GetInitiatorIdOk returns a tuple with the InitiatorId field value
+// and a boolean to check if the value has been set.
+func (o *InviteDataAttributes) GetInitiatorIdOk() (*uuid.UUID, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.InitiatorId, true
+}
+
+// SetInitiatorId sets field value
+func (o *InviteDataAttributes) SetInitiatorId(v uuid.UUID) {
+	o.InitiatorId = v
+}
+
 // GetExpiresAt returns the ExpiresAt field value
 func (o *InviteDataAttributes) GetExpiresAt() time.Time {
 	if o == nil {
@@ -220,6 +247,7 @@ func (o InviteDataAttributes) ToMap() (map[string]interface{}, error) {
 	toSerialize["role"] = o.Role
 	toSerialize["city_id"] = o.CityId
 	toSerialize["user_id"] = o.UserId
+	toSerialize["initiator_id"] = o.InitiatorId
 	toSerialize["expires_at"] = o.ExpiresAt
 	toSerialize["created_at"] = o.CreatedAt
 	return toSerialize, nil
@@ -234,6 +262,7 @@ func (o *InviteDataAttributes) UnmarshalJSON(data []byte) (err error) {
 		"role",
 		"city_id",
 		"user_id",
+		"initiator_id",
 		"expires_at",
 		"created_at",
 	}

@@ -1,4 +1,4 @@
-package events
+package contracts
 
 import (
 	"encoding/json"
@@ -6,7 +6,7 @@ import (
 )
 
 type Envelope[T any] struct {
-	Event     string    `json:"event"`
+	Event     string    `json:"events"`
 	Version   string    `json:"version"`
 	Timestamp time.Time `json:"timestamp"`
 	Data      T         `json:"data"`

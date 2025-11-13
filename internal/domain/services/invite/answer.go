@@ -20,7 +20,8 @@ func (s Service) Answer(ctx context.Context, answerID, userID uuid.UUID, answer 
 	}
 
 	now := time.Now().UTC()
-	inv, err := s.GetInvite(ctx, answerID)
+
+	inv, err := s.Get(ctx, answerID)
 	if err != nil {
 		return models.Invite{}, err
 	}
@@ -36,33 +37,48 @@ func (s Service) Answer(ctx context.Context, answerID, userID uuid.UUID, answer 
 		)
 	}
 
-	adm, err := s.db.GetCityAdminByUserID(ctx, userID)
+	admin, err := s.db.GetCityAdminByUserID(ctx, userID)
 	if err != nil {
 		return models.Invite{}, errx.ErrorInternal.Raise(
 			fmt.Errorf("failed to get city admin by user_id %s and city_id %s, cause: %w", userID, inv.CityID, err),
 		)
 	}
-	if !adm.IsNil() {
-		return models.Invite{}, errx.ErrorUserIsAlreadyCityAdmin.Raise(
+	if !admin.IsNil() {
+		return models.Invite{}, errx.ErrorCityAdminAlreadyExists.Raise(
 			fmt.Errorf("city admin with user_id %s already exists in city_id %s", userID, inv.CityID),
 		)
 	}
 
-	err = s.CityIsOfficialSupport(ctx, inv.CityID)
+	city, err := s.getOfficiality(ctx, inv.CityID)
 	if err != nil {
 		return models.Invite{}, err
 	}
 
 	switch answer {
-	case enum.InviteStatusDeclined:
-		if err = s.db.UpdateInviteStatus(ctx, inv.ID, userID, enum.InviteStatusDeclined); err != nil {
-			return models.Invite{}, errx.ErrorInternal.Raise(
-				fmt.Errorf("failed to update invite status, cause: %w", err),
-			)
-		}
 	case enum.InviteStatusAccepted:
 		if err = s.db.Transaction(ctx, func(ctx context.Context) error {
-			adm = models.CityAdmin{
+			if inv.Role == enum.CityAdminRoleTechLead {
+				existingTechLead, err := s.db.GetCityAdminWithFilter(
+					ctx, nil, &inv.CityID, &inv.Role,
+				)
+				if err != nil {
+					return errx.ErrorInternal.Raise(
+						fmt.Errorf("failed to get existing tech lead for city %s, cause: %w", inv.CityID, err),
+					)
+				}
+
+				// Theoretically, it can be removed, but to avoid bugs, it is better not to touch it.
+				if !existingTechLead.IsNil() {
+					err = s.db.DeleteCityAdmin(ctx, existingTechLead.UserID, inv.CityID)
+					if err != nil {
+						return errx.ErrorInternal.Raise(
+							fmt.Errorf("failed to delete existing tech lead for city %s, cause: %w", inv.CityID, err),
+						)
+					}
+				}
+			}
+
+			admin = models.CityAdmin{
 				UserID:    userID,
 				CityID:    inv.CityID,
 				Role:      inv.Role,
@@ -70,7 +86,7 @@ func (s Service) Answer(ctx context.Context, answerID, userID uuid.UUID, answer 
 				UpdatedAt: now,
 			}
 
-			err = s.db.CreateCityAdmin(ctx, adm)
+			err = s.db.CreateCityAdmin(ctx, admin)
 			if err != nil {
 				return err
 			}
@@ -85,15 +101,42 @@ func (s Service) Answer(ctx context.Context, answerID, userID uuid.UUID, answer 
 			return models.Invite{}, err
 		}
 
-		err = s.event.PublishCityAdminCreated(ctx, adm)
+		admins, err := s.db.GetCityAdmins(ctx, inv.CityID, enum.CityAdminRoleModerator)
 		if err != nil {
 			return models.Invite{}, errx.ErrorInternal.Raise(
-				fmt.Errorf("failed to publish city admin created event, cause: %w", err),
+				fmt.Errorf("failed to get city admins for city %s, cause: %w", inv.CityID, err),
+			)
+		}
+
+		err = s.event.PublishCityAdminCreated(ctx, admin, city, append(admins.GetUserIDs(), userID))
+		if err != nil {
+			return models.Invite{}, errx.ErrorInternal.Raise(
+				fmt.Errorf("failed to publish city admin created events, cause: %w", err),
+			)
+		}
+
+		err = s.event.PublishInviteAccepted(ctx, inv, city, admin, []uuid.UUID{inv.InitiatorID})
+		if err != nil {
+			return models.Invite{}, errx.ErrorInternal.Raise(
+				fmt.Errorf("failed to publish invite accepted events, cause: %w", err),
+			)
+		}
+
+	case enum.InviteStatusDeclined:
+		if err = s.db.UpdateInviteStatus(ctx, inv.ID, userID, enum.InviteStatusDeclined); err != nil {
+			return models.Invite{}, errx.ErrorInternal.Raise(
+				fmt.Errorf("failed to update invite status, cause: %w", err),
+			)
+		}
+
+		if err = s.event.PublishInviteDeclined(ctx, inv, city, []uuid.UUID{inv.InitiatorID}); err != nil {
+			return models.Invite{}, errx.ErrorInternal.Raise(
+				fmt.Errorf("failed to publish invite declined events, cause: %w", err),
 			)
 		}
 	}
 
-	inv.Status = enum.InviteStatusAccepted
+	inv.Status = answer
 	inv.UserID = userID
 
 	return inv, nil

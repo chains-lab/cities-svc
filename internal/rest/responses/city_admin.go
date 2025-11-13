@@ -5,7 +5,7 @@ import (
 	"github.com/chains-lab/cities-svc/resources"
 )
 
-func CityAdmin(m models.CityAdminWithUserData) resources.CityAdmin {
+func CityAdmin(m models.CityAdmin) resources.CityAdmin {
 	return resources.CityAdmin{
 		Data: resources.CityAdminData{
 			Id:   m.Data.UserID,
@@ -23,7 +23,7 @@ func CityAdmin(m models.CityAdminWithUserData) resources.CityAdmin {
 	}
 }
 
-func CityAdminsCollection(ms models.CityAdminsWithUserDataCollection) resources.CityAdminsCollection {
+func CityAdminsCollection(ms models.CityAdminCollection) resources.CityAdminsCollection {
 	resp := resources.CityAdminsCollection{
 		Data: make([]resources.CityAdminData, 0, len(ms.Data)),
 		Links: resources.PaginationData{

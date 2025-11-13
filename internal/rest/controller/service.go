@@ -18,17 +18,17 @@ type CityModSvc interface {
 		ctx context.Context,
 		filters admin.FilterParams,
 		page, size uint64,
-	) (models.CityAdminsWithUserDataCollection, error)
+	) (models.CityAdminCollection, error)
 
-	Get(ctx context.Context, filters admin.GetFilters) (models.CityAdminWithUserData, error)
-	GetInitiator(ctx context.Context, initiatorID uuid.UUID) (models.CityAdminWithUserData, error)
+	Get(ctx context.Context, filters admin.GetFilters) (models.CityAdmin, error)
+	GetInitiator(ctx context.Context, initiatorID uuid.UUID) (models.CityAdmin, error)
 
 	RefuseOwn(ctx context.Context, userID uuid.UUID) error
 
 	Delete(ctx context.Context, UserID, CityID uuid.UUID) error
 
-	UpdateOther(ctx context.Context, UserID uuid.UUID, params admin.UpdateParams) (models.CityAdminWithUserData, error)
-	UpdateOwn(ctx context.Context, userID uuid.UUID, params admin.UpdateParams) (models.CityAdminWithUserData, error)
+	UpdateOther(ctx context.Context, UserID uuid.UUID, params admin.UpdateParams) (models.CityAdmin, error)
+	UpdateOwn(ctx context.Context, userID uuid.UUID, params admin.UpdateParams) (models.CityAdmin, error)
 }
 
 type CitySvc interface {
@@ -50,7 +50,7 @@ type CitySvc interface {
 }
 
 type inviteSvc interface {
-	Sent(
+	Create(
 		ctx context.Context,
 		cityID, userID uuid.UUID,
 		role string,

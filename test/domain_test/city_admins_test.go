@@ -14,7 +14,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func CreateHead(s Setup, t *testing.T, cityID, userID uuid.UUID) models.CityAdminsWithUserData {
+func CreateHead(s Setup, t *testing.T, cityID, userID uuid.UUID) models.CityAdmin {
 	inv, err := s.domain.invites.Create(
 		context.Background(),
 		enum.CityGovRoleExecutive,

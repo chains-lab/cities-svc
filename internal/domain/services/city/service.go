@@ -95,20 +95,38 @@ type database interface {
 	GetCityByID(ctx context.Context, id uuid.UUID) (models.City, error)
 	GetCityBySlug(ctx context.Context, slug string) (models.City, error)
 	GetCityByRadius(ctx context.Context, point orb.Point, radius uint64) (models.City, error)
+	GetCityAdmins(ctx context.Context, cityID uuid.UUID, roles ...string) (models.CityAdminsCollection, error)
 
 	FilterCities(ctx context.Context, filter FilterParams, page, size uint64) (models.CitiesCollection, error)
 
 	UpdateCity(ctx context.Context, id uuid.UUID, m UpdateParams, updatedAt time.Time) error
 	UpdateCityStatus(ctx context.Context, id uuid.UUID, status string, updatedAt time.Time) error
 
-	DeleteGovForCity(ctx context.Context, cityID uuid.UUID) error
+	DeleteAdminsForCity(ctx context.Context, cityID uuid.UUID) error
 }
 
 type event interface {
-	PublishCityCreated(ctx context.Context, city models.City) error
-	PublishCityUpdated(ctx context.Context, city models.City) error
+	PublishCityCreated(
+		ctx context.Context,
+		city models.City,
+	) error
+
+	PublishCityUpdated(
+		ctx context.Context,
+		city models.City,
+		recipients []uuid.UUID,
+	) error
+
+	PublishCityUpdatedStatus(
+		ctx context.Context,
+		city models.City,
+		status string,
+		recipients []uuid.UUID,
+	) error
 }
 
 func (s Service) CountryIsSupported(ctx context.Context, countryID string) error {
+	//TODO: in future
+
 	return nil
 }

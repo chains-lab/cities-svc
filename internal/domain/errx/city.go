@@ -9,3 +9,7 @@ var ErrorInvalidSlug = ape.DeclareError("INVALID_SLUG")
 var ErrorCityAlreadyExistsWithThisSlug = ape.DeclareError("CITY_ALREADY_EXISTS_WITH_THIS_SLUG")
 
 var ErrorInvalidCityName = ape.DeclareError("INVALID_CITY_NAME")
+
+var ErrorCityIsNotSupported = ape.DeclareError("CITY_IS_NOT_SUPPORTED")
+
+var ErrorInvalidCityStatus = ape.DeclareError("INVALID_CITY_STATUS")

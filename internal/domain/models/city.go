@@ -8,17 +8,17 @@ import (
 )
 
 type City struct {
-	ID        uuid.UUID
-	CountryID string
-	Point     orb.Point // [lon, lat]
-	Status    string
-	Name      string
-	Icon      *string
-	Slug      *string
-	Timezone  string
+	ID        uuid.UUID `json:"id"`
+	CountryID string    `json:"country_id"`
+	Point     orb.Point `json:"point"` // [lon, lat]
+	Status    string    `json:"status"`
+	Name      string    `json:"name"`
+	Icon      *string   `json:"icon,omitempty"`
+	Slug      *string   `json:"slug,omitempty"`
+	Timezone  string    `json:"timezone"`
 
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 func (c City) IsNil() bool {

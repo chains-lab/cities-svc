@@ -13,13 +13,13 @@ import (
 const CityAdminsTable = "city_admins"
 
 type CityAdmin struct {
-	UserID    uuid.UUID      `db:"user_id"`
-	CityID    uuid.UUID      `db:"city_id"`
-	Role      string         `db:"role"`
-	Position  sql.NullString `db:"position"`
-	Label     sql.NullString `db:"label"`
-	CreatedAt time.Time      `db:"created_at"`
-	UpdatedAt time.Time      `db:"updated_at"`
+	UserID    uuid.UUID `db:"user_id"`
+	CityID    uuid.UUID `db:"city_id"`
+	Role      string    `db:"role"`
+	Position  *string   `db:"position"`
+	Label     *string   `db:"label"`
+	CreatedAt time.Time `db:"created_at"`
+	UpdatedAt time.Time `db:"updated_at"`
 }
 
 type CityAdminsQ struct {
@@ -62,10 +62,11 @@ func (q CityAdminsQ) Insert(ctx context.Context, in CityAdmin) error {
 		"city_id": in.CityID,
 		"role":    in.Role,
 	}
-	if in.Position.Valid {
+
+	if in.Position != nil {
 		values["position"] = in.Position
 	}
-	if in.Label.Valid {
+	if in.Label != nil {
 		values["label"] = in.Label
 	}
 	if !in.CreatedAt.IsZero() {
@@ -229,7 +230,7 @@ func (q CityAdminsQ) FilterRole(role ...string) CityAdminsQ {
 	return q
 }
 
-// FilterCountryID deprecated: this method is commented out and should not be used.
+// FilterCountryID Unsupported: this method is commented out and should not be used.
 func (q CityAdminsQ) FilterCountryID(countryID string) CityAdminsQ {
 	join := fmt.Sprintf("LEFT JOIN %s c ON c.id = cg.city_id", citiesTable)
 	q.selector = q.selector.LeftJoin(join).Where(sq.Eq{"c.country_id": countryID})
