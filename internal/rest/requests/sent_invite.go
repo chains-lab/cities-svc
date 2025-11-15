@@ -22,7 +22,7 @@ func CreateInvite(r *http.Request) (req resources.SentInvite, err error) {
 	}
 
 	errs := validation.Errors{
-		"data/type":       validation.Validate(req.Data.Type, validation.Required, validation.In(resources.CreateInviteType)),
+		"data/type":       validation.Validate(req.Data.Type, validation.Required, validation.In(resources.InviteType)),
 		"data/attributes": validation.Validate(req.Data.Attributes, validation.Required),
 	}
 

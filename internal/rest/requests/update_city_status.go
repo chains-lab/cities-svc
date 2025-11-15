@@ -18,7 +18,7 @@ func UpdateCityStatus(r *http.Request) (req resources.UpdateCityStatus, err erro
 
 	errs := validation.Errors{
 		"data/id":         validation.Validate(req.Data.Id, validation.Required),
-		"data/type":       validation.Validate(req.Data.Type, validation.Required, validation.In(resources.UpdateCityStatusType)),
+		"data/type":       validation.Validate(req.Data.Type, validation.Required, validation.In(resources.CityType)),
 		"data/attributes": validation.Validate(req.Data.Attributes, validation.Required),
 	}
 

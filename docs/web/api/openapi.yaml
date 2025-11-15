@@ -40,6 +40,12 @@ components:
           $ref: "#/components/schemas/UpdateOwnAdmin_data"
       required:
       - data
+    UpdateCityAdmin:
+      properties:
+        data:
+          $ref: "#/components/schemas/UpdateCityAdmin_data"
+      required:
+      - data
     SentInvite:
       properties:
         data:
@@ -141,7 +147,7 @@ components:
           type: string
         type:
           enum:
-          - city_moderator
+          - city_admin
           type: string
         attributes:
           $ref: "#/components/schemas/CityAdminAttributes"
@@ -157,9 +163,6 @@ components:
         city_id:
           description: city id
           format: uuid
-          type: string
-        avatar:
-          description: optional avatar url for the user in this city
           type: string
         role:
           description: role of the user in this city
@@ -183,7 +186,6 @@ components:
       - created_at
       - role
       - updated_at
-      - username
     CityAdminsCollection:
       properties:
         data:
@@ -254,6 +256,9 @@ components:
         name:
           description: city name
           type: string
+        status:
+          description: city status
+          type: string
         point:
           $ref: "#/components/schemas/Point"
         timezone:
@@ -264,6 +269,7 @@ components:
       - country_id
       - name
       - point
+      - status
       - timezone
     CreateCity_data:
       properties:
@@ -362,6 +368,33 @@ components:
       - attributes
       - id
       - type
+    UpdateCityAdmin_data_attributes:
+      properties:
+        role:
+          description: optional role
+          type: string
+        label:
+          description: optional label for the user in this city
+          type: string
+        position:
+          description: optional position for the user in this city
+          type: string
+    UpdateCityAdmin_data:
+      properties:
+        id:
+          description: user id
+          format: uuid
+          type: string
+        type:
+          enum:
+          - city_admin
+          type: string
+        attributes:
+          $ref: "#/components/schemas/UpdateCityAdmin_data_attributes"
+      required:
+      - attributes
+      - id
+      - type
     SentInvite_data_attributes:
       properties:
         city_id:
@@ -387,7 +420,7 @@ components:
           type: string
         type:
           enum:
-          - sent_invite
+          - city_invite
           type: string
         attributes:
           $ref: "#/components/schemas/SentInvite_data_attributes"
@@ -465,7 +498,7 @@ components:
           type: string
         type:
           enum:
-          - invite_city_gov
+          - city_invite
           type: string
         attributes:
           $ref: "#/components/schemas/Invite_data_attributes"

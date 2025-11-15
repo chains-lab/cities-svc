@@ -6,6 +6,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **CountryId** | **string** | country id | 
 **Name** | **string** | city name | 
+**Status** | **string** | city status | 
 **Point** | [**Point**](Point.md) |  | 
 **Timezone** | **string** | city timezone | 
 
@@ -13,7 +14,7 @@ Name | Type | Description | Notes
 
 ### NewCreateCityDataAttributes
 
-`func NewCreateCityDataAttributes(countryId string, name string, point Point, timezone string, ) *CreateCityDataAttributes`
+`func NewCreateCityDataAttributes(countryId string, name string, status string, point Point, timezone string, ) *CreateCityDataAttributes`
 
 NewCreateCityDataAttributes instantiates a new CreateCityDataAttributes object
 This constructor will assign default values to properties that have it defined,
@@ -66,6 +67,26 @@ and a boolean to check if the value has been set.
 `func (o *CreateCityDataAttributes) SetName(v string)`
 
 SetName sets Name field to given value.
+
+
+### GetStatus
+
+`func (o *CreateCityDataAttributes) GetStatus() string`
+
+GetStatus returns the Status field if non-nil, zero value otherwise.
+
+### GetStatusOk
+
+`func (o *CreateCityDataAttributes) GetStatusOk() (*string, bool)`
+
+GetStatusOk returns a tuple with the Status field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetStatus
+
+`func (o *CreateCityDataAttributes) SetStatus(v string)`
+
+SetStatus sets Status field to given value.
 
 
 ### GetPoint

@@ -102,6 +102,8 @@ type database interface {
 	UpdateCity(ctx context.Context, id uuid.UUID, m UpdateParams, updatedAt time.Time) error
 	UpdateCityStatus(ctx context.Context, id uuid.UUID, status string, updatedAt time.Time) error
 
+	GetCityAdminByUserID(ctx context.Context, userID uuid.UUID) (models.CityAdmin, error)
+
 	DeleteAdminsForCity(ctx context.Context, cityID uuid.UUID) error
 }
 
@@ -114,14 +116,14 @@ type event interface {
 	PublishCityUpdated(
 		ctx context.Context,
 		city models.City,
-		recipients []uuid.UUID,
+		recipients ...uuid.UUID,
 	) error
 
 	PublishCityUpdatedStatus(
 		ctx context.Context,
 		city models.City,
 		status string,
-		recipients []uuid.UUID,
+		recipients ...uuid.UUID,
 	) error
 }
 
@@ -129,4 +131,21 @@ func (s Service) CountryIsSupported(ctx context.Context, countryID string) error
 	//TODO: in future
 
 	return nil
+}
+
+func (s Service) getInitiator(ctx context.Context, initiatorID uuid.UUID) (models.CityAdmin, error) {
+	res, err := s.db.GetCityAdminByUserID(ctx, initiatorID)
+	if err != nil {
+		return models.CityAdmin{}, errx.ErrorInternal.Raise(
+			fmt.Errorf("failed to get city admin, cause: %w", err),
+		)
+	}
+
+	if res.IsNil() {
+		return models.CityAdmin{}, errx.ErrorInitiatorIsNotCityAdmin.Raise(
+			fmt.Errorf("city admin not found"),
+		)
+	}
+
+	return res, nil
 }

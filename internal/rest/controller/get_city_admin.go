@@ -14,10 +14,10 @@ import (
 	"github.com/google/uuid"
 )
 
-func (a Service) GetCityAdmin(w http.ResponseWriter, r *http.Request) {
+func (s Service) GetCityAdmin(w http.ResponseWriter, r *http.Request) {
 	userID, err := uuid.Parse(chi.URLParam(r, "user_id"))
 	if err != nil {
-		a.log.WithError(err).Error("invalid user_id")
+		s.log.WithError(err).Error("invalid user_id")
 		ape.RenderErr(w, problems.BadRequest(validation.Errors{
 			"user_id": err,
 		})...)
@@ -25,9 +25,9 @@ func (a Service) GetCityAdmin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res, err := a.domain.moder.Get(r.Context(), admin.GetFilters{UserID: &userID})
+	res, err := s.domain.admin.Get(r.Context(), admin.GetFilters{UserID: &userID})
 	if err != nil {
-		a.log.WithError(err).Error("failed to get admin")
+		s.log.WithError(err).Error("failed to get admin")
 		switch {
 		case errors.Is(err, errx.ErrorCityAdminNotFound):
 			ape.RenderErr(w, problems.NotFound("city adminernment not found"))

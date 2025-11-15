@@ -8,22 +8,21 @@ import (
 func CityAdmin(m models.CityAdmin) resources.CityAdmin {
 	return resources.CityAdmin{
 		Data: resources.CityAdminData{
-			Id:   m.Data.UserID,
-			Type: resources.GovType,
+			Id:   m.UserID,
+			Type: resources.CityAdminType,
 			Attributes: resources.CityAdminAttributes{
-				CityId:    m.Data.CityID,
-				Label:     m.Data.Label,
-				Username:  m.Username,
-				Avatar:    m.Avatar,
-				Role:      m.Data.Role,
-				CreatedAt: m.Data.CreatedAt,
-				UpdatedAt: m.Data.UpdatedAt,
+				CityId:    m.CityID,
+				Label:     m.Label,
+				Position:  m.Position,
+				Role:      m.Role,
+				CreatedAt: m.CreatedAt,
+				UpdatedAt: m.UpdatedAt,
 			},
 		},
 	}
 }
 
-func CityAdminsCollection(ms models.CityAdminCollection) resources.CityAdminsCollection {
+func CityAdminsCollection(ms models.CityAdminsCollection) resources.CityAdminsCollection {
 	resp := resources.CityAdminsCollection{
 		Data: make([]resources.CityAdminData, 0, len(ms.Data)),
 		Links: resources.PaginationData{

@@ -31,6 +31,9 @@ docs/SentInviteData.md
 docs/SentInviteDataAttributes.md
 docs/TestAPI.md
 docs/UpdateCity.md
+docs/UpdateCityAdmin.md
+docs/UpdateCityAdminData.md
+docs/UpdateCityAdminDataAttributes.md
 docs/UpdateCityData.md
 docs/UpdateCityDataAttributes.md
 docs/UpdateCityStatus.md
@@ -67,6 +70,9 @@ model_sent_invite.go
 model_sent_invite_data.go
 model_sent_invite_data_attributes.go
 model_update_city.go
+model_update_city_admin.go
+model_update_city_admin_data.go
+model_update_city_admin_data_attributes.go
 model_update_city_data.go
 model_update_city_data_attributes.go
 model_update_city_status.go

@@ -10,6 +10,6 @@ properties:
     description: "invite id"
   type:
     type: string
-    enum: [ invite_city_gov ]
+    enum: [ city_invite ]
   attributes:
     $ref: './InviteAttributes.yaml'

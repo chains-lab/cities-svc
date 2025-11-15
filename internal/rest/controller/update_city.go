@@ -16,10 +16,10 @@ import (
 	"github.com/paulmach/orb"
 )
 
-func (a Service) UpdateCity(w http.ResponseWriter, r *http.Request) {
+func (s Service) UpdateCity(w http.ResponseWriter, r *http.Request) {
 	initiator, err := meta.User(r.Context())
 	if err != nil {
-		a.log.WithError(err).Error("failed to get user from context")
+		s.log.WithError(err).Error("failed to get user from context")
 		ape.RenderErr(w, problems.Unauthorized("failed to get user from context"))
 
 		return
@@ -27,7 +27,7 @@ func (a Service) UpdateCity(w http.ResponseWriter, r *http.Request) {
 
 	req, err := requests.UpdateCity(r)
 	if err != nil {
-		a.log.WithError(err).Error("failed to parse update city request")
+		s.log.WithError(err).Error("failed to parse update city request")
 		ape.RenderErr(w, problems.BadRequest(err)...)
 
 		return
@@ -54,9 +54,9 @@ func (a Service) UpdateCity(w http.ResponseWriter, r *http.Request) {
 		param.Slug = req.Data.Attributes.Slug
 	}
 
-	res, err := a.domain.city.Update(r.Context(), req.Data.Id, param)
+	res, err := s.domain.city.Update(r.Context(), req.Data.Id, initiator.ID, param)
 	if err != nil {
-		a.log.WithError(err).Error("failed to update city")
+		s.log.WithError(err).Error("failed to update city")
 		switch {
 		case errors.Is(err, errx.ErrorCityNotFound):
 			ape.RenderErr(w, problems.NotFound("city not found"))
@@ -86,7 +86,7 @@ func (a Service) UpdateCity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	a.log.Infof("city %s updated by user %s", res.ID, initiator.ID)
+	s.log.Infof("city %s updated by user %s", res.ID, initiator.ID)
 
 	ape.Render(w, http.StatusOK, responses.City(res))
 }

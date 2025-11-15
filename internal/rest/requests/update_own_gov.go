@@ -16,7 +16,7 @@ func UpdateOwnAdmin(r *http.Request) (req resources.UpdateOwnAdmin, err error) {
 
 	errs := validation.Errors{
 		"data/id":         validation.Validate(req.Data.Id, validation.Required),
-		"data/type":       validation.Validate(req.Data.Type, validation.Required, validation.In(resources.UpdateOwnGovType)),
+		"data/type":       validation.Validate(req.Data.Type, validation.Required, validation.In(resources.CityAdminType)),
 		"data/attributes": validation.Validate(req.Data.Attributes, validation.Required),
 	}
 	return req, errs.Filter()

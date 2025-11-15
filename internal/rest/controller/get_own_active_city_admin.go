@@ -11,18 +11,18 @@ import (
 	"github.com/chains-lab/cities-svc/internal/rest/responses"
 )
 
-func (a Service) GetMyCityAdmin(w http.ResponseWriter, r *http.Request) {
+func (s Service) GetMyCityAdmin(w http.ResponseWriter, r *http.Request) {
 	initiator, err := meta.User(r.Context())
 	if err != nil {
-		a.log.WithError(err).Error("failed to get user from context")
+		s.log.WithError(err).Error("failed to get user from context")
 		ape.RenderErr(w, problems.Unauthorized("failed to get user from context"))
 
 		return
 	}
 
-	res, err := a.domain.moder.GetInitiator(r.Context(), initiator.ID)
+	res, err := s.domain.admin.GetInitiator(r.Context(), initiator.ID)
 	if err != nil {
-		a.log.WithError(err).Error("failed to get own active admin")
+		s.log.WithError(err).Error("failed to get own active admin")
 
 		switch {
 		case errors.Is(err, errx.ErrorInitiatorIsNotCityAdmin):

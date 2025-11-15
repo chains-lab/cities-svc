@@ -17,7 +17,7 @@ import (
 	"github.com/paulmach/orb"
 )
 
-func (a Service) ListCities(w http.ResponseWriter, r *http.Request) {
+func (s Service) ListCities(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	q := r.URL.Query()
 
@@ -99,9 +99,9 @@ func (a Service) ListCities(w http.ResponseWriter, r *http.Request) {
 
 	page, size := pagi.GetPagination(r)
 
-	cities, err := a.domain.city.Filter(ctx, filters, page, size)
+	cities, err := s.domain.city.Filter(ctx, filters, page, size)
 	if err != nil {
-		a.log.WithError(err).Error("failed to search cities")
+		s.log.WithError(err).Error("failed to search cities")
 		switch {
 		default:
 			ape.RenderErr(w, problems.InternalError())

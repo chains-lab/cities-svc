@@ -13,10 +13,10 @@ import (
 	"github.com/google/uuid"
 )
 
-func (a Service) GetCity(w http.ResponseWriter, r *http.Request) {
+func (s Service) GetCity(w http.ResponseWriter, r *http.Request) {
 	cityID, err := uuid.Parse(chi.URLParam(r, "city_id"))
 	if err != nil {
-		a.log.WithError(err).Error("invalid city_id")
+		s.log.WithError(err).Error("invalid city_id")
 		ape.RenderErr(w, problems.BadRequest(validation.Errors{
 			"city_id": err,
 		})...)
@@ -24,9 +24,9 @@ func (a Service) GetCity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	city, err := a.domain.city.GetByID(r.Context(), cityID)
+	city, err := s.domain.city.GetByID(r.Context(), cityID)
 	if err != nil {
-		a.log.WithError(err).Error("failed to get city")
+		s.log.WithError(err).Error("failed to get city")
 		switch {
 		case errors.Is(err, errx.ErrorCityNotFound):
 			ape.RenderErr(w, problems.NotFound("city not found"))

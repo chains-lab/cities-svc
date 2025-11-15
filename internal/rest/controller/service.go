@@ -13,22 +13,39 @@ import (
 	"github.com/paulmach/orb"
 )
 
-type CityModSvc interface {
+type CityAdminSvc interface {
 	Filter(
 		ctx context.Context,
 		filters admin.FilterParams,
 		page, size uint64,
-	) (models.CityAdminCollection, error)
+	) (models.CityAdminsCollection, error)
 
 	Get(ctx context.Context, filters admin.GetFilters) (models.CityAdmin, error)
 	GetInitiator(ctx context.Context, initiatorID uuid.UUID) (models.CityAdmin, error)
 
-	RefuseOwn(ctx context.Context, userID uuid.UUID) error
+	DeleteOwn(ctx context.Context, userID uuid.UUID) error
 
-	Delete(ctx context.Context, UserID, CityID uuid.UUID) error
+	Delete(ctx context.Context, userID, cityID, initiatorID uuid.UUID) error
+	DeleteBySysAdmin(ctx context.Context, userID, cityID uuid.UUID) error
 
-	UpdateOther(ctx context.Context, UserID uuid.UUID, params admin.UpdateParams) (models.CityAdmin, error)
-	UpdateOwn(ctx context.Context, userID uuid.UUID, params admin.UpdateParams) (models.CityAdmin, error)
+	Update(
+		ctx context.Context,
+		userID uuid.UUID,
+		initiatorID uuid.UUID,
+		params admin.UpdateParams,
+	) (models.CityAdmin, error)
+
+	UpdateBySysAdmin(
+		ctx context.Context,
+		userID uuid.UUID,
+		params admin.UpdateParams,
+	) (models.CityAdmin, error)
+
+	UpdateOwn(
+		ctx context.Context,
+		userID uuid.UUID,
+		params admin.UpdateOwnParams,
+	) (models.CityAdmin, error)
 }
 
 type CitySvc interface {
@@ -44,15 +61,24 @@ type CitySvc interface {
 	GetByRadius(ctx context.Context, point orb.Point, radius uint64) (models.City, error)
 	GetBySlug(ctx context.Context, slug string) (models.City, error)
 
-	UpdateStatus(ctx context.Context, cityID uuid.UUID, status string) (models.City, error)
+	UpdateStatus(ctx context.Context, cityID, initiatorID uuid.UUID, status string) (models.City, error)
+	UpdateStatusBySysAdmin(ctx context.Context, cityID uuid.UUID, status string) (models.City, error)
 
-	Update(ctx context.Context, cityID uuid.UUID, params city.UpdateParams) (models.City, error)
+	Update(ctx context.Context, cityID, initiatorID uuid.UUID, params city.UpdateParams) (models.City, error)
+	UpdateAdmin(ctx context.Context, cityID uuid.UUID, params city.UpdateParams) (models.City, error)
 }
 
 type inviteSvc interface {
+	CreateBySysAdmin(
+		ctx context.Context,
+		userID, cityID uuid.UUID,
+		role string,
+		duration time.Duration,
+	) (models.Invite, error)
+
 	Create(
 		ctx context.Context,
-		cityID, userID uuid.UUID,
+		userID, cityID, initiatorID uuid.UUID,
 		role string,
 		duration time.Duration,
 	) (models.Invite, error)
@@ -65,7 +91,7 @@ type inviteSvc interface {
 }
 
 type domain struct {
-	moder  CityModSvc
+	admin  CityAdminSvc
 	city   CitySvc
 	invite inviteSvc
 }
@@ -75,12 +101,12 @@ type Service struct {
 	log    logium.Logger
 }
 
-func New(log logium.Logger, city CitySvc, cityMod CityModSvc, invSvc inviteSvc) Service {
+func New(log logium.Logger, city CitySvc, cityMod CityAdminSvc, invSvc inviteSvc) Service {
 	return Service{
 		log: log,
 		domain: domain{
 			city:   city,
-			moder:  cityMod,
+			admin:  cityMod,
 			invite: invSvc,
 		},
 	}

@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/chains-lab/cities-svc/internal"
-	"github.com/chains-lab/cities-svc/internal/domain/enum"
 	"github.com/chains-lab/cities-svc/internal/rest/meta"
 	"github.com/chains-lab/logium"
 	"github.com/chains-lab/restkit/roles"
@@ -29,6 +28,7 @@ type Handlers interface {
 	DeleteCityAdmin(w http.ResponseWriter, r *http.Request)
 
 	GetMyCityAdmin(w http.ResponseWriter, r *http.Request)
+	UpdateCityAdmin(w http.ResponseWriter, r *http.Request)
 	UpdateMyCityAdmin(w http.ResponseWriter, r *http.Request)
 	RefuseMyCityAdmin(w http.ResponseWriter, r *http.Request)
 }
@@ -36,29 +36,13 @@ type Handlers interface {
 type Middlewares interface {
 	Auth(userCtxKey interface{}, skUser string) func(http.Handler) http.Handler
 	RoleGrant(userCtxKey interface{}, allowedRoles map[string]bool) func(http.Handler) http.Handler
-
-	CityAdminMember(
-		UserCtxKey interface{},
-		AllowedAdminRoles map[string]bool,
-	) func(http.Handler) http.Handler
 }
 
 func Run(ctx context.Context, cfg internal.Config, log logium.Logger, m Middlewares, h Handlers) {
 	auth := m.Auth(meta.UserCtxKey, cfg.JWT.User.AccessToken.SecretKey)
 
 	sysadmin := m.RoleGrant(meta.UserCtxKey, map[string]bool{
-		roles.Admin: true,
-	})
-
-	cityMod := m.CityAdminMember(meta.UserCtxKey, map[string]bool{
-		enum.CityAdminRoleMember:    true,
-		enum.CityAdminRoleModerator: true,
-	})
-
-	cityStuff := m.CityAdminMember(meta.UserCtxKey, map[string]bool{
-		enum.CityAdminRoleMember:    true,
-		enum.CityAdminRoleModerator: true,
-		enum.CityAdminRoleMember:    true,
+		roles.SystemAdmin: true,
 	})
 
 	r := chi.NewRouter()
@@ -75,18 +59,18 @@ func Run(ctx context.Context, cfg internal.Config, log logium.Logger, m Middlewa
 				r.Route("/{city_id}", func(r chi.Router) {
 					r.Get("/", h.GetCity)
 
-					r.With(auth, cityMod).Put("/", h.UpdateCity)
+					r.With(auth).Put("/", h.UpdateCity)
 					r.With(auth, sysadmin).Patch("/status", h.UpdateCityStatus)
 
 					r.Route("/admins", func(r chi.Router) {
 						r.Get("/", h.ListAdmins)
 
 						r.With(auth).Route("/invite", func(r chi.Router) {
-							r.With(cityMod).Post("/", h.SentInvite)
+							r.Post("/", h.SentInvite)
 							r.Post("/", h.AnswerInvite)
 						})
 
-						r.With(auth, cityStuff).Route("/me", func(r chi.Router) {
+						r.With(auth).Route("/me", func(r chi.Router) {
 							r.Get("/", h.GetMyCityAdmin)
 							r.Put("/", h.UpdateMyCityAdmin)
 							r.Delete("/", h.RefuseMyCityAdmin)
@@ -94,7 +78,8 @@ func Run(ctx context.Context, cfg internal.Config, log logium.Logger, m Middlewa
 
 						r.Route("/{user_id}", func(r chi.Router) {
 							r.Get("/", h.GetCityAdmin)
-							r.With(auth, cityMod).Delete("/", h.DeleteCityAdmin)
+							r.With(auth).Put("/", h.UpdateCityAdmin)
+							r.With(auth).Delete("/", h.DeleteCityAdmin)
 						})
 					})
 				})

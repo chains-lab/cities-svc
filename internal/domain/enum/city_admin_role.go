@@ -40,7 +40,7 @@ func GetAllCityAdminRoles() []string {
 	return citiesAdminRoles
 }
 
-func RightTechPolitics(first, second string) bool {
+func RightCityAdminsTechPolitics(first, second string) bool {
 	switch first {
 	case CityAdminRoleModerator:
 		if second != CityAdminRoleTechLead && second != CityAdminRoleChief {

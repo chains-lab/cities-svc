@@ -49,7 +49,7 @@ func (s Service) Answer(ctx context.Context, answerID, userID uuid.UUID, answer 
 		)
 	}
 
-	city, err := s.getOfficiality(ctx, inv.CityID)
+	city, err := s.getSupportedCity(ctx, inv.CityID)
 	if err != nil {
 		return models.Invite{}, err
 	}
@@ -108,14 +108,14 @@ func (s Service) Answer(ctx context.Context, answerID, userID uuid.UUID, answer 
 			)
 		}
 
-		err = s.event.PublishCityAdminCreated(ctx, admin, city, append(admins.GetUserIDs(), userID))
+		err = s.event.PublishCityAdminCreated(ctx, admin, city, append(admins.GetUserIDs(), userID)...)
 		if err != nil {
 			return models.Invite{}, errx.ErrorInternal.Raise(
 				fmt.Errorf("failed to publish city admin created events, cause: %w", err),
 			)
 		}
 
-		err = s.event.PublishInviteAccepted(ctx, inv, city, admin, []uuid.UUID{inv.InitiatorID})
+		err = s.event.PublishInviteAccepted(ctx, inv, city, admin, inv.InitiatorID)
 		if err != nil {
 			return models.Invite{}, errx.ErrorInternal.Raise(
 				fmt.Errorf("failed to publish invite accepted events, cause: %w", err),
@@ -129,7 +129,7 @@ func (s Service) Answer(ctx context.Context, answerID, userID uuid.UUID, answer 
 			)
 		}
 
-		if err = s.event.PublishInviteDeclined(ctx, inv, city, []uuid.UUID{inv.InitiatorID}); err != nil {
+		if err = s.event.PublishInviteDeclined(ctx, inv, city, inv.InitiatorID); err != nil {
 			return models.Invite{}, errx.ErrorInternal.Raise(
 				fmt.Errorf("failed to publish invite declined events, cause: %w", err),
 			)

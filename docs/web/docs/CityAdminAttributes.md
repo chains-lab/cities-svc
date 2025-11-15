@@ -4,9 +4,8 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Username** | **string** | username of the user | 
+**Username** | Pointer to **string** | username of the user | [optional] 
 **CityId** | [**uuid.UUID**](uuid.UUID.md) | city id | 
-**Avatar** | Pointer to **string** | optional avatar url for the user in this city | [optional] 
 **Role** | **string** | role of the user in this city | 
 **Position** | Pointer to **string** | optional position for the user in this city | [optional] 
 **Label** | Pointer to **string** | optional label for the user in this city | [optional] 
@@ -17,7 +16,7 @@ Name | Type | Description | Notes
 
 ### NewCityAdminAttributes
 
-`func NewCityAdminAttributes(username string, cityId uuid.UUID, role string, createdAt time.Time, updatedAt time.Time, ) *CityAdminAttributes`
+`func NewCityAdminAttributes(cityId uuid.UUID, role string, createdAt time.Time, updatedAt time.Time, ) *CityAdminAttributes`
 
 NewCityAdminAttributes instantiates a new CityAdminAttributes object
 This constructor will assign default values to properties that have it defined,
@@ -51,6 +50,11 @@ and a boolean to check if the value has been set.
 
 SetUsername sets Username field to given value.
 
+### HasUsername
+
+`func (o *CityAdminAttributes) HasUsername() bool`
+
+HasUsername returns a boolean if a field has been set.
 
 ### GetCityId
 
@@ -71,31 +75,6 @@ and a boolean to check if the value has been set.
 
 SetCityId sets CityId field to given value.
 
-
-### GetAvatar
-
-`func (o *CityAdminAttributes) GetAvatar() string`
-
-GetAvatar returns the Avatar field if non-nil, zero value otherwise.
-
-### GetAvatarOk
-
-`func (o *CityAdminAttributes) GetAvatarOk() (*string, bool)`
-
-GetAvatarOk returns a tuple with the Avatar field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetAvatar
-
-`func (o *CityAdminAttributes) SetAvatar(v string)`
-
-SetAvatar sets Avatar field to given value.
-
-### HasAvatar
-
-`func (o *CityAdminAttributes) HasAvatar() bool`
-
-HasAvatar returns a boolean if a field has been set.
 
 ### GetRole
 

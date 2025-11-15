@@ -15,7 +15,7 @@ func CreateCity(r *http.Request) (req resources.CreateCity, err error) {
 	}
 
 	errs := validation.Errors{
-		"data/type":       validation.Validate(req.Data.Type, validation.Required, validation.In(resources.CreateCityType)),
+		"data/type":       validation.Validate(req.Data.Type, validation.Required, validation.In(resources.CityType)),
 		"data/attributes": validation.Validate(req.Data.Attributes, validation.Required),
 	}
 	return req, errs.Filter()

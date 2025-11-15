@@ -16,6 +16,7 @@ properties:
         required:
           - country_id
           - name
+          - status
           - point
           - timezone
         properties:
@@ -25,6 +26,9 @@ properties:
           name:
             type: string
             description: "city name"
+          status:
+            type: string
+            description: "city status"
           point:
             $ref: './Point.yaml'
           timezone:

@@ -47,21 +47,21 @@ type EventPublisher interface {
 		ctx context.Context,
 		admin models.CityAdmin,
 		city models.City,
-		recipients []uuid.UUID,
+		recipients ...uuid.UUID,
 	) error
 
 	PublishCityAdminUpdated(
 		ctx context.Context,
 		admin models.CityAdmin,
 		city models.City,
-		recipients []uuid.UUID,
+		recipients ...uuid.UUID,
 	) error
 
 	PublishCityAdminDeleted(
 		ctx context.Context,
 		admin models.CityAdmin,
 		city models.City,
-		recipients []uuid.UUID,
+		recipients ...uuid.UUID,
 	) error
 }
 

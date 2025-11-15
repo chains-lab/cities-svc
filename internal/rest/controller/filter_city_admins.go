@@ -12,7 +12,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (a Service) ListAdmins(w http.ResponseWriter, r *http.Request) {
+func (s Service) ListAdmins(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	q := r.URL.Query()
 
@@ -33,9 +33,9 @@ func (a Service) ListAdmins(w http.ResponseWriter, r *http.Request) {
 
 	page, size := pagi.GetPagination(r)
 
-	admins, err := a.domain.moder.Filter(ctx, filters, page, size)
+	admins, err := s.domain.admin.Filter(ctx, filters, page, size)
 	if err != nil {
-		a.log.WithError(err).Error("failed to search admins")
+		s.log.WithError(err).Error("failed to search admins")
 		switch {
 		default:
 			ape.RenderErr(w, problems.InternalError())

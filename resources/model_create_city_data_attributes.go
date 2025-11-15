@@ -25,6 +25,8 @@ type CreateCityDataAttributes struct {
 	CountryId string `json:"country_id"`
 	// city name
 	Name string `json:"name"`
+	// city status
+	Status string `json:"status"`
 	Point Point `json:"point"`
 	// city timezone
 	Timezone string `json:"timezone"`
@@ -36,10 +38,11 @@ type _CreateCityDataAttributes CreateCityDataAttributes
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCreateCityDataAttributes(countryId string, name string, point Point, timezone string) *CreateCityDataAttributes {
+func NewCreateCityDataAttributes(countryId string, name string, status string, point Point, timezone string) *CreateCityDataAttributes {
 	this := CreateCityDataAttributes{}
 	this.CountryId = countryId
 	this.Name = name
+	this.Status = status
 	this.Point = point
 	this.Timezone = timezone
 	return &this
@@ -99,6 +102,30 @@ func (o *CreateCityDataAttributes) GetNameOk() (*string, bool) {
 // SetName sets field value
 func (o *CreateCityDataAttributes) SetName(v string) {
 	o.Name = v
+}
+
+// GetStatus returns the Status field value
+func (o *CreateCityDataAttributes) GetStatus() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.Status
+}
+
+// GetStatusOk returns a tuple with the Status field value
+// and a boolean to check if the value has been set.
+func (o *CreateCityDataAttributes) GetStatusOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Status, true
+}
+
+// SetStatus sets field value
+func (o *CreateCityDataAttributes) SetStatus(v string) {
+	o.Status = v
 }
 
 // GetPoint returns the Point field value
@@ -161,6 +188,7 @@ func (o CreateCityDataAttributes) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["country_id"] = o.CountryId
 	toSerialize["name"] = o.Name
+	toSerialize["status"] = o.Status
 	toSerialize["point"] = o.Point
 	toSerialize["timezone"] = o.Timezone
 	return toSerialize, nil
@@ -173,6 +201,7 @@ func (o *CreateCityDataAttributes) UnmarshalJSON(data []byte) (err error) {
 	requiredProperties := []string{
 		"country_id",
 		"name",
+		"status",
 		"point",
 		"timezone",
 	}

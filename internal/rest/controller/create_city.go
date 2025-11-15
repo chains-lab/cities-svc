@@ -15,10 +15,10 @@ import (
 	"github.com/paulmach/orb"
 )
 
-func (a Service) CreateCity(w http.ResponseWriter, r *http.Request) {
+func (s Service) CreateCity(w http.ResponseWriter, r *http.Request) {
 	initiator, err := meta.User(r.Context())
 	if err != nil {
-		a.log.WithError(err).Error("failed to get user from context")
+		s.log.WithError(err).Error("failed to get user from context")
 		ape.RenderErr(w, problems.Unauthorized("failed to get user from context"))
 
 		return
@@ -26,15 +26,16 @@ func (a Service) CreateCity(w http.ResponseWriter, r *http.Request) {
 
 	req, err := requests.CreateCity(r)
 	if err != nil {
-		a.log.WithError(err).Error("error creating city")
+		s.log.WithError(err).Error("error creating city")
 		ape.RenderErr(w, problems.BadRequest(err)...)
 
 		return
 	}
 
-	c, err := a.domain.city.Create(r.Context(), city.CreateParams{
+	c, err := s.domain.city.Create(r.Context(), city.CreateParams{
 		Name:      req.Data.Attributes.Name,
 		CountryID: req.Data.Attributes.CountryId,
+		Status:    req.Data.Attributes.Status,
 		Point: orb.Point{
 			req.Data.Attributes.Point.Longitude,
 			req.Data.Attributes.Point.Latitude,
@@ -42,10 +43,8 @@ func (a Service) CreateCity(w http.ResponseWriter, r *http.Request) {
 		Timezone: req.Data.Attributes.Timezone,
 	})
 	if err != nil {
-		a.log.WithError(err).Error("error creating city")
+		s.log.WithError(err).Error("error creating city")
 		switch {
-		case errors.Is(err, errx.ErrorCountryIsNotSupported):
-			ape.RenderErr(w, problems.Forbidden("cannot create city in unsupported country"))
 		case errors.Is(err, errx.ErrorInvalidTimeZone):
 			ape.RenderErr(w, problems.BadRequest(validation.Errors{
 				"data/attributes/timezone": err,
@@ -58,6 +57,15 @@ func (a Service) CreateCity(w http.ResponseWriter, r *http.Request) {
 			ape.RenderErr(w, problems.BadRequest(validation.Errors{
 				"data/attributes/name": err,
 			})...)
+		case errors.Is(err, errx.ErrorInvalidCountryISO3ID):
+			ape.RenderErr(w, problems.BadRequest(validation.Errors{
+				"data/attributes/country_id": err,
+			})...)
+		case errors.Is(err, errx.ErrorInvalidCityStatus):
+			ape.RenderErr(w, problems.BadRequest(validation.Errors{
+				"data/attributes/status": err,
+			})...)
+
 		default:
 			ape.RenderErr(w, problems.InternalError())
 		}
@@ -65,7 +73,7 @@ func (a Service) CreateCity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	a.log.Infof("created city with name %s by user %s", c.Name, initiator.ID)
+	s.log.Infof("created city with name %s by user %s", c.Name, initiator.ID)
 
 	ape.Render(w, http.StatusCreated, responses.City(c))
 }

@@ -21,7 +21,7 @@ func (s Service) PublishInviteDeclined(
 	ctx context.Context,
 	invite models.Invite,
 	city models.City,
-	recipients []uuid.UUID,
+	recipients ...uuid.UUID,
 ) error {
 	return s.publish(
 		ctx,

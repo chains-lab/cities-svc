@@ -16,6 +16,8 @@ github.com/chains-lab/profiles-svc v0.0.0-20251015205022-35384bdab330 h1:eoRm2xe
 github.com/chains-lab/profiles-svc v0.0.0-20251015205022-35384bdab330/go.mod h1:+k0PE29QfXvTdaLt+UsKbeTIu3ZNYBJPdocgquKR8F0=
 github.com/chains-lab/restkit v0.3.0 h1:y9F8bJ0O2fOiNSm5+f5GEKa0H6VekjYfgXnwwvGiwMc=
 github.com/chains-lab/restkit v0.3.0/go.mod h1:XJahox52LJLWZ8/i+f9SJEWajqgyFJwqj2fH7B9Tw3U=
+github.com/chains-lab/restkit v0.4.0 h1:ZZT+aqILivJhpg+WZRaaNRVN3arMVnt6SCCZYIGgu8s=
+github.com/chains-lab/restkit v0.4.0/go.mod h1:XJahox52LJLWZ8/i+f9SJEWajqgyFJwqj2fH7B9Tw3U=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

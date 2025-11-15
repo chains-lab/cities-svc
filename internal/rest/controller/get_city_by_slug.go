@@ -11,10 +11,10 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func (a Service) GetCityBySlug(w http.ResponseWriter, r *http.Request) {
-	city, err := a.domain.city.GetBySlug(r.Context(), chi.URLParam(r, "slug"))
+func (s Service) GetCityBySlug(w http.ResponseWriter, r *http.Request) {
+	city, err := s.domain.city.GetBySlug(r.Context(), chi.URLParam(r, "slug"))
 	if err != nil {
-		a.log.WithError(err).Error("failed to get city")
+		s.log.WithError(err).Error("failed to get city")
 		switch {
 		case errors.Is(err, errx.ErrorCityNotFound):
 			ape.RenderErr(w, problems.NotFound("city not found"))

@@ -43,7 +43,7 @@ type EventPublisher interface {
 		ctx context.Context,
 		invite models.Invite,
 		city models.City,
-		recipients []uuid.UUID,
+		recipients ...uuid.UUID,
 	) error
 
 	PublishInviteAccepted(
@@ -51,25 +51,25 @@ type EventPublisher interface {
 		invite models.Invite,
 		city models.City,
 		cityAdmin models.CityAdmin,
-		recipients []uuid.UUID,
+		recipients ...uuid.UUID,
 	) error
 
 	PublishInviteDeclined(
 		ctx context.Context,
 		invite models.Invite,
 		city models.City,
-		recipients []uuid.UUID,
+		recipients ...uuid.UUID,
 	) error
 
 	PublishCityAdminCreated(
 		ctx context.Context,
 		cityAdmin models.CityAdmin,
 		city models.City,
-		recipients []uuid.UUID,
+		recipients ...uuid.UUID,
 	) error
 }
 
-func (s Service) getOfficiality(ctx context.Context, cityID uuid.UUID) (models.City, error) {
+func (s Service) getSupportedCity(ctx context.Context, cityID uuid.UUID) (models.City, error) {
 	ci, err := s.db.GetCityByID(ctx, cityID)
 	if err != nil {
 		return models.City{}, errx.ErrorInternal.Raise(
@@ -81,7 +81,7 @@ func (s Service) getOfficiality(ctx context.Context, cityID uuid.UUID) (models.C
 			fmt.Errorf("city not found"),
 		)
 	}
-	if ci.Status != enum.CityStatusOfficial {
+	if ci.Status != enum.CityStatusSupported {
 		return models.City{}, errx.ErrorCityIsNotSupported.Raise(
 			fmt.Errorf("city not supported"),
 		)
@@ -104,4 +104,21 @@ func (s Service) getCity(ctx context.Context, cityID uuid.UUID) (models.City, er
 	}
 
 	return ci, nil
+}
+
+func (s Service) getInitiator(ctx context.Context, initiatorID uuid.UUID) (models.CityAdmin, error) {
+	res, err := s.db.GetCityAdminByUserID(ctx, initiatorID)
+	if err != nil {
+		return models.CityAdmin{}, errx.ErrorInternal.Raise(
+			fmt.Errorf("failed to get city admin, cause: %w", err),
+		)
+	}
+
+	if res.IsNil() {
+		return models.CityAdmin{}, errx.ErrorInitiatorIsNotCityAdmin.Raise(
+			fmt.Errorf("city admin not found"),
+		)
+	}
+
+	return res, nil
 }

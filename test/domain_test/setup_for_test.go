@@ -12,10 +12,8 @@ import (
 	"github.com/chains-lab/cities-svc/internal/domain/services/admin"
 	"github.com/chains-lab/cities-svc/internal/domain/services/city"
 	"github.com/chains-lab/cities-svc/internal/repo"
-	"github.com/chains-lab/cities-svc/internal/usrguesser"
 
 	"github.com/chains-lab/cities-svc/internal/domain/services/invite"
-	"github.com/chains-lab/cities-svc/internal/infra/jwtmanager"
 	"github.com/chains-lab/cities-svc/test"
 	"github.com/google/uuid"
 	"github.com/paulmach/orb"

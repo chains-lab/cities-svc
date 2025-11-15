@@ -34,6 +34,7 @@ components:
               required:
                 - country_id
                 - name
+                - status
                 - point
                 - timezone
               properties:
@@ -43,6 +44,9 @@ components:
                 name:
                   type: string
                   description: city name
+                status:
+                  type: string
+                  description: city status
                 point:
                   $ref: '#/components/schemas/Point'
                 timezone:
@@ -150,6 +154,38 @@ components:
                 position:
                   type: string
                   description: optional position for the user in this city
+    UpdateCityAdmin:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: object
+          required:
+            - id
+            - type
+            - attributes
+          properties:
+            id:
+              type: string
+              format: uuid
+              description: user id
+            type:
+              type: string
+              enum:
+                - city_admin
+            attributes:
+              type: object
+              properties:
+                role:
+                  type: string
+                  description: optional role
+                label:
+                  type: string
+                  description: optional label for the user in this city
+                position:
+                  type: string
+                  description: optional position for the user in this city
     SentInvite:
       type: object
       required:
@@ -169,7 +205,7 @@ components:
             type:
               type: string
               enum:
-                - sent_invite
+                - city_invite
             attributes:
               type: object
               required:
@@ -319,13 +355,12 @@ components:
         type:
           type: string
           enum:
-            - city_moderator
+            - city_admin
         attributes:
           $ref: '#/components/schemas/CityAdminAttributes'
     CityAdminAttributes:
       type: object
       required:
-        - username
         - city_id
         - role
         - created_at
@@ -338,9 +373,6 @@ components:
           type: string
           format: uuid
           description: city id
-        avatar:
-          type: string
-          description: optional avatar url for the user in this city
         role:
           type: string
           description: role of the user in this city
@@ -389,7 +421,7 @@ components:
             type:
               type: string
               enum:
-                - invite_city_gov
+                - city_invite
             attributes:
               type: object
               required:

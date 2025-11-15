@@ -21,7 +21,25 @@ type UpdateParams struct {
 	Timezone *string
 }
 
-func (s Service) Update(ctx context.Context, cityID uuid.UUID, params UpdateParams) (models.City, error) {
+func (s Service) Update(ctx context.Context, cityID, initiatorID uuid.UUID, params UpdateParams) (models.City, error) {
+	initiator, err := s.getInitiator(ctx, initiatorID)
+	if err != nil {
+		return models.City{}, err
+	}
+	if initiator.Role != enum.CityAdminRoleTechLead && initiator.Role != enum.CityAdminRoleModerator {
+		return models.City{}, errx.ErrorInitiatorHasNoRights.Raise(
+			fmt.Errorf("only role city tech lead or moder can update city"),
+		)
+	}
+
+	return s.update(ctx, cityID, params)
+}
+
+func (s Service) UpdateAdmin(ctx context.Context, cityID uuid.UUID, params UpdateParams) (models.City, error) {
+	return s.update(ctx, cityID, params)
+}
+
+func (s Service) update(ctx context.Context, cityID uuid.UUID, params UpdateParams) (models.City, error) {
 	city, err := s.GetByID(ctx, cityID)
 	if err != nil {
 		return models.City{}, err
@@ -86,7 +104,7 @@ func (s Service) Update(ctx context.Context, cityID uuid.UUID, params UpdatePara
 		)
 	}
 
-	err = s.event.PublishCityUpdated(ctx, city, admins.GetUserIDs())
+	err = s.event.PublishCityUpdated(ctx, city, admins.GetUserIDs()...)
 	if err != nil {
 		return models.City{}, errx.ErrorInternal.Raise(
 			fmt.Errorf("failed to publish city updated event, cause: %w", err),
@@ -96,7 +114,25 @@ func (s Service) Update(ctx context.Context, cityID uuid.UUID, params UpdatePara
 	return city, nil
 }
 
-func (s Service) UpdateStatus(ctx context.Context, cityID uuid.UUID, status string) (models.City, error) {
+func (s Service) UpdateStatus(ctx context.Context, cityID, initiatorID uuid.UUID, status string) (models.City, error) {
+	initiator, err := s.getInitiator(ctx, initiatorID)
+	if err != nil {
+		return models.City{}, err
+	}
+	if initiator.Role != enum.CityAdminRoleTechLead {
+		return models.City{}, errx.ErrorInitiatorHasNoRights.Raise(
+			fmt.Errorf("only role city tech lead or system admin can update city status"),
+		)
+	}
+
+	return s.updateStatus(ctx, cityID, status)
+}
+
+func (s Service) UpdateStatusBySysAdmin(ctx context.Context, cityID uuid.UUID, status string) (models.City, error) {
+	return s.updateStatus(ctx, cityID, status)
+}
+
+func (s Service) updateStatus(ctx context.Context, cityID uuid.UUID, status string) (models.City, error) {
 	err := enum.CheckCityStatus(status)
 	if err != nil {
 		return models.City{}, errx.ErrorInvalidCityStatus.Raise(err)
@@ -162,7 +198,7 @@ func (s Service) UpdateStatus(ctx context.Context, cityID uuid.UUID, status stri
 		return models.City{}, err
 	}
 
-	err = s.event.PublishCityUpdatedStatus(ctx, city, status, recipients.GetUserIDs())
+	err = s.event.PublishCityUpdatedStatus(ctx, city, status, recipients.GetUserIDs()...)
 	if err != nil {
 		return models.City{}, errx.ErrorInternal.Raise(
 			fmt.Errorf("failed to publish city updated status event, cause: %w", err),

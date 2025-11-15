@@ -23,7 +23,7 @@ func (s Service) PublishInviteAccepted(
 	invite models.Invite,
 	city models.City,
 	cityAdmin models.CityAdmin,
-	recipients []uuid.UUID,
+	recipients ...uuid.UUID,
 ) error {
 	return s.publish(
 		ctx,

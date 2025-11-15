@@ -19,7 +19,7 @@ const CityUpdateEvent = "city.admin.update"
 func (s Service) PublishCityUpdated(
 	ctx context.Context,
 	city models.City,
-	recipients []uuid.UUID,
+	recipients ...uuid.UUID,
 ) error {
 	env := events.Envelope[CityUpdatedData]{
 		Event:     CityUpdateEvent,

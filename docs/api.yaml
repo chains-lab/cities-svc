@@ -24,6 +24,8 @@ components:
       $ref: './spec/components/schemas/UpdateCityStatus.yaml'
     UpdateOwnAdmin:
       $ref: './spec/components/schemas/UpdateOwnAdmin.yaml'
+    UpdateCityAdmin:
+      $ref: './spec/components/schemas/UpdateCityAdmin.yaml'
 
     SentInvite:
       $ref: './spec/components/schemas/SentInvite.yaml'

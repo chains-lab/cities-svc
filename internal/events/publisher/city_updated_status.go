@@ -23,7 +23,7 @@ func (s Service) PublishCityUpdatedStatus(
 	ctx context.Context,
 	city models.City,
 	status string,
-	recipients []uuid.UUID,
+	recipients ...uuid.UUID,
 ) error {
 	var eventName string
 	switch status {

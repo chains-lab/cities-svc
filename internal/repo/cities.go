@@ -129,9 +129,6 @@ func (r *Repo) UpdateCity(
 	if params.Point != nil {
 		query = query.UpdatePoint(*params.Point)
 	}
-	if params.CountryID != nil {
-		query = query.UpdateCountryID(*params.CountryID)
-	}
 
 	if params == (city.UpdateParams{}) {
 		return nil

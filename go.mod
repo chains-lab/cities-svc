@@ -10,7 +10,7 @@ require (
 	github.com/chains-lab/ape v0.4.14
 	github.com/chains-lab/logium v0.1.2
 	github.com/chains-lab/profiles-svc v0.0.0-20251015205022-35384bdab330
-	github.com/chains-lab/restkit v0.3.0
+	github.com/chains-lab/restkit v0.4.0
 	github.com/go-chi/chi/v5 v5.2.3
 	github.com/go-ozzo/ozzo-validation/v4 v4.3.0
 	github.com/golang-jwt/jwt/v5 v5.2.2

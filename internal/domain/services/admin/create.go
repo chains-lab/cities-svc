@@ -75,7 +75,7 @@ func (s Service) Create(ctx context.Context, userID, cityID uuid.UUID, role stri
 		)
 	}
 
-	err = s.event.PublishCityAdminCreated(ctx, res, city, append(admins.GetUserIDs(), userID))
+	err = s.event.PublishCityAdminCreated(ctx, res, city, append(admins.GetUserIDs(), userID)...)
 	if err != nil {
 		return models.CityAdmin{}, errx.ErrorInternal.Raise(
 			fmt.Errorf("failed to publish city admin created events, cause: %w", err),
