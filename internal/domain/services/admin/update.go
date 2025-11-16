@@ -17,7 +17,7 @@ type UpdateParams struct {
 	Role     *string
 }
 
-func (s Service) Update(
+func (s Service) UpdateByCityAdmin(
 	ctx context.Context,
 	userID uuid.UUID,
 	initiatorID uuid.UUID,
@@ -102,7 +102,7 @@ func (s Service) Update(
 		return admin, nil
 	}
 
-	return s.applyAdminUpdate(ctx, admin, params)
+	return s.update(ctx, admin, params)
 }
 
 func (s Service) UpdateBySysAdmin(
@@ -182,7 +182,7 @@ func (s Service) UpdateBySysAdmin(
 		return admin, nil
 	}
 
-	return s.applyAdminUpdate(ctx, admin, params)
+	return s.update(ctx, admin, params)
 }
 
 type UpdateOwnParams struct {
@@ -200,13 +200,13 @@ func (s Service) UpdateOwn(
 		return models.CityAdmin{}, err
 	}
 
-	return s.applyAdminUpdate(ctx, admin, UpdateParams{
+	return s.update(ctx, admin, UpdateParams{
 		Label:    params.Label,
 		Position: params.Position,
 	})
 }
 
-func (s Service) applyAdminUpdate(
+func (s Service) update(
 	ctx context.Context,
 	admin models.CityAdmin,
 	params UpdateParams,

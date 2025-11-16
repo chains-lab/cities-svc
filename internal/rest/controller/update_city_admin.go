@@ -33,7 +33,7 @@ func (s Service) UpdateCityAdmin(w http.ResponseWriter, r *http.Request) {
 	var result models.CityAdmin
 	switch initiator.Role {
 	case roles.SystemUser:
-		result, err = s.domain.admin.Update(r.Context(), req.Data.Id, initiator.ID, admin.UpdateParams{
+		result, err = s.domain.admin.UpdateByCityAdmin(r.Context(), req.Data.Id, initiator.ID, admin.UpdateParams{
 			Label:    req.Data.Attributes.Label,
 			Position: req.Data.Attributes.Position,
 		})

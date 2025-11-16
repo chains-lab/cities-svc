@@ -45,7 +45,7 @@ func (s Service) DeleteCityAdmin(w http.ResponseWriter, r *http.Request) {
 
 	switch initiator.Role {
 	case roles.SystemUser:
-		err = s.domain.admin.Delete(r.Context(), cityID, userID, initiator.ID)
+		err = s.domain.admin.DeleteByCityAdmin(r.Context(), cityID, userID, initiator.ID)
 	default:
 		err = s.domain.admin.DeleteBySysAdmin(r.Context(), userID, cityID)
 	}

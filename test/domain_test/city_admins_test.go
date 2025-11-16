@@ -115,7 +115,7 @@ func TestCreateInviteMayor(t *testing.T) {
 
 	InviteForAdmin, err := s.domain.invites.Create(ctx, enum.CityGovRoleExecutive, kyiv.ID, time.Hour)
 	if err != nil {
-		t.Fatalf("Create: %v", err)
+		t.Fatalf("CreateByCityAdmin: %v", err)
 	}
 
 	adminID := uuid.New()
@@ -139,7 +139,7 @@ func TestCreateInviteMayor(t *testing.T) {
 
 	InviteForModer, err := s.domain.invites.Create(ctx, enum.CityGovRoleExecutive, kyiv.ID, time.Hour)
 	if err != nil {
-		t.Fatalf("Create: %v", err)
+		t.Fatalf("CreateByCityAdmin: %v", err)
 	}
 
 	InviteForModer, err = s.domain.invites.Accept(ctx, userModerator, InviteForModer.Token)

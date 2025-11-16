@@ -10,7 +10,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (s Service) Delete(
+func (s Service) DeleteByCityAdmin(
 	ctx context.Context,
 	userID, cityID, initiatorID uuid.UUID,
 ) error {

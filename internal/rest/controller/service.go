@@ -25,10 +25,10 @@ type CityAdminSvc interface {
 
 	DeleteOwn(ctx context.Context, userID uuid.UUID) error
 
-	Delete(ctx context.Context, userID, cityID, initiatorID uuid.UUID) error
+	DeleteByCityAdmin(ctx context.Context, userID, cityID, initiatorID uuid.UUID) error
 	DeleteBySysAdmin(ctx context.Context, userID, cityID uuid.UUID) error
 
-	Update(
+	UpdateByCityAdmin(
 		ctx context.Context,
 		userID uuid.UUID,
 		initiatorID uuid.UUID,
@@ -61,11 +61,11 @@ type CitySvc interface {
 	GetByRadius(ctx context.Context, point orb.Point, radius uint64) (models.City, error)
 	GetBySlug(ctx context.Context, slug string) (models.City, error)
 
-	UpdateStatus(ctx context.Context, cityID, initiatorID uuid.UUID, status string) (models.City, error)
+	UpdateStatusByCityAdmin(ctx context.Context, cityID, initiatorID uuid.UUID, status string) (models.City, error)
 	UpdateStatusBySysAdmin(ctx context.Context, cityID uuid.UUID, status string) (models.City, error)
 
-	Update(ctx context.Context, cityID, initiatorID uuid.UUID, params city.UpdateParams) (models.City, error)
-	UpdateAdmin(ctx context.Context, cityID uuid.UUID, params city.UpdateParams) (models.City, error)
+	UpdateByCityAdmin(ctx context.Context, cityID, initiatorID uuid.UUID, params city.UpdateParams) (models.City, error)
+	UpdateByAdmin(ctx context.Context, cityID uuid.UUID, params city.UpdateParams) (models.City, error)
 }
 
 type inviteSvc interface {
@@ -76,7 +76,7 @@ type inviteSvc interface {
 		duration time.Duration,
 	) (models.Invite, error)
 
-	Create(
+	CreateByCityAdmin(
 		ctx context.Context,
 		userID, cityID, initiatorID uuid.UUID,
 		role string,

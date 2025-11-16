@@ -36,7 +36,7 @@ func (s Service) SentInvite(w http.ResponseWriter, r *http.Request) {
 	var result models.Invite
 	switch initiator.Role {
 	case roles.SystemUser:
-		result, err = s.domain.invite.Create(r.Context(),
+		result, err = s.domain.invite.CreateByCityAdmin(r.Context(),
 			req.Data.Attributes.UserId,
 			req.Data.Attributes.CityId,
 			initiator.ID,

@@ -239,7 +239,7 @@ func TestGetCitiesBySlug(t *testing.T) {
 		Slug: func(s string) *string { return &s }("kyiv"),
 	})
 	if err != nil {
-		t.Fatalf("Update: %v", err)
+		t.Fatalf("UpdateByCityAdmin: %v", err)
 	}
 
 	cityBySlug, err := s.domain.city.GetBySlug(ctx, "kyiv")
@@ -297,7 +297,7 @@ func TestUpdateCities(t *testing.T) {
 		Point:    &point,
 	})
 	if err != nil {
-		t.Fatalf("Update: %v", err)
+		t.Fatalf("UpdateByCityAdmin: %v", err)
 	}
 }
 
@@ -319,7 +319,7 @@ func TestUpdateCityFailsForNonExistentCity(t *testing.T) {
 		Point:    &point,
 	})
 	if !errors.Is(err, errx.ErrorCityNotFound) {
-		t.Fatalf("Update: %v", err)
+		t.Fatalf("UpdateByCityAdmin: %v", err)
 	}
 }
 
@@ -475,7 +475,7 @@ func TestSetCityStatusInUnsupportedCountry(t *testing.T) {
 
 	ukr, err = s.domain.country.UpdateStatus(ctx, ukr.ID, enum.CountryStatusSupported)
 	if err != nil {
-		t.Fatalf("Update country status to active: %v", err)
+		t.Fatalf("UpdateByCityAdmin country status to active: %v", err)
 	}
 	if ukr.Status != enum.CountryStatusSupported {
 		t.Errorf("expected country status 'supported', got '%s'", ukr.Status)

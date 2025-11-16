@@ -21,7 +21,7 @@ type UpdateParams struct {
 	Timezone *string
 }
 
-func (s Service) Update(ctx context.Context, cityID, initiatorID uuid.UUID, params UpdateParams) (models.City, error) {
+func (s Service) UpdateByCityAdmin(ctx context.Context, cityID, initiatorID uuid.UUID, params UpdateParams) (models.City, error) {
 	initiator, err := s.getInitiator(ctx, initiatorID)
 	if err != nil {
 		return models.City{}, err
@@ -35,7 +35,7 @@ func (s Service) Update(ctx context.Context, cityID, initiatorID uuid.UUID, para
 	return s.update(ctx, cityID, params)
 }
 
-func (s Service) UpdateAdmin(ctx context.Context, cityID uuid.UUID, params UpdateParams) (models.City, error) {
+func (s Service) UpdateByAdmin(ctx context.Context, cityID uuid.UUID, params UpdateParams) (models.City, error) {
 	return s.update(ctx, cityID, params)
 }
 
@@ -114,7 +114,7 @@ func (s Service) update(ctx context.Context, cityID uuid.UUID, params UpdatePara
 	return city, nil
 }
 
-func (s Service) UpdateStatus(ctx context.Context, cityID, initiatorID uuid.UUID, status string) (models.City, error) {
+func (s Service) UpdateStatusByCityAdmin(ctx context.Context, cityID, initiatorID uuid.UUID, status string) (models.City, error) {
 	initiator, err := s.getInitiator(ctx, initiatorID)
 	if err != nil {
 		return models.City{}, err

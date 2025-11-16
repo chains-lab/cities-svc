@@ -54,7 +54,7 @@ func (s Service) UpdateCity(w http.ResponseWriter, r *http.Request) {
 		param.Slug = req.Data.Attributes.Slug
 	}
 
-	res, err := s.domain.city.Update(r.Context(), req.Data.Id, initiator.ID, param)
+	res, err := s.domain.city.UpdateByCityAdmin(r.Context(), req.Data.Id, initiator.ID, param)
 	if err != nil {
 		s.log.WithError(err).Error("failed to update city")
 		switch {

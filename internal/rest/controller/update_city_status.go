@@ -31,7 +31,7 @@ func (s Service) UpdateCityStatus(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res, err := s.domain.city.UpdateStatus(r.Context(), req.Data.Id, initiator.ID, req.Data.Attributes.Status)
+	res, err := s.domain.city.UpdateStatusByCityAdmin(r.Context(), req.Data.Id, initiator.ID, req.Data.Attributes.Status)
 	if err != nil {
 		s.log.WithError(err).Error("failed to update city status")
 		switch {

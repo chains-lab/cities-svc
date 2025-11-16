@@ -107,7 +107,6 @@ func (s Service) Answer(ctx context.Context, answerID, userID uuid.UUID, answer 
 				fmt.Errorf("failed to get city admins for city %s, cause: %w", inv.CityID, err),
 			)
 		}
-
 		err = s.event.PublishCityAdminCreated(ctx, admin, city, append(admins.GetUserIDs(), userID)...)
 		if err != nil {
 			return models.Invite{}, errx.ErrorInternal.Raise(

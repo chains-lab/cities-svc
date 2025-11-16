@@ -11,16 +11,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (s Service) CreateBySysAdmin(
-	ctx context.Context,
-	userID, cityID uuid.UUID,
-	role string,
-	duration time.Duration,
-) (models.Invite, error) {
-	return s.create(ctx, userID, cityID, role, duration)
-}
-
-func (s Service) Create(
+func (s Service) CreateByCityAdmin(
 	ctx context.Context,
 	userID, cityID, initiatorID uuid.UUID,
 	role string,
@@ -61,6 +52,15 @@ func (s Service) Create(
 	}
 
 	return s.create(ctx, userID, initiatorID, role, duration)
+}
+
+func (s Service) CreateBySysAdmin(
+	ctx context.Context,
+	userID, cityID uuid.UUID,
+	role string,
+	duration time.Duration,
+) (models.Invite, error) {
+	return s.create(ctx, userID, cityID, role, duration)
 }
 
 func (s Service) create(

@@ -33,7 +33,7 @@ func TestCountries(t *testing.T) {
 		Name: &UkrNewName,
 	})
 	if err != nil {
-		t.Fatalf("Update: %v", err)
+		t.Fatalf("UpdateByCityAdmin: %v", err)
 	}
 
 	ukr2, err := s.domain.country.GetByID(ctx, ukr.ID)

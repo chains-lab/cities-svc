@@ -33,8 +33,6 @@ func (s Service) AnswerInvite(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		s.log.WithError(err).Error("failed to answer to invite")
 		switch {
-		case errors.Is(err, errx.ErrorInvalidInviteToken):
-			ape.RenderErr(w, problems.Unauthorized("invalid invite token"))
 		case errors.Is(err, errx.ErrorInviteNotFound):
 			ape.RenderErr(w, problems.NotFound("invite not found"))
 		case errors.Is(err, errx.ErrorInviteAlreadyAnswered):
