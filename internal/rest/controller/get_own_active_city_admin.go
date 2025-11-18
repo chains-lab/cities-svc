@@ -9,6 +9,8 @@ import (
 	"github.com/chains-lab/cities-svc/internal/domain/errx"
 	"github.com/chains-lab/cities-svc/internal/rest/meta"
 	"github.com/chains-lab/cities-svc/internal/rest/responses"
+	validation "github.com/go-ozzo/ozzo-validation/v4"
+	"github.com/google/uuid"
 )
 
 func (s Service) GetMyCityAdmin(w http.ResponseWriter, r *http.Request) {
@@ -20,13 +22,22 @@ func (s Service) GetMyCityAdmin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res, err := s.domain.admin.GetInitiator(r.Context(), initiator.ID)
+	cityID, err := uuid.Parse(r.URL.Query().Get("city_id"))
+	if err != nil {
+		s.log.WithError(err).Error("invalid city_id parameter")
+		ape.RenderErr(w, problems.BadRequest(validation.Errors{
+			"city_id": errors.New("invalid city_id parameter"),
+		})...)
+		return
+	}
+
+	res, err := s.domain.admin.Get(r.Context(), initiator.ID, cityID)
 	if err != nil {
 		s.log.WithError(err).Error("failed to get own active admin")
 
 		switch {
-		case errors.Is(err, errx.ErrorInitiatorIsNotCityAdmin):
-			ape.RenderErr(w, problems.Unauthorized("no active city adminernment for the user"))
+		case errors.Is(err, errx.ErrorCityAdminNotFound):
+			ape.RenderErr(w, problems.Unauthorized("no active city admin for the user"))
 		default:
 			ape.RenderErr(w, problems.InternalError())
 		}

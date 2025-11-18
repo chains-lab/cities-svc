@@ -1,35 +1,20 @@
 package middlewares
 
 import (
-	"context"
 	"net/http"
 
-	"github.com/chains-lab/cities-svc/internal/domain/models"
-	"github.com/chains-lab/cities-svc/internal/domain/services/admin"
 	"github.com/chains-lab/logium"
 	"github.com/chains-lab/restkit/mdlv"
 )
 
-type domain struct {
-	admin CityAdminSvc
-}
-
 type Service struct {
-	log    logium.Logger
-	domain domain
+	log logium.Logger
 }
 
-func New(log logium.Logger, admin CityAdminSvc) Service {
+func New(log logium.Logger) Service {
 	return Service{
 		log: log,
-		domain: domain{
-			admin: admin,
-		},
 	}
-}
-
-type CityAdminSvc interface {
-	Get(ctx context.Context, filters admin.GetFilters) (models.CityAdmin, error)
 }
 
 func (s Service) Auth(userCtxKey interface{}, skUser string) func(http.Handler) http.Handler {

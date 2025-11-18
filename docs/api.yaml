@@ -22,15 +22,15 @@ components:
       $ref: './spec/components/schemas/UpdateCity.yaml'
     UpdateCityStatus:
       $ref: './spec/components/schemas/UpdateCityStatus.yaml'
-    UpdateOwnAdmin:
-      $ref: './spec/components/schemas/UpdateOwnAdmin.yaml'
+    UpdateOwnCityAdmin:
+      $ref: './spec/components/schemas/UpdateOwnCityAdmin.yaml'
     UpdateCityAdmin:
       $ref: './spec/components/schemas/UpdateCityAdmin.yaml'
 
     SentInvite:
       $ref: './spec/components/schemas/SentInvite.yaml'
-    AcceptInvite:
-      $ref: './spec/components/schemas/AcceptInvite.yaml'
+    ReplyToInvite:
+      $ref: './spec/components/schemas/ReplyToInvite.yaml'
 
     City:
       $ref: './spec/components/schemas/City.yaml'

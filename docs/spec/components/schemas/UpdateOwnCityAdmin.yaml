@@ -12,8 +12,9 @@ properties:
     properties:
       id:
         type: string
-        format: uuid
-        description: "user id"
+        format: string
+        description: "user id + city id (UUID:UUID)"
+        pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
       type:
         type: string
         enum: [ city_admin ]

@@ -135,7 +135,7 @@ func (q CityAdminsQ) Select(ctx context.Context) ([]CityAdmin, error) {
 	var out []CityAdmin
 	for rows.Next() {
 		var m CityAdmin
-		if err := rows.Scan(
+		if err = rows.Scan(
 			&m.UserID,
 			&m.CityID,
 			&m.Role,
@@ -206,7 +206,7 @@ func (q CityAdminsQ) Delete(ctx context.Context) error {
 	return err
 }
 
-func (q CityAdminsQ) FilterUserID(userID uuid.UUID) CityAdminsQ {
+func (q CityAdminsQ) FilterUserID(userID ...uuid.UUID) CityAdminsQ {
 	q.selector = q.selector.Where(sq.Eq{"user_id": userID})
 	q.deleter = q.deleter.Where(sq.Eq{"user_id": userID})
 	q.updater = q.updater.Where(sq.Eq{"user_id": userID})
@@ -214,7 +214,7 @@ func (q CityAdminsQ) FilterUserID(userID uuid.UUID) CityAdminsQ {
 	return q
 }
 
-func (q CityAdminsQ) FilterCityID(cityID uuid.UUID) CityAdminsQ {
+func (q CityAdminsQ) FilterCityID(cityID ...uuid.UUID) CityAdminsQ {
 	q.selector = q.selector.Where(sq.Eq{"city_id": cityID})
 	q.deleter = q.deleter.Where(sq.Eq{"city_id": cityID})
 	q.updater = q.updater.Where(sq.Eq{"city_id": cityID})

@@ -11,8 +11,8 @@ import (
 )
 
 type UpdatedStatusStatusData struct {
-	City       models.City       `json:"city"`
-	Recipients PayloadRecipients `json:"recipients"`
+	City       models.City        `json:"city"`
+	Recipients *PayloadRecipients `json:"recipients,omitempty"`
 }
 
 const CityUpdatedStatusSupportedEvent = "city.update.status.supported"
@@ -37,20 +37,24 @@ func (s Service) PublishCityUpdatedStatus(
 		return enum.ErrorInvalidCityStatus
 	}
 
+	event := events.Envelope[UpdatedStatusStatusData]{
+		Event:     eventName,
+		Version:   "1",
+		Timestamp: time.Now().UTC(),
+		Data: UpdatedStatusStatusData{
+			City: city,
+		},
+	}
+	if len(recipients) > 0 {
+		event.Data.Recipients = &PayloadRecipients{
+			Users: recipients,
+		}
+	}
+
 	return s.publish(
 		ctx,
 		events.TopicCitiesAdminV1,
 		city.ID.String(),
-		events.Envelope[CityUpdatedData]{
-			Event:     eventName,
-			Version:   "1",
-			Timestamp: time.Now().UTC(),
-			Data: CityUpdatedData{
-				City: city,
-				Recipients: PayloadRecipients{
-					Users: recipients,
-				},
-			},
-		},
+		event,
 	)
 }

@@ -12,47 +12,47 @@ import (
 
 func (s Service) DeleteByCityAdmin(
 	ctx context.Context,
-	userID, cityID, initiatorID uuid.UUID,
+	initiatorID uuid.UUID,
+	adminID uuid.UUID,
+	cityID uuid.UUID,
 ) error {
-	initiator, err := s.GetInitiator(ctx, initiatorID)
-	if err != nil {
-		return err
-	}
-
-	if initiator.CityID != cityID {
-		return errx.ErrorInitiatorHasNoRights.Raise(
-			fmt.Errorf("initiator %s has no rights to delete admin: %s", initiatorID, userID),
+	if initiatorID == adminID {
+		return errx.ErrorCannotDeleteYourself.Raise(
+			fmt.Errorf("city admin %s cannot delete himself", initiatorID),
 		)
 	}
-
-	city, err := s.getSupportedCity(ctx, cityID)
+	admin, err := s.Get(ctx, adminID, cityID)
 	if err != nil {
 		return err
 	}
 
-	admin, err := s.Get(ctx, GetFilters{
-		UserID: &userID,
-		CityID: &cityID,
-	})
+	initiator, err := s.validateInitiator(
+		ctx, initiatorID, cityID,
+		enum.CityAdminRoleModerator, enum.CityAdminRoleTechLead,
+	)
 	if err != nil {
 		return err
 	}
 
-	if initiator.CityID != cityID {
-		return errx.ErrorInitiatorHasNoRights.Raise(
-			fmt.Errorf("initiator %s has no rights to delete admin: %s", initiatorID, userID),
+	city, err := s.getCity(ctx, admin.CityID)
+	if err != nil {
+		return err
+	}
+	if city.Status != enum.CityStatusSupported {
+		return errx.ErrorCityIsNotSupported.Raise(
+			fmt.Errorf("city not supported"),
 		)
 	}
 
 	if admin.Role == enum.CityAdminRoleTechLead {
-		return errx.ErrorInitiatorHasNoRights.Raise(
-			fmt.Errorf("only system admin can delete tech lead for city %s", cityID),
+		return errx.ErrorNotEnoughRight.Raise(
+			fmt.Errorf("only system admin can delete tech lead for city %s", city.ID),
 		)
 	}
 
 	if !enum.RightCityAdminsTechPolitics(initiator.Role, admin.Role) {
-		return errx.ErrorInitiatorHasNoRights.Raise(
-			fmt.Errorf("only system admin can delete tech lead for city %s", cityID),
+		return errx.ErrorNotEnoughRight.Raise(
+			fmt.Errorf("only system admin can delete tech lead for city %s", city.ID),
 		)
 	}
 
@@ -63,15 +63,12 @@ func (s Service) DeleteBySysAdmin(
 	ctx context.Context,
 	userID, cityID uuid.UUID,
 ) error {
-	city, err := s.getSupportedCity(ctx, cityID)
+	city, err := s.getCity(ctx, cityID)
 	if err != nil {
 		return err
 	}
 
-	admin, err := s.Get(ctx, GetFilters{
-		UserID: &userID,
-		CityID: &cityID,
-	})
+	admin, err := s.Get(ctx, userID, cityID)
 	if err != nil {
 		return err
 	}
@@ -79,15 +76,22 @@ func (s Service) DeleteBySysAdmin(
 	return s.delete(ctx, admin, city)
 }
 
-func (s Service) DeleteOwn(ctx context.Context, userID uuid.UUID) error {
-	initiator, err := s.GetInitiator(ctx, userID)
+func (s Service) DeleteOwn(ctx context.Context, userID, cityID uuid.UUID) error {
+	initiator, err := s.Get(ctx, userID, cityID)
 	if err != nil {
 		return err
 	}
 
-	city, err := s.getSupportedCity(ctx, initiator.CityID)
+	city, err := s.db.GetCityByID(ctx, cityID)
 	if err != nil {
-		return err
+		return errx.ErrorInternal.Raise(
+			fmt.Errorf("get city: %w", err),
+		)
+	}
+	if city.IsNil() {
+		return errx.ErrorCityNotFound.Raise(
+			fmt.Errorf("city not found"),
+		)
 	}
 
 	if initiator.Role == enum.CityAdminRoleTechLead {

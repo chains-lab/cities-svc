@@ -16,38 +16,38 @@ import (
 	"fmt"
 )
 
-// checks if the UpdateOwnAdmin type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &UpdateOwnAdmin{}
+// checks if the UpdateOwnCityAdmin type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &UpdateOwnCityAdmin{}
 
-// UpdateOwnAdmin struct for UpdateOwnAdmin
-type UpdateOwnAdmin struct {
-	Data UpdateOwnAdminData `json:"data"`
+// UpdateOwnCityAdmin struct for UpdateOwnCityAdmin
+type UpdateOwnCityAdmin struct {
+	Data UpdateOwnCityAdminData `json:"data"`
 }
 
-type _UpdateOwnAdmin UpdateOwnAdmin
+type _UpdateOwnCityAdmin UpdateOwnCityAdmin
 
-// NewUpdateOwnAdmin instantiates a new UpdateOwnAdmin object
+// NewUpdateOwnCityAdmin instantiates a new UpdateOwnCityAdmin object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewUpdateOwnAdmin(data UpdateOwnAdminData) *UpdateOwnAdmin {
-	this := UpdateOwnAdmin{}
+func NewUpdateOwnCityAdmin(data UpdateOwnCityAdminData) *UpdateOwnCityAdmin {
+	this := UpdateOwnCityAdmin{}
 	this.Data = data
 	return &this
 }
 
-// NewUpdateOwnAdminWithDefaults instantiates a new UpdateOwnAdmin object
+// NewUpdateOwnCityAdminWithDefaults instantiates a new UpdateOwnCityAdmin object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewUpdateOwnAdminWithDefaults() *UpdateOwnAdmin {
-	this := UpdateOwnAdmin{}
+func NewUpdateOwnCityAdminWithDefaults() *UpdateOwnCityAdmin {
+	this := UpdateOwnCityAdmin{}
 	return &this
 }
 
 // GetData returns the Data field value
-func (o *UpdateOwnAdmin) GetData() UpdateOwnAdminData {
+func (o *UpdateOwnCityAdmin) GetData() UpdateOwnCityAdminData {
 	if o == nil {
-		var ret UpdateOwnAdminData
+		var ret UpdateOwnCityAdminData
 		return ret
 	}
 
@@ -56,7 +56,7 @@ func (o *UpdateOwnAdmin) GetData() UpdateOwnAdminData {
 
 // GetDataOk returns a tuple with the Data field value
 // and a boolean to check if the value has been set.
-func (o *UpdateOwnAdmin) GetDataOk() (*UpdateOwnAdminData, bool) {
+func (o *UpdateOwnCityAdmin) GetDataOk() (*UpdateOwnCityAdminData, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -64,11 +64,11 @@ func (o *UpdateOwnAdmin) GetDataOk() (*UpdateOwnAdminData, bool) {
 }
 
 // SetData sets field value
-func (o *UpdateOwnAdmin) SetData(v UpdateOwnAdminData) {
+func (o *UpdateOwnCityAdmin) SetData(v UpdateOwnCityAdminData) {
 	o.Data = v
 }
 
-func (o UpdateOwnAdmin) MarshalJSON() ([]byte, error) {
+func (o UpdateOwnCityAdmin) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -76,13 +76,13 @@ func (o UpdateOwnAdmin) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o UpdateOwnAdmin) ToMap() (map[string]interface{}, error) {
+func (o UpdateOwnCityAdmin) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["data"] = o.Data
 	return toSerialize, nil
 }
 
-func (o *UpdateOwnAdmin) UnmarshalJSON(data []byte) (err error) {
+func (o *UpdateOwnCityAdmin) UnmarshalJSON(data []byte) (err error) {
 	// This validates that all required properties are included in the JSON object
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
@@ -104,53 +104,53 @@ func (o *UpdateOwnAdmin) UnmarshalJSON(data []byte) (err error) {
 		}
 	}
 
-	varUpdateOwnAdmin := _UpdateOwnAdmin{}
+	varUpdateOwnCityAdmin := _UpdateOwnCityAdmin{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varUpdateOwnAdmin)
+	err = decoder.Decode(&varUpdateOwnCityAdmin)
 
 	if err != nil {
 		return err
 	}
 
-	*o = UpdateOwnAdmin(varUpdateOwnAdmin)
+	*o = UpdateOwnCityAdmin(varUpdateOwnCityAdmin)
 
 	return err
 }
 
-type NullableUpdateOwnAdmin struct {
-	value *UpdateOwnAdmin
+type NullableUpdateOwnCityAdmin struct {
+	value *UpdateOwnCityAdmin
 	isSet bool
 }
 
-func (v NullableUpdateOwnAdmin) Get() *UpdateOwnAdmin {
+func (v NullableUpdateOwnCityAdmin) Get() *UpdateOwnCityAdmin {
 	return v.value
 }
 
-func (v *NullableUpdateOwnAdmin) Set(val *UpdateOwnAdmin) {
+func (v *NullableUpdateOwnCityAdmin) Set(val *UpdateOwnCityAdmin) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableUpdateOwnAdmin) IsSet() bool {
+func (v NullableUpdateOwnCityAdmin) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableUpdateOwnAdmin) Unset() {
+func (v *NullableUpdateOwnCityAdmin) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableUpdateOwnAdmin(val *UpdateOwnAdmin) *NullableUpdateOwnAdmin {
-	return &NullableUpdateOwnAdmin{value: val, isSet: true}
+func NewNullableUpdateOwnCityAdmin(val *UpdateOwnCityAdmin) *NullableUpdateOwnCityAdmin {
+	return &NullableUpdateOwnCityAdmin{value: val, isSet: true}
 }
 
-func (v NullableUpdateOwnAdmin) MarshalJSON() ([]byte, error) {
+func (v NullableUpdateOwnCityAdmin) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableUpdateOwnAdmin) UnmarshalJSON(src []byte) error {
+func (v *NullableUpdateOwnCityAdmin) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

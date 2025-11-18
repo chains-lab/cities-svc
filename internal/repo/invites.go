@@ -28,11 +28,10 @@ func (r *Repo) GetInvite(ctx context.Context, ID uuid.UUID) (models.Invite, erro
 	return inviteSchemaToModel(row), nil
 }
 
-func (r *Repo) UpdateInviteStatus(ctx context.Context, inviteID uuid.UUID, userID uuid.UUID, status string) error {
+func (r *Repo) UpdateInviteStatus(ctx context.Context, inviteID uuid.UUID, status string) error {
 	err := r.sql.invites.New().
 		FilterID(inviteID).
 		UpdateStatus(status).
-		UpdateUserID(userID).
 		Update(ctx)
 	return err
 }

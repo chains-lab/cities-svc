@@ -11,6 +11,7 @@ import (
 	"github.com/chains-lab/cities-svc/internal/rest/meta"
 	"github.com/chains-lab/cities-svc/internal/rest/requests"
 	"github.com/chains-lab/cities-svc/internal/rest/responses"
+	"github.com/go-chi/chi/v5"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 )
 
@@ -30,8 +31,16 @@ func (s Service) UpdateCityStatus(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
+	if req.Data.Id.String() != chi.URLParam(r, "city_id") {
+		s.log.Error("city_id in url and city_id in body do not match")
+		ape.RenderErr(w, problems.BadRequest(validation.Errors{
+			"id": fmt.Errorf("city_id in url and city_id in body do not match"),
+		})...)
 
-	res, err := s.domain.city.UpdateStatusByCityAdmin(r.Context(), req.Data.Id, initiator.ID, req.Data.Attributes.Status)
+		return
+	}
+
+	res, err := s.domain.city.UpdateStatusByCityAdmin(r.Context(), initiator.ID, req.Data.Id, req.Data.Attributes.Status)
 	if err != nil {
 		s.log.WithError(err).Error("failed to update city status")
 		switch {

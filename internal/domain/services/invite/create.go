@@ -11,78 +11,64 @@ import (
 	"github.com/google/uuid"
 )
 
+type CreateParams struct {
+	UserID   uuid.UUID
+	CityID   uuid.UUID
+	Role     string
+	Duration time.Duration
+}
+
 func (s Service) CreateByCityAdmin(
 	ctx context.Context,
-	userID, cityID, initiatorID uuid.UUID,
-	role string,
-	duration time.Duration,
+	initiatorID uuid.UUID,
+	params CreateParams,
 ) (models.Invite, error) {
-	initiator, err := s.getInitiator(ctx, initiatorID)
+	initiator, err := s.getInitiator(ctx, initiatorID, params.CityID)
 	if err != nil {
 		return models.Invite{}, err
 	}
-
-	if initiator.CityID != cityID {
-		return models.Invite{}, errx.ErrorInitiatorHasNoRights.Raise(
+	if initiator.CityID != params.CityID {
+		return models.Invite{}, errx.ErrorNotEnoughRight.Raise(
 			fmt.Errorf("initiator has no rights to create invite for %s", initiatorID),
 		)
 	}
 
-	err = enum.CheckCityAdminRole(role)
-	if err != nil {
-		return models.Invite{}, errx.ErrorInvalidCityAdminRole.Raise(err)
-	}
-
-	employeeAlreadyExist, err := s.db.GetCityAdminByUserID(ctx, userID)
-	if err != nil {
-		return models.Invite{}, errx.ErrorInternal.Raise(
-			fmt.Errorf("failed to get emloyee by user id %w", err),
-		)
-	}
-	if !employeeAlreadyExist.IsNil() {
-		return models.Invite{}, errx.ErrorCityAdminAlreadyExists.Raise(
-			fmt.Errorf("emloyee already exists %s", userID),
-		)
-	}
-
-	if !enum.RightCityAdminsTechPolitics(initiator.Role, role) {
-		return models.Invite{}, errx.ErrorInitiatorHasNoRights.Raise(
+	if !enum.RightCityAdminsTechPolitics(initiator.Role, params.Role) {
+		return models.Invite{}, errx.ErrorNotEnoughRight.Raise(
 			fmt.Errorf("initiator has no rights to create invite for %s", initiatorID),
 		)
 	}
 
-	return s.create(ctx, userID, initiatorID, role, duration)
+	return s.create(ctx, initiatorID, params)
 }
 
 func (s Service) CreateBySysAdmin(
 	ctx context.Context,
-	userID, cityID uuid.UUID,
-	role string,
-	duration time.Duration,
+	initiatorID uuid.UUID,
+	params CreateParams,
 ) (models.Invite, error) {
-	return s.create(ctx, userID, cityID, role, duration)
+	return s.create(ctx, initiatorID, params)
 }
 
 func (s Service) create(
 	ctx context.Context,
-	userID, cityID uuid.UUID,
-	role string,
-	duration time.Duration,
+	initiatorID uuid.UUID,
+	params CreateParams,
 ) (models.Invite, error) {
 	inviteID := uuid.New()
 	now := time.Now().UTC()
 
-	err := enum.CheckCityAdminRole(role)
+	err := enum.CheckCityAdminRole(params.Role)
 	if err != nil {
 		return models.Invite{}, errx.ErrorInvalidCityAdminRole.Raise(err)
 	}
 
-	city, err := s.getSupportedCity(ctx, cityID)
+	city, err := s.getCity(ctx, params.CityID)
 	if err != nil {
 		return models.Invite{}, err
 	}
 
-	employeeAlreadyExist, err := s.db.GetCityAdminByUserID(ctx, userID)
+	employeeAlreadyExist, err := s.db.GetCityAdmin(ctx, params.UserID, params.CityID)
 	if err != nil {
 		return models.Invite{}, errx.ErrorInternal.Raise(
 			fmt.Errorf("failed to get emloyee by user id %w", err),
@@ -90,18 +76,19 @@ func (s Service) create(
 	}
 	if !employeeAlreadyExist.IsNil() {
 		return models.Invite{}, errx.ErrorCityAdminAlreadyExists.Raise(
-			fmt.Errorf("emloyee already exists %s", userID),
+			fmt.Errorf("city admin %s already exists in city %s", params.UserID, params.CityID),
 		)
 	}
 
 	invite := models.Invite{
-		ID:        inviteID,
-		Status:    enum.InviteStatusSent,
-		Role:      role,
-		CityID:    cityID,
-		UserID:    userID,
-		CreatedAt: now,
-		ExpiresAt: now.Add(duration),
+		ID:          inviteID,
+		CityID:      params.CityID,
+		UserID:      params.UserID,
+		InitiatorID: initiatorID,
+		Status:      enum.InviteStatusSent,
+		Role:        params.Role,
+		ExpiresAt:   now.Add(params.Duration),
+		CreatedAt:   now,
 	}
 
 	err = s.db.CreateInvite(ctx, invite)
@@ -111,10 +98,10 @@ func (s Service) create(
 		)
 	}
 
-	admins, err := s.db.GetCityAdmins(ctx, cityID, enum.CityAdminRoleModerator)
+	admins, err := s.db.GetCityAdmins(ctx, params.CityID, enum.CityAdminRoleModerator, enum.CityAdminRoleTechLead)
 	if err != nil {
 		return models.Invite{}, errx.ErrorInternal.Raise(
-			fmt.Errorf("failed to get city admins for city %s, cause: %w", cityID, err),
+			fmt.Errorf("failed to get city admins for city %s, cause: %w", params.CityID, err),
 		)
 	}
 

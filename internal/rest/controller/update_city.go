@@ -6,10 +6,12 @@ import (
 
 	"github.com/chains-lab/ape"
 	"github.com/chains-lab/ape/problems"
+	"github.com/chains-lab/cities-svc/internal/domain/models"
 	"github.com/chains-lab/cities-svc/internal/domain/services/city"
 	"github.com/chains-lab/cities-svc/internal/rest/meta"
 	"github.com/chains-lab/cities-svc/internal/rest/requests"
 	"github.com/chains-lab/cities-svc/internal/rest/responses"
+	"github.com/chains-lab/restkit/roles"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 
 	"github.com/chains-lab/cities-svc/internal/domain/errx"
@@ -54,10 +56,18 @@ func (s Service) UpdateCity(w http.ResponseWriter, r *http.Request) {
 		param.Slug = req.Data.Attributes.Slug
 	}
 
-	res, err := s.domain.city.UpdateByCityAdmin(r.Context(), req.Data.Id, initiator.ID, param)
+	var res models.City
+	switch initiator.Role {
+	case roles.SystemUser:
+		res, err = s.domain.city.UpdateByCityAdmin(r.Context(), initiator.ID, req.Data.Id, param)
+	default:
+		res, err = s.domain.city.UpdateByAdmin(r.Context(), req.Data.Id, param)
+	}
 	if err != nil {
 		s.log.WithError(err).Error("failed to update city")
 		switch {
+		case errors.Is(err, errx.ErrorNotEnoughRight):
+			ape.RenderErr(w, problems.Forbidden("not enough rights to update city"))
 		case errors.Is(err, errx.ErrorCityNotFound):
 			ape.RenderErr(w, problems.NotFound("city not found"))
 		case errors.Is(err, errx.ErrorInvalidPoint):
@@ -76,6 +86,11 @@ func (s Service) UpdateCity(w http.ResponseWriter, r *http.Request) {
 			ape.RenderErr(w, problems.BadRequest(validation.Errors{
 				"data/attributes/name": err,
 			})...)
+		case errors.Is(err, errx.ErrorInvalidSlug):
+			ape.RenderErr(w, problems.BadRequest(validation.Errors{
+				"data/attributes/slug": err,
+			})...)
+
 		case errors.Is(err, errx.ErrorCityAlreadyExistsWithThisSlug):
 			ape.RenderErr(w, problems.Conflict("city with the given slug already exists"))
 

@@ -34,10 +34,10 @@ components:
           $ref: "#/components/schemas/UpdateCityStatus_data"
       required:
       - data
-    UpdateOwnAdmin:
+    UpdateOwnCityAdmin:
       properties:
         data:
-          $ref: "#/components/schemas/UpdateOwnAdmin_data"
+          $ref: "#/components/schemas/UpdateOwnCityAdmin_data"
       required:
       - data
     UpdateCityAdmin:
@@ -52,10 +52,10 @@ components:
           $ref: "#/components/schemas/SentInvite_data"
       required:
       - data
-    AcceptInvite:
+    ReplyToInvite:
       properties:
         data:
-          $ref: "#/components/schemas/AcceptInvite_data"
+          $ref: "#/components/schemas/ReplyToInvite_data"
       required:
       - data
     City:
@@ -142,8 +142,9 @@ components:
     CityAdminData:
       properties:
         id:
-          description: user id
-          format: uuid
+          description: user id + city id (UUID:UUID)
+          format: string
+          pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
           type: string
         type:
           enum:
@@ -157,13 +158,6 @@ components:
       - type
     CityAdminAttributes:
       properties:
-        username:
-          description: username of the user
-          type: string
-        city_id:
-          description: city id
-          format: uuid
-          type: string
         role:
           description: role of the user in this city
           type: string
@@ -182,7 +176,6 @@ components:
           format: date-time
           type: string
       required:
-      - city_id
       - created_at
       - role
       - updated_at
@@ -344,7 +337,7 @@ components:
       - attributes
       - id
       - type
-    UpdateOwnAdmin_data_attributes:
+    UpdateOwnCityAdmin_data_attributes:
       properties:
         label:
           description: optional label for the user in this city
@@ -352,18 +345,19 @@ components:
         position:
           description: optional position for the user in this city
           type: string
-    UpdateOwnAdmin_data:
+    UpdateOwnCityAdmin_data:
       properties:
         id:
-          description: user id
-          format: uuid
+          description: user id + city id (UUID:UUID)
+          format: string
+          pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
           type: string
         type:
           enum:
           - city_admin
           type: string
         attributes:
-          $ref: "#/components/schemas/UpdateOwnAdmin_data_attributes"
+          $ref: "#/components/schemas/UpdateOwnCityAdmin_data_attributes"
       required:
       - attributes
       - id
@@ -382,8 +376,9 @@ components:
     UpdateCityAdmin_data:
       properties:
         id:
-          description: user id
-          format: uuid
+          description: user id + city id (UUID:UUID)
+          format: string
+          pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
           type: string
         type:
           enum:
@@ -428,7 +423,7 @@ components:
       - attributes
       - id
       - type
-    AcceptInvite_data_attributes:
+    ReplyToInvite_data_attributes:
       properties:
         answer:
           description: "The answer to the invite, either 'accept' or 'decline'"
@@ -438,7 +433,7 @@ components:
           type: string
       required:
       - answer
-    AcceptInvite_data:
+    ReplyToInvite_data:
       properties:
         id:
           description: invite id
@@ -449,7 +444,7 @@ components:
           - invite
           type: string
         attributes:
-          $ref: "#/components/schemas/AcceptInvite_data_attributes"
+          $ref: "#/components/schemas/ReplyToInvite_data_attributes"
       required:
       - attributes
       - id

@@ -96,13 +96,11 @@ type database interface {
 	GetCityBySlug(ctx context.Context, slug string) (models.City, error)
 	GetCityByRadius(ctx context.Context, point orb.Point, radius uint64) (models.City, error)
 	GetCityAdmins(ctx context.Context, cityID uuid.UUID, roles ...string) (models.CityAdminsCollection, error)
-
+	GetCityAdmin(ctx context.Context, userID, cityID uuid.UUID) (models.CityAdmin, error)
 	FilterCities(ctx context.Context, filter FilterParams, page, size uint64) (models.CitiesCollection, error)
 
 	UpdateCity(ctx context.Context, id uuid.UUID, m UpdateParams, updatedAt time.Time) error
 	UpdateCityStatus(ctx context.Context, id uuid.UUID, status string, updatedAt time.Time) error
-
-	GetCityAdminByUserID(ctx context.Context, userID uuid.UUID) (models.CityAdmin, error)
 
 	DeleteAdminsForCity(ctx context.Context, cityID uuid.UUID) error
 }
@@ -133,8 +131,8 @@ func (s Service) CountryIsSupported(ctx context.Context, countryID string) error
 	return nil
 }
 
-func (s Service) getInitiator(ctx context.Context, initiatorID uuid.UUID) (models.CityAdmin, error) {
-	res, err := s.db.GetCityAdminByUserID(ctx, initiatorID)
+func (s Service) getInitiator(ctx context.Context, userID, cityID uuid.UUID) (models.CityAdmin, error) {
+	res, err := s.db.GetCityAdmin(ctx, userID, cityID)
 	if err != nil {
 		return models.CityAdmin{}, errx.ErrorInternal.Raise(
 			fmt.Errorf("failed to get city admin, cause: %w", err),
@@ -142,7 +140,7 @@ func (s Service) getInitiator(ctx context.Context, initiatorID uuid.UUID) (model
 	}
 
 	if res.IsNil() {
-		return models.CityAdmin{}, errx.ErrorInitiatorIsNotCityAdmin.Raise(
+		return models.CityAdmin{}, errx.ErrorNotEnoughRight.Raise(
 			fmt.Errorf("city admin not found"),
 		)
 	}

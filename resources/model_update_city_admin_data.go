@@ -12,7 +12,6 @@ package resources
 
 import (
 	"encoding/json"
-	"github.com/google/uuid"
 	"bytes"
 	"fmt"
 )
@@ -22,8 +21,8 @@ var _ MappedNullable = &UpdateCityAdminData{}
 
 // UpdateCityAdminData struct for UpdateCityAdminData
 type UpdateCityAdminData struct {
-	// user id
-	Id uuid.UUID `json:"id"`
+	// user id + city id (UUID:UUID)
+	Id string `json:"id" validate:"regexp=^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"`
 	Type string `json:"type"`
 	Attributes UpdateCityAdminDataAttributes `json:"attributes"`
 }
@@ -34,7 +33,7 @@ type _UpdateCityAdminData UpdateCityAdminData
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewUpdateCityAdminData(id uuid.UUID, type_ string, attributes UpdateCityAdminDataAttributes) *UpdateCityAdminData {
+func NewUpdateCityAdminData(id string, type_ string, attributes UpdateCityAdminDataAttributes) *UpdateCityAdminData {
 	this := UpdateCityAdminData{}
 	this.Id = id
 	this.Type = type_
@@ -51,9 +50,9 @@ func NewUpdateCityAdminDataWithDefaults() *UpdateCityAdminData {
 }
 
 // GetId returns the Id field value
-func (o *UpdateCityAdminData) GetId() uuid.UUID {
+func (o *UpdateCityAdminData) GetId() string {
 	if o == nil {
-		var ret uuid.UUID
+		var ret string
 		return ret
 	}
 
@@ -62,7 +61,7 @@ func (o *UpdateCityAdminData) GetId() uuid.UUID {
 
 // GetIdOk returns a tuple with the Id field value
 // and a boolean to check if the value has been set.
-func (o *UpdateCityAdminData) GetIdOk() (*uuid.UUID, bool) {
+func (o *UpdateCityAdminData) GetIdOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -70,7 +69,7 @@ func (o *UpdateCityAdminData) GetIdOk() (*uuid.UUID, bool) {
 }
 
 // SetId sets field value
-func (o *UpdateCityAdminData) SetId(v uuid.UUID) {
+func (o *UpdateCityAdminData) SetId(v string) {
 	o.Id = v
 }
 

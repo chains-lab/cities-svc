@@ -10,9 +10,9 @@ import (
 )
 
 type InviteDeclinedData struct {
-	Invite     models.Invite     `json:"invite"`
-	City       models.City       `json:"city"`
-	Recipients PayloadRecipients `json:"recipients"`
+	Invite     models.Invite      `json:"invite"`
+	City       models.City        `json:"city"`
+	Recipients *PayloadRecipients `json:"recipients,omitempty"`
 }
 
 const InviteCanceledEvent = "city.invite.decline"
@@ -23,21 +23,25 @@ func (s Service) PublishInviteDeclined(
 	city models.City,
 	recipients ...uuid.UUID,
 ) error {
+	event := contracts.Envelope[InviteDeclinedData]{
+		Event:     InviteCanceledEvent,
+		Version:   "1",
+		Timestamp: time.Now().UTC(),
+		Data: InviteDeclinedData{
+			Invite: invite,
+			City:   city,
+		},
+	}
+	if len(recipients) > 0 {
+		event.Data.Recipients = &PayloadRecipients{
+			Users: recipients,
+		}
+	}
+
 	return s.publish(
 		ctx,
 		contracts.TopicCitiesV1,
 		invite.ID.String(),
-		contracts.Envelope[InviteDeclinedData]{
-			Event:     InviteCanceledEvent,
-			Version:   "1",
-			Timestamp: time.Now().UTC(),
-			Data: InviteDeclinedData{
-				Invite: invite,
-				City:   city,
-				Recipients: PayloadRecipients{
-					Users: recipients,
-				},
-			},
-		},
+		event,
 	)
 }

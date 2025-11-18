@@ -7,7 +7,6 @@ import (
 	"github.com/chains-lab/ape"
 	"github.com/chains-lab/ape/problems"
 	"github.com/chains-lab/cities-svc/internal/domain/errx"
-	"github.com/chains-lab/cities-svc/internal/domain/services/admin"
 	"github.com/chains-lab/cities-svc/internal/rest/responses"
 	"github.com/go-chi/chi/v5"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
@@ -25,12 +24,22 @@ func (s Service) GetCityAdmin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res, err := s.domain.admin.Get(r.Context(), admin.GetFilters{UserID: &userID})
+	cityID, err := uuid.Parse(chi.URLParam(r, "city_id"))
+	if err != nil {
+		s.log.WithError(err).Error("invalid city_id")
+		ape.RenderErr(w, problems.BadRequest(validation.Errors{
+			"city_id": err,
+		})...)
+
+		return
+	}
+
+	res, err := s.domain.admin.Get(r.Context(), userID, cityID)
 	if err != nil {
 		s.log.WithError(err).Error("failed to get admin")
 		switch {
 		case errors.Is(err, errx.ErrorCityAdminNotFound):
-			ape.RenderErr(w, problems.NotFound("city adminernment not found"))
+			ape.RenderErr(w, problems.NotFound("city city admin not found"))
 		default:
 			ape.RenderErr(w, problems.InternalError())
 		}

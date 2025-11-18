@@ -4,7 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Id** | [**uuid.UUID**](uuid.UUID.md) | user id | 
+**Id** | **string** | user id + city id (UUID:UUID) | 
 **Type** | **string** |  | 
 **Attributes** | [**UpdateOwnAdminDataAttributes**](UpdateOwnAdminDataAttributes.md) |  | 
 
@@ -12,7 +12,7 @@ Name | Type | Description | Notes
 
 ### NewUpdateOwnAdminData
 
-`func NewUpdateOwnAdminData(id uuid.UUID, type_ string, attributes UpdateOwnAdminDataAttributes, ) *UpdateOwnAdminData`
+`func NewUpdateOwnAdminData(id string, type_ string, attributes UpdateOwnAdminDataAttributes, ) *UpdateOwnAdminData`
 
 NewUpdateOwnAdminData instantiates a new UpdateOwnAdminData object
 This constructor will assign default values to properties that have it defined,
@@ -29,20 +29,20 @@ but it doesn't guarantee that properties required by API are set
 
 ### GetId
 
-`func (o *UpdateOwnAdminData) GetId() uuid.UUID`
+`func (o *UpdateOwnAdminData) GetId() string`
 
 GetId returns the Id field if non-nil, zero value otherwise.
 
 ### GetIdOk
 
-`func (o *UpdateOwnAdminData) GetIdOk() (*uuid.UUID, bool)`
+`func (o *UpdateOwnAdminData) GetIdOk() (*string, bool)`
 
 GetIdOk returns a tuple with the Id field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetId
 
-`func (o *UpdateOwnAdminData) SetId(v uuid.UUID)`
+`func (o *UpdateOwnAdminData) SetId(v string)`
 
 SetId sets Id field to given value.
 

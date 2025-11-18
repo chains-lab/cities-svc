@@ -6,6 +6,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/chains-lab/cities-svc/internal/domain/enum"
 	"github.com/chains-lab/cities-svc/internal/domain/models"
 	"github.com/chains-lab/cities-svc/internal/domain/services/admin"
 	"github.com/chains-lab/cities-svc/internal/repo/pgdb"
@@ -17,55 +18,8 @@ func (r *Repo) CreateCityAdmin(ctx context.Context, cityMod models.CityAdmin) er
 	return r.sql.cityAdmin.New().Insert(ctx, CityAdminModelToSchema(cityMod))
 }
 
-//func (d *Repo) GetCityAdmin(ctx context.Context, filters admin.GetFilters) (models.CityAdmin, error) {
-//	query := d.sql.cityAdmin.New()
-//
-//	if filters.UserID != nil {
-//		query = query.FilterUserID(*filters.UserID)
-//	}
-//	if filters.CityID != nil {
-//		query = query.FilterCityID(*filters.CityID)
-//	}
-//	if filters.Role != nil {
-//		query = query.FilterRole(*filters.Role)
-//	}
-//
-//	row, err := query.Get(ctx)
-//	switch {
-//	case errors.Is(err, sql.ErrNoRows):
-//		return models.CityAdmin{}, nil
-//	case err != nil:
-//		return models.CityAdmin{}, err
-//	}
-//
-//	return CityAdminSchemaToModel(row), nil
-//}
-//
-//func (d *Repo) GetCityAdminByUserAndCityID(ctx context.Context, userID, cityID uuid.UUID) (models.CityAdmin, error) {
-//	return d.GetCityAdmin(ctx, admin.GetFilters{
-//		UserID: &userID,
-//		CityID: &cityID,
-//	})
-//}
-
-func (r *Repo) GetCityAdminWithFilter(
-	ctx context.Context,
-	userID, cityID *uuid.UUID,
-	role *string,
-) (models.CityAdmin, error) {
-	query := r.sql.cityAdmin.New()
-
-	if userID != nil {
-		query = query.FilterUserID(*userID)
-	}
-	if cityID != nil {
-		query = query.FilterCityID(*cityID)
-	}
-	if role != nil {
-		query = query.FilterRole(*role)
-	}
-
-	row, err := query.Get(ctx)
+func (r *Repo) GetCityAdmin(ctx context.Context, userID, cityID uuid.UUID) (models.CityAdmin, error) {
+	row, err := r.sql.cityAdmin.New().FilterCityID(cityID).FilterUserID(userID).Get(ctx)
 	switch {
 	case errors.Is(err, sql.ErrNoRows):
 		return models.CityAdmin{}, nil
@@ -76,16 +30,16 @@ func (r *Repo) GetCityAdminWithFilter(
 	return CityAdminSchemaToModel(row), nil
 }
 
-func (r *Repo) GetCityAdminByUserID(ctx context.Context, userID uuid.UUID) (models.CityAdmin, error) {
-	schemas, err := r.sql.cityAdmin.New().FilterUserID(userID).Get(ctx)
-	if errors.Is(err, sql.ErrNoRows) {
+func (r *Repo) GetCityTechLead(ctx context.Context, cityID uuid.UUID) (models.CityAdmin, error) {
+	row, err := r.sql.cityAdmin.New().FilterCityID(cityID).FilterRole(enum.CityAdminRoleTechLead).Get(ctx)
+	switch {
+	case errors.Is(err, sql.ErrNoRows):
 		return models.CityAdmin{}, nil
-	}
-
-	if err != nil {
+	case err != nil:
 		return models.CityAdmin{}, err
 	}
-	return CityAdminSchemaToModel(schemas), nil
+
+	return CityAdminSchemaToModel(row), nil
 }
 
 func (r *Repo) GetCityAdmins(ctx context.Context, cityID uuid.UUID, roles ...string) (models.CityAdminsCollection, error) {
@@ -121,8 +75,11 @@ func (r *Repo) FilterCityAdmins(
 
 	query := r.sql.cityAdmin.New()
 
+	if filter.UserID != nil {
+		query.FilterUserID(filter.UserID...)
+	}
 	if filter.CityID != nil {
-		query.FilterCityID(*filter.CityID)
+		query.FilterCityID(filter.CityID...)
 	}
 	if filter.Roles != nil {
 		query.FilterRole(filter.Roles...)
@@ -153,12 +110,15 @@ func (r *Repo) FilterCityAdmins(
 
 func (r *Repo) UpdateCityAdmin(
 	ctx context.Context,
-	userID uuid.UUID,
+	userID, cityID uuid.UUID,
 	params admin.UpdateParams,
 	updatedAt time.Time,
 ) error {
-	q := r.sql.cityAdmin.New().FilterUserID(userID)
+	q := r.sql.cityAdmin.New().FilterUserID(userID).FilterCityID(cityID)
 
+	if params.Role != nil {
+		q.UpdateRole(*params.Role)
+	}
 	if params.Label != nil {
 		switch *params.Label {
 		case "":

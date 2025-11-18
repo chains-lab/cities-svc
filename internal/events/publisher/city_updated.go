@@ -10,8 +10,8 @@ import (
 )
 
 type CityUpdatedData struct {
-	City       models.City       `json:"city"`
-	Recipients PayloadRecipients `json:"recipients"`
+	City       models.City        `json:"city"`
+	Recipients *PayloadRecipients `json:"recipients,omitempty"`
 }
 
 const CityUpdateEvent = "city.admin.update"
@@ -21,22 +21,24 @@ func (s Service) PublishCityUpdated(
 	city models.City,
 	recipients ...uuid.UUID,
 ) error {
-	env := events.Envelope[CityUpdatedData]{
+	event := events.Envelope[CityUpdatedData]{
 		Event:     CityUpdateEvent,
 		Version:   "1",
 		Timestamp: time.Now().UTC(),
 		Data: CityUpdatedData{
 			City: city,
-			Recipients: PayloadRecipients{
-				Users: recipients,
-			},
 		},
+	}
+	if len(recipients) > 0 {
+		event.Data.Recipients = &PayloadRecipients{
+			Users: recipients,
+		}
 	}
 
 	return s.publish(
 		ctx,
 		events.TopicCitiesAdminV1,
 		city.ID.String(),
-		env,
+		event,
 	)
 }

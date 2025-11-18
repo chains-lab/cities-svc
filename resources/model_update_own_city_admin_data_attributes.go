@@ -14,36 +14,36 @@ import (
 	"encoding/json"
 )
 
-// checks if the UpdateOwnAdminDataAttributes type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &UpdateOwnAdminDataAttributes{}
+// checks if the UpdateOwnCityAdminDataAttributes type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &UpdateOwnCityAdminDataAttributes{}
 
-// UpdateOwnAdminDataAttributes struct for UpdateOwnAdminDataAttributes
-type UpdateOwnAdminDataAttributes struct {
+// UpdateOwnCityAdminDataAttributes struct for UpdateOwnCityAdminDataAttributes
+type UpdateOwnCityAdminDataAttributes struct {
 	// optional label for the user in this city
 	Label *string `json:"label,omitempty"`
 	// optional position for the user in this city
 	Position *string `json:"position,omitempty"`
 }
 
-// NewUpdateOwnAdminDataAttributes instantiates a new UpdateOwnAdminDataAttributes object
+// NewUpdateOwnCityAdminDataAttributes instantiates a new UpdateOwnCityAdminDataAttributes object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewUpdateOwnAdminDataAttributes() *UpdateOwnAdminDataAttributes {
-	this := UpdateOwnAdminDataAttributes{}
+func NewUpdateOwnCityAdminDataAttributes() *UpdateOwnCityAdminDataAttributes {
+	this := UpdateOwnCityAdminDataAttributes{}
 	return &this
 }
 
-// NewUpdateOwnAdminDataAttributesWithDefaults instantiates a new UpdateOwnAdminDataAttributes object
+// NewUpdateOwnCityAdminDataAttributesWithDefaults instantiates a new UpdateOwnCityAdminDataAttributes object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewUpdateOwnAdminDataAttributesWithDefaults() *UpdateOwnAdminDataAttributes {
-	this := UpdateOwnAdminDataAttributes{}
+func NewUpdateOwnCityAdminDataAttributesWithDefaults() *UpdateOwnCityAdminDataAttributes {
+	this := UpdateOwnCityAdminDataAttributes{}
 	return &this
 }
 
 // GetLabel returns the Label field value if set, zero value otherwise.
-func (o *UpdateOwnAdminDataAttributes) GetLabel() string {
+func (o *UpdateOwnCityAdminDataAttributes) GetLabel() string {
 	if o == nil || IsNil(o.Label) {
 		var ret string
 		return ret
@@ -53,7 +53,7 @@ func (o *UpdateOwnAdminDataAttributes) GetLabel() string {
 
 // GetLabelOk returns a tuple with the Label field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *UpdateOwnAdminDataAttributes) GetLabelOk() (*string, bool) {
+func (o *UpdateOwnCityAdminDataAttributes) GetLabelOk() (*string, bool) {
 	if o == nil || IsNil(o.Label) {
 		return nil, false
 	}
@@ -61,7 +61,7 @@ func (o *UpdateOwnAdminDataAttributes) GetLabelOk() (*string, bool) {
 }
 
 // HasLabel returns a boolean if a field has been set.
-func (o *UpdateOwnAdminDataAttributes) HasLabel() bool {
+func (o *UpdateOwnCityAdminDataAttributes) HasLabel() bool {
 	if o != nil && !IsNil(o.Label) {
 		return true
 	}
@@ -70,12 +70,12 @@ func (o *UpdateOwnAdminDataAttributes) HasLabel() bool {
 }
 
 // SetLabel gets a reference to the given string and assigns it to the Label field.
-func (o *UpdateOwnAdminDataAttributes) SetLabel(v string) {
+func (o *UpdateOwnCityAdminDataAttributes) SetLabel(v string) {
 	o.Label = &v
 }
 
 // GetPosition returns the Position field value if set, zero value otherwise.
-func (o *UpdateOwnAdminDataAttributes) GetPosition() string {
+func (o *UpdateOwnCityAdminDataAttributes) GetPosition() string {
 	if o == nil || IsNil(o.Position) {
 		var ret string
 		return ret
@@ -85,7 +85,7 @@ func (o *UpdateOwnAdminDataAttributes) GetPosition() string {
 
 // GetPositionOk returns a tuple with the Position field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *UpdateOwnAdminDataAttributes) GetPositionOk() (*string, bool) {
+func (o *UpdateOwnCityAdminDataAttributes) GetPositionOk() (*string, bool) {
 	if o == nil || IsNil(o.Position) {
 		return nil, false
 	}
@@ -93,7 +93,7 @@ func (o *UpdateOwnAdminDataAttributes) GetPositionOk() (*string, bool) {
 }
 
 // HasPosition returns a boolean if a field has been set.
-func (o *UpdateOwnAdminDataAttributes) HasPosition() bool {
+func (o *UpdateOwnCityAdminDataAttributes) HasPosition() bool {
 	if o != nil && !IsNil(o.Position) {
 		return true
 	}
@@ -102,11 +102,11 @@ func (o *UpdateOwnAdminDataAttributes) HasPosition() bool {
 }
 
 // SetPosition gets a reference to the given string and assigns it to the Position field.
-func (o *UpdateOwnAdminDataAttributes) SetPosition(v string) {
+func (o *UpdateOwnCityAdminDataAttributes) SetPosition(v string) {
 	o.Position = &v
 }
 
-func (o UpdateOwnAdminDataAttributes) MarshalJSON() ([]byte, error) {
+func (o UpdateOwnCityAdminDataAttributes) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -114,7 +114,7 @@ func (o UpdateOwnAdminDataAttributes) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o UpdateOwnAdminDataAttributes) ToMap() (map[string]interface{}, error) {
+func (o UpdateOwnCityAdminDataAttributes) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.Label) {
 		toSerialize["label"] = o.Label
@@ -125,38 +125,38 @@ func (o UpdateOwnAdminDataAttributes) ToMap() (map[string]interface{}, error) {
 	return toSerialize, nil
 }
 
-type NullableUpdateOwnAdminDataAttributes struct {
-	value *UpdateOwnAdminDataAttributes
+type NullableUpdateOwnCityAdminDataAttributes struct {
+	value *UpdateOwnCityAdminDataAttributes
 	isSet bool
 }
 
-func (v NullableUpdateOwnAdminDataAttributes) Get() *UpdateOwnAdminDataAttributes {
+func (v NullableUpdateOwnCityAdminDataAttributes) Get() *UpdateOwnCityAdminDataAttributes {
 	return v.value
 }
 
-func (v *NullableUpdateOwnAdminDataAttributes) Set(val *UpdateOwnAdminDataAttributes) {
+func (v *NullableUpdateOwnCityAdminDataAttributes) Set(val *UpdateOwnCityAdminDataAttributes) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableUpdateOwnAdminDataAttributes) IsSet() bool {
+func (v NullableUpdateOwnCityAdminDataAttributes) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableUpdateOwnAdminDataAttributes) Unset() {
+func (v *NullableUpdateOwnCityAdminDataAttributes) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableUpdateOwnAdminDataAttributes(val *UpdateOwnAdminDataAttributes) *NullableUpdateOwnAdminDataAttributes {
-	return &NullableUpdateOwnAdminDataAttributes{value: val, isSet: true}
+func NewNullableUpdateOwnCityAdminDataAttributes(val *UpdateOwnCityAdminDataAttributes) *NullableUpdateOwnCityAdminDataAttributes {
+	return &NullableUpdateOwnCityAdminDataAttributes{value: val, isSet: true}
 }
 
-func (v NullableUpdateOwnAdminDataAttributes) MarshalJSON() ([]byte, error) {
+func (v NullableUpdateOwnCityAdminDataAttributes) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableUpdateOwnAdminDataAttributes) UnmarshalJSON(src []byte) error {
+func (v *NullableUpdateOwnCityAdminDataAttributes) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

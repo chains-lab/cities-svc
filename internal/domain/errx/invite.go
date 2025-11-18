@@ -6,6 +6,6 @@ var ErrorInviteNotFound = ape.DeclareError("INVITE_NOT_FOUND")
 
 var ErrorInviteExpired = ape.DeclareError("INVITE_EXPIRED")
 
-var ErrorInviteAlreadyAnswered = ape.DeclareError("INVITE_ALREADY_ANSWERED")
+var ErrorInviteAlreadyReplied = ape.DeclareError("INVITE_ALREADY_REPLIED")
 
-var ErrorInvalidInviteAnswer = ape.DeclareError("INVALID_INVITE_ANSWER")
+var ErrorInvalidInviteReply = ape.DeclareError("INVALID_INVITE_ANSWER")

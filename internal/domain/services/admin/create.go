@@ -20,9 +20,14 @@ func (s Service) Create(ctx context.Context, userID, cityID uuid.UUID, role stri
 		)
 	}
 
-	city, err := s.getSupportedCity(ctx, cityID)
+	city, err := s.getCity(ctx, cityID)
 	if err != nil {
 		return models.CityAdmin{}, err
+	}
+	if city.Status != enum.CityStatusSupported {
+		return models.CityAdmin{}, errx.ErrorCityIsNotSupported.Raise(
+			fmt.Errorf("city not supported"),
+		)
 	}
 
 	now := time.Now().UTC()
@@ -36,16 +41,15 @@ func (s Service) Create(ctx context.Context, userID, cityID uuid.UUID, role stri
 
 	if err = s.db.Transaction(ctx, func(ctx context.Context) error {
 		if role == enum.CityAdminRoleTechLead {
-			existingTechLead, err := s.db.GetCityAdminWithFilter(
-				ctx, nil, &cityID, &role,
-			)
+			existingTechLead, err := s.db.GetCityTechLead(ctx, cityID)
 			if err != nil {
 				return errx.ErrorInternal.Raise(
 					fmt.Errorf("failed to get existing tech lead for city %s, cause: %w", cityID, err),
 				)
 			}
 
-			// Theoretically, it can be removed, but to avoid bugs, it is better not to touch it.
+			// Theoretically, this part can be removed, but to avoid bugs, it is better not to touch it.
+			// For default city tech-lead must be in active city, but if something went wrong before, we need to handle this case.
 			if !existingTechLead.IsNil() {
 				err = s.db.DeleteCityAdmin(ctx, existingTechLead.UserID, cityID)
 				if err != nil {

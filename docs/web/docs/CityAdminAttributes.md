@@ -4,8 +4,6 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Username** | Pointer to **string** | username of the user | [optional] 
-**CityId** | [**uuid.UUID**](uuid.UUID.md) | city id | 
 **Role** | **string** | role of the user in this city | 
 **Position** | Pointer to **string** | optional position for the user in this city | [optional] 
 **Label** | Pointer to **string** | optional label for the user in this city | [optional] 
@@ -16,7 +14,7 @@ Name | Type | Description | Notes
 
 ### NewCityAdminAttributes
 
-`func NewCityAdminAttributes(cityId uuid.UUID, role string, createdAt time.Time, updatedAt time.Time, ) *CityAdminAttributes`
+`func NewCityAdminAttributes(role string, createdAt time.Time, updatedAt time.Time, ) *CityAdminAttributes`
 
 NewCityAdminAttributes instantiates a new CityAdminAttributes object
 This constructor will assign default values to properties that have it defined,
@@ -30,51 +28,6 @@ will change when the set of required properties is changed
 NewCityAdminAttributesWithDefaults instantiates a new CityAdminAttributes object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
-
-### GetUsername
-
-`func (o *CityAdminAttributes) GetUsername() string`
-
-GetUsername returns the Username field if non-nil, zero value otherwise.
-
-### GetUsernameOk
-
-`func (o *CityAdminAttributes) GetUsernameOk() (*string, bool)`
-
-GetUsernameOk returns a tuple with the Username field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetUsername
-
-`func (o *CityAdminAttributes) SetUsername(v string)`
-
-SetUsername sets Username field to given value.
-
-### HasUsername
-
-`func (o *CityAdminAttributes) HasUsername() bool`
-
-HasUsername returns a boolean if a field has been set.
-
-### GetCityId
-
-`func (o *CityAdminAttributes) GetCityId() uuid.UUID`
-
-GetCityId returns the CityId field if non-nil, zero value otherwise.
-
-### GetCityIdOk
-
-`func (o *CityAdminAttributes) GetCityIdOk() (*uuid.UUID, bool)`
-
-GetCityIdOk returns a tuple with the CityId field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetCityId
-
-`func (o *CityAdminAttributes) SetCityId(v uuid.UUID)`
-
-SetCityId sets CityId field to given value.
-
 
 ### GetRole
 

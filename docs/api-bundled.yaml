@@ -125,7 +125,7 @@ components:
                 status:
                   type: string
                   description: new city status
-    UpdateOwnAdmin:
+    UpdateOwnCityAdmin:
       type: object
       required:
         - data
@@ -139,8 +139,9 @@ components:
           properties:
             id:
               type: string
-              format: uuid
-              description: user id
+              format: string
+              description: 'user id + city id (UUID:UUID)'
+              pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
             type:
               type: string
               enum:
@@ -168,8 +169,9 @@ components:
           properties:
             id:
               type: string
-              format: uuid
-              description: user id
+              format: string
+              description: 'user id + city id (UUID:UUID)'
+              pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
             type:
               type: string
               enum:
@@ -224,7 +226,7 @@ components:
                 role:
                   type: string
                   description: Role assigned to the invited user
-    AcceptInvite:
+    ReplyToInvite:
       type: object
       required:
         - data
@@ -350,8 +352,9 @@ components:
       properties:
         id:
           type: string
-          format: uuid
-          description: user id
+          format: string
+          description: 'user id + city id (UUID:UUID)'
+          pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
         type:
           type: string
           enum:
@@ -361,18 +364,10 @@ components:
     CityAdminAttributes:
       type: object
       required:
-        - city_id
         - role
         - created_at
         - updated_at
       properties:
-        username:
-          type: string
-          description: username of the user
-        city_id:
-          type: string
-          format: uuid
-          description: city id
         role:
           type: string
           description: role of the user in this city

@@ -9,6 +9,7 @@ import (
 	"github.com/chains-lab/ape/problems"
 	"github.com/chains-lab/cities-svc/internal/domain/errx"
 	"github.com/chains-lab/cities-svc/internal/domain/models"
+	"github.com/chains-lab/cities-svc/internal/domain/services/invite"
 	"github.com/chains-lab/cities-svc/internal/rest/meta"
 	"github.com/chains-lab/cities-svc/internal/rest/requests"
 	"github.com/chains-lab/cities-svc/internal/rest/responses"
@@ -36,26 +37,32 @@ func (s Service) SentInvite(w http.ResponseWriter, r *http.Request) {
 	var result models.Invite
 	switch initiator.Role {
 	case roles.SystemUser:
-		result, err = s.domain.invite.CreateByCityAdmin(r.Context(),
-			req.Data.Attributes.UserId,
-			req.Data.Attributes.CityId,
+		result, err = s.domain.invite.CreateByCityAdmin(
+			r.Context(),
 			initiator.ID,
-			req.Data.Attributes.Role,
-			24*time.Hour,
+			invite.CreateParams{
+				UserID:   req.Data.Attributes.UserId,
+				CityID:   req.Data.Attributes.CityId,
+				Role:     req.Data.Attributes.Role,
+				Duration: 24 * time.Hour,
+			},
 		)
 	default:
 		result, err = s.domain.invite.CreateBySysAdmin(
 			r.Context(),
-			req.Data.Attributes.UserId,
-			req.Data.Attributes.CityId,
-			req.Data.Attributes.Role,
-			24*time.Hour,
+			initiator.ID,
+			invite.CreateParams{
+				UserID:   req.Data.Attributes.UserId,
+				CityID:   req.Data.Attributes.CityId,
+				Role:     req.Data.Attributes.Role,
+				Duration: 24 * time.Hour,
+			},
 		)
 	}
 	if err != nil {
 		s.log.WithError(err).Error("failed to create city admin")
 		switch {
-		case errors.Is(err, errx.ErrorInitiatorHasNoRights):
+		case errors.Is(err, errx.ErrorNotEnoughRight):
 			ape.RenderErr(w, problems.Conflict("initiator have no rights for this action"))
 		case errors.Is(err, errx.ErrorCityAdminAlreadyExists):
 			ape.RenderErr(w, problems.Conflict("city admin already exists"))

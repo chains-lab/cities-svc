@@ -17,41 +17,41 @@ import (
 	"fmt"
 )
 
-// checks if the UpdateOwnAdminData type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &UpdateOwnAdminData{}
+// checks if the ReplyToInviteData type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &ReplyToInviteData{}
 
-// UpdateOwnAdminData struct for UpdateOwnAdminData
-type UpdateOwnAdminData struct {
-	// user id
+// ReplyToInviteData struct for ReplyToInviteData
+type ReplyToInviteData struct {
+	// invite id
 	Id uuid.UUID `json:"id"`
 	Type string `json:"type"`
-	Attributes UpdateOwnAdminDataAttributes `json:"attributes"`
+	Attributes ReplyToInviteDataAttributes `json:"attributes"`
 }
 
-type _UpdateOwnAdminData UpdateOwnAdminData
+type _ReplyToInviteData ReplyToInviteData
 
-// NewUpdateOwnAdminData instantiates a new UpdateOwnAdminData object
+// NewReplyToInviteData instantiates a new ReplyToInviteData object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewUpdateOwnAdminData(id uuid.UUID, type_ string, attributes UpdateOwnAdminDataAttributes) *UpdateOwnAdminData {
-	this := UpdateOwnAdminData{}
+func NewReplyToInviteData(id uuid.UUID, type_ string, attributes ReplyToInviteDataAttributes) *ReplyToInviteData {
+	this := ReplyToInviteData{}
 	this.Id = id
 	this.Type = type_
 	this.Attributes = attributes
 	return &this
 }
 
-// NewUpdateOwnAdminDataWithDefaults instantiates a new UpdateOwnAdminData object
+// NewReplyToInviteDataWithDefaults instantiates a new ReplyToInviteData object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewUpdateOwnAdminDataWithDefaults() *UpdateOwnAdminData {
-	this := UpdateOwnAdminData{}
+func NewReplyToInviteDataWithDefaults() *ReplyToInviteData {
+	this := ReplyToInviteData{}
 	return &this
 }
 
 // GetId returns the Id field value
-func (o *UpdateOwnAdminData) GetId() uuid.UUID {
+func (o *ReplyToInviteData) GetId() uuid.UUID {
 	if o == nil {
 		var ret uuid.UUID
 		return ret
@@ -62,7 +62,7 @@ func (o *UpdateOwnAdminData) GetId() uuid.UUID {
 
 // GetIdOk returns a tuple with the Id field value
 // and a boolean to check if the value has been set.
-func (o *UpdateOwnAdminData) GetIdOk() (*uuid.UUID, bool) {
+func (o *ReplyToInviteData) GetIdOk() (*uuid.UUID, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -70,12 +70,12 @@ func (o *UpdateOwnAdminData) GetIdOk() (*uuid.UUID, bool) {
 }
 
 // SetId sets field value
-func (o *UpdateOwnAdminData) SetId(v uuid.UUID) {
+func (o *ReplyToInviteData) SetId(v uuid.UUID) {
 	o.Id = v
 }
 
 // GetType returns the Type field value
-func (o *UpdateOwnAdminData) GetType() string {
+func (o *ReplyToInviteData) GetType() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -86,7 +86,7 @@ func (o *UpdateOwnAdminData) GetType() string {
 
 // GetTypeOk returns a tuple with the Type field value
 // and a boolean to check if the value has been set.
-func (o *UpdateOwnAdminData) GetTypeOk() (*string, bool) {
+func (o *ReplyToInviteData) GetTypeOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -94,14 +94,14 @@ func (o *UpdateOwnAdminData) GetTypeOk() (*string, bool) {
 }
 
 // SetType sets field value
-func (o *UpdateOwnAdminData) SetType(v string) {
+func (o *ReplyToInviteData) SetType(v string) {
 	o.Type = v
 }
 
 // GetAttributes returns the Attributes field value
-func (o *UpdateOwnAdminData) GetAttributes() UpdateOwnAdminDataAttributes {
+func (o *ReplyToInviteData) GetAttributes() ReplyToInviteDataAttributes {
 	if o == nil {
-		var ret UpdateOwnAdminDataAttributes
+		var ret ReplyToInviteDataAttributes
 		return ret
 	}
 
@@ -110,7 +110,7 @@ func (o *UpdateOwnAdminData) GetAttributes() UpdateOwnAdminDataAttributes {
 
 // GetAttributesOk returns a tuple with the Attributes field value
 // and a boolean to check if the value has been set.
-func (o *UpdateOwnAdminData) GetAttributesOk() (*UpdateOwnAdminDataAttributes, bool) {
+func (o *ReplyToInviteData) GetAttributesOk() (*ReplyToInviteDataAttributes, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -118,11 +118,11 @@ func (o *UpdateOwnAdminData) GetAttributesOk() (*UpdateOwnAdminDataAttributes, b
 }
 
 // SetAttributes sets field value
-func (o *UpdateOwnAdminData) SetAttributes(v UpdateOwnAdminDataAttributes) {
+func (o *ReplyToInviteData) SetAttributes(v ReplyToInviteDataAttributes) {
 	o.Attributes = v
 }
 
-func (o UpdateOwnAdminData) MarshalJSON() ([]byte, error) {
+func (o ReplyToInviteData) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -130,7 +130,7 @@ func (o UpdateOwnAdminData) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o UpdateOwnAdminData) ToMap() (map[string]interface{}, error) {
+func (o ReplyToInviteData) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["id"] = o.Id
 	toSerialize["type"] = o.Type
@@ -138,7 +138,7 @@ func (o UpdateOwnAdminData) ToMap() (map[string]interface{}, error) {
 	return toSerialize, nil
 }
 
-func (o *UpdateOwnAdminData) UnmarshalJSON(data []byte) (err error) {
+func (o *ReplyToInviteData) UnmarshalJSON(data []byte) (err error) {
 	// This validates that all required properties are included in the JSON object
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
@@ -162,53 +162,53 @@ func (o *UpdateOwnAdminData) UnmarshalJSON(data []byte) (err error) {
 		}
 	}
 
-	varUpdateOwnAdminData := _UpdateOwnAdminData{}
+	varReplyToInviteData := _ReplyToInviteData{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varUpdateOwnAdminData)
+	err = decoder.Decode(&varReplyToInviteData)
 
 	if err != nil {
 		return err
 	}
 
-	*o = UpdateOwnAdminData(varUpdateOwnAdminData)
+	*o = ReplyToInviteData(varReplyToInviteData)
 
 	return err
 }
 
-type NullableUpdateOwnAdminData struct {
-	value *UpdateOwnAdminData
+type NullableReplyToInviteData struct {
+	value *ReplyToInviteData
 	isSet bool
 }
 
-func (v NullableUpdateOwnAdminData) Get() *UpdateOwnAdminData {
+func (v NullableReplyToInviteData) Get() *ReplyToInviteData {
 	return v.value
 }
 
-func (v *NullableUpdateOwnAdminData) Set(val *UpdateOwnAdminData) {
+func (v *NullableReplyToInviteData) Set(val *ReplyToInviteData) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableUpdateOwnAdminData) IsSet() bool {
+func (v NullableReplyToInviteData) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableUpdateOwnAdminData) Unset() {
+func (v *NullableReplyToInviteData) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableUpdateOwnAdminData(val *UpdateOwnAdminData) *NullableUpdateOwnAdminData {
-	return &NullableUpdateOwnAdminData{value: val, isSet: true}
+func NewNullableReplyToInviteData(val *ReplyToInviteData) *NullableReplyToInviteData {
+	return &NullableReplyToInviteData{value: val, isSet: true}
 }
 
-func (v NullableUpdateOwnAdminData) MarshalJSON() ([]byte, error) {
+func (v NullableReplyToInviteData) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableUpdateOwnAdminData) UnmarshalJSON(src []byte) error {
+func (v *NullableReplyToInviteData) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

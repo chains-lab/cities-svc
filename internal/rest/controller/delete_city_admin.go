@@ -45,7 +45,7 @@ func (s Service) DeleteCityAdmin(w http.ResponseWriter, r *http.Request) {
 
 	switch initiator.Role {
 	case roles.SystemUser:
-		err = s.domain.admin.DeleteByCityAdmin(r.Context(), cityID, userID, initiator.ID)
+		err = s.domain.admin.DeleteByCityAdmin(r.Context(), initiator.ID, userID, cityID)
 	default:
 		err = s.domain.admin.DeleteBySysAdmin(r.Context(), userID, cityID)
 	}
@@ -53,6 +53,8 @@ func (s Service) DeleteCityAdmin(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		s.log.WithError(err).Error("failed to delete admin")
 		switch {
+		case errors.Is(err, errx.ErrorCannotDeleteYourself):
+			ape.RenderErr(w, problems.Forbidden("cannot delete yourself"))
 		case errors.Is(err, errx.ErrorCityAdminNotFound):
 			ape.RenderErr(w, problems.NotFound("city admin not found"))
 		default:

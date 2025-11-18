@@ -9,7 +9,7 @@ CREATE TYPE city_admin_role AS ENUM (
 );
 
 CREATE TABLE city_administration (
-    user_id    UUID      PRIMARY KEY,
+    user_id    UUID      NOT NULL,
     city_id    UUID      NOT NULL REFERENCES city(id) ON DELETE CASCADE,
 
     position   VARCHAR(255),
@@ -17,7 +17,9 @@ CREATE TABLE city_administration (
     role       city_admin_role NOT NULL,
 
     updated_at TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'UTC'),
-    created_at TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'UTC')
+    created_at TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'UTC'),
+
+    PRIMARY KEY (user_id, city_id)
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS uniq_city_chief

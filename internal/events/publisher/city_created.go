@@ -18,7 +18,7 @@ func (s Service) PublishCityCreated(
 	ctx context.Context,
 	city models.City,
 ) error {
-	env := contracts.Envelope[CityCreatedData]{
+	event := contracts.Envelope[CityCreatedData]{
 		Event:     CityCreatedEvent,
 		Version:   "1",
 		Timestamp: time.Now().UTC(),
@@ -31,6 +31,6 @@ func (s Service) PublishCityCreated(
 		ctx,
 		contracts.TopicCitiesV1,
 		city.ID.String(),
-		env,
+		event,
 	)
 }

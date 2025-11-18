@@ -42,7 +42,7 @@ func StartServices(ctx context.Context, cfg internal.Config, log logium.Logger, 
 	inviteSvc := invite.NewService(database, eventPublish)
 
 	ctrl := controller.New(log, citySvc, cityAdminSvc, inviteSvc)
-	mdlv := middlewares.New(log, cityAdminSvc)
+	mdlv := middlewares.New(log)
 
 	run(func() { rest.Run(ctx, cfg, log, mdlv, ctrl) })
 }

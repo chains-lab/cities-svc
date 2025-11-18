@@ -7,6 +7,7 @@ import (
 	"github.com/chains-lab/ape/problems"
 	"github.com/chains-lab/cities-svc/internal/domain/services/admin"
 	"github.com/chains-lab/cities-svc/internal/rest/responses"
+	validation "github.com/go-ozzo/ozzo-validation/v4"
 
 	"github.com/chains-lab/restkit/pagi"
 	"github.com/google/uuid"
@@ -18,8 +19,38 @@ func (s Service) ListAdmins(w http.ResponseWriter, r *http.Request) {
 
 	var filters admin.FilterParams
 
-	if cityID, err := uuid.Parse(q.Get("city_id")); err != nil {
-		filters.CityID = &cityID
+	if userIDs := q["user_id"]; len(userIDs) > 0 {
+		ids := make([]uuid.UUID, 0, len(userIDs))
+		for _, idStr := range userIDs {
+			id, err := uuid.Parse(idStr)
+			if err != nil {
+				ape.RenderErr(w, problems.BadRequest(
+					validation.Errors{
+						"user_id": err,
+					})...)
+				return
+			}
+			ids = append(ids, id)
+		}
+
+		filters.UserID = ids
+	}
+
+	if cityIDs := q["city_id"]; len(cityIDs) > 0 {
+		ids := make([]uuid.UUID, 0, len(cityIDs))
+		for _, idStr := range cityIDs {
+			id, err := uuid.Parse(idStr)
+			if err != nil {
+				ape.RenderErr(w, problems.BadRequest(
+					validation.Errors{
+						"city_id": err,
+					})...)
+				return
+			}
+			ids = append(ids, id)
+		}
+
+		filters.CityID = ids
 	}
 
 	if role := q["role"]; len(role) > 0 {

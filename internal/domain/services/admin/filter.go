@@ -10,7 +10,8 @@ import (
 )
 
 type FilterParams struct {
-	CityID *uuid.UUID
+	UserID []uuid.UUID
+	CityID []uuid.UUID
 	Roles  []string
 }
 

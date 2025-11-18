@@ -1,17 +1,9 @@
 type: object
 required:
-  - city_id
   - role
   - created_at
   - updated_at
 properties:
-  username:
-    type: string
-    description: "username of the user"
-  city_id:
-    type: string
-    format: uuid
-    description: "city id"
   role:
     type: string
     description: "role of the user in this city"

@@ -10,9 +10,9 @@ import (
 )
 
 type InviteCreatedData struct {
-	Invite     models.Invite `json:"invite"`
-	City       models.City   `json:"city"`
-	Recipients []uuid.UUID   `json:"recipients"`
+	Invite     models.Invite      `json:"invite"`
+	City       models.City        `json:"city"`
+	Recipients *PayloadRecipients `json:"recipients,omitempty"`
 }
 
 const InviteCreatedEvent = "city.invite.create"
@@ -23,19 +23,25 @@ func (s Service) PublishInviteCreated(
 	city models.City,
 	recipients ...uuid.UUID,
 ) error {
+	event := events.Envelope[InviteCreatedData]{
+		Event:     InviteCreatedEvent,
+		Version:   "1",
+		Timestamp: time.Now().UTC(),
+		Data: InviteCreatedData{
+			Invite: invite,
+			City:   city,
+		},
+	}
+	if len(recipients) > 0 {
+		event.Data.Recipients = &PayloadRecipients{
+			Users: recipients,
+		}
+	}
+
 	return s.publish(
 		ctx,
 		events.TopicCitiesAdminV1,
 		invite.ID.String(),
-		events.Envelope[InviteCreatedData]{
-			Event:     InviteCreatedEvent,
-			Version:   "1",
-			Timestamp: time.Now().UTC(),
-			Data: InviteCreatedData{
-				Invite:     invite,
-				City:       city,
-				Recipients: recipients,
-			},
-		},
+		event,
 	)
 }

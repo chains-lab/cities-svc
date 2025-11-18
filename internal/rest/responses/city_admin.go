@@ -1,6 +1,8 @@
 package responses
 
 import (
+	"fmt"
+
 	"github.com/chains-lab/cities-svc/internal/domain/models"
 	"github.com/chains-lab/cities-svc/resources"
 )
@@ -8,10 +10,9 @@ import (
 func CityAdmin(m models.CityAdmin) resources.CityAdmin {
 	return resources.CityAdmin{
 		Data: resources.CityAdminData{
-			Id:   m.UserID,
+			Id:   fmt.Sprintf("%s:%s", m.UserID, m.CityID),
 			Type: resources.CityAdminType,
 			Attributes: resources.CityAdminAttributes{
-				CityId:    m.CityID,
 				Label:     m.Label,
 				Position:  m.Position,
 				Role:      m.Role,

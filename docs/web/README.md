@@ -83,9 +83,6 @@ Class | Method | HTTP request | Description
 
 ## Documentation For Models
 
- - [AcceptInvite](docs/AcceptInvite.md)
- - [AcceptInviteData](docs/AcceptInviteData.md)
- - [AcceptInviteDataAttributes](docs/AcceptInviteDataAttributes.md)
  - [CitiesCollection](docs/CitiesCollection.md)
  - [City](docs/City.md)
  - [CityAdmin](docs/CityAdmin.md)
@@ -104,6 +101,9 @@ Class | Method | HTTP request | Description
  - [InviteDataAttributes](docs/InviteDataAttributes.md)
  - [PaginationData](docs/PaginationData.md)
  - [Point](docs/Point.md)
+ - [ReplyToInvite](docs/ReplyToInvite.md)
+ - [ReplyToInviteData](docs/ReplyToInviteData.md)
+ - [ReplyToInviteDataAttributes](docs/ReplyToInviteDataAttributes.md)
  - [SentInvite](docs/SentInvite.md)
  - [SentInviteData](docs/SentInviteData.md)
  - [SentInviteDataAttributes](docs/SentInviteDataAttributes.md)
@@ -116,9 +116,9 @@ Class | Method | HTTP request | Description
  - [UpdateCityStatus](docs/UpdateCityStatus.md)
  - [UpdateCityStatusData](docs/UpdateCityStatusData.md)
  - [UpdateCityStatusDataAttributes](docs/UpdateCityStatusDataAttributes.md)
- - [UpdateOwnAdmin](docs/UpdateOwnAdmin.md)
- - [UpdateOwnAdminData](docs/UpdateOwnAdminData.md)
- - [UpdateOwnAdminDataAttributes](docs/UpdateOwnAdminDataAttributes.md)
+ - [UpdateOwnCityAdmin](docs/UpdateOwnCityAdmin.md)
+ - [UpdateOwnCityAdminData](docs/UpdateOwnCityAdminData.md)
+ - [UpdateOwnCityAdminDataAttributes](docs/UpdateOwnCityAdminDataAttributes.md)
 
 
 ## Documentation For Authorization

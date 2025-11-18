@@ -21,13 +21,17 @@ type UpdateParams struct {
 	Timezone *string
 }
 
-func (s Service) UpdateByCityAdmin(ctx context.Context, cityID, initiatorID uuid.UUID, params UpdateParams) (models.City, error) {
-	initiator, err := s.getInitiator(ctx, initiatorID)
+func (s Service) UpdateByCityAdmin(
+	ctx context.Context,
+	initiatorUserID, cityID uuid.UUID,
+	params UpdateParams,
+) (models.City, error) {
+	initiator, err := s.getInitiator(ctx, initiatorUserID, cityID)
 	if err != nil {
 		return models.City{}, err
 	}
 	if initiator.Role != enum.CityAdminRoleTechLead && initiator.Role != enum.CityAdminRoleModerator {
-		return models.City{}, errx.ErrorInitiatorHasNoRights.Raise(
+		return models.City{}, errx.ErrorNotEnoughRight.Raise(
 			fmt.Errorf("only role city tech lead or moder can update city"),
 		)
 	}
@@ -35,11 +39,19 @@ func (s Service) UpdateByCityAdmin(ctx context.Context, cityID, initiatorID uuid
 	return s.update(ctx, cityID, params)
 }
 
-func (s Service) UpdateByAdmin(ctx context.Context, cityID uuid.UUID, params UpdateParams) (models.City, error) {
+func (s Service) UpdateByAdmin(
+	ctx context.Context,
+	cityID uuid.UUID,
+	params UpdateParams,
+) (models.City, error) {
 	return s.update(ctx, cityID, params)
 }
 
-func (s Service) update(ctx context.Context, cityID uuid.UUID, params UpdateParams) (models.City, error) {
+func (s Service) update(
+	ctx context.Context,
+	cityID uuid.UUID,
+	params UpdateParams,
+) (models.City, error) {
 	city, err := s.GetByID(ctx, cityID)
 	if err != nil {
 		return models.City{}, err
@@ -114,13 +126,17 @@ func (s Service) update(ctx context.Context, cityID uuid.UUID, params UpdatePara
 	return city, nil
 }
 
-func (s Service) UpdateStatusByCityAdmin(ctx context.Context, cityID, initiatorID uuid.UUID, status string) (models.City, error) {
-	initiator, err := s.getInitiator(ctx, initiatorID)
+func (s Service) UpdateStatusByCityAdmin(
+	ctx context.Context,
+	initiatorUserID, cityID uuid.UUID,
+	status string,
+) (models.City, error) {
+	initiator, err := s.getInitiator(ctx, initiatorUserID, cityID)
 	if err != nil {
 		return models.City{}, err
 	}
 	if initiator.Role != enum.CityAdminRoleTechLead {
-		return models.City{}, errx.ErrorInitiatorHasNoRights.Raise(
+		return models.City{}, errx.ErrorNotEnoughRight.Raise(
 			fmt.Errorf("only role city tech lead or system admin can update city status"),
 		)
 	}
@@ -128,11 +144,19 @@ func (s Service) UpdateStatusByCityAdmin(ctx context.Context, cityID, initiatorI
 	return s.updateStatus(ctx, cityID, status)
 }
 
-func (s Service) UpdateStatusBySysAdmin(ctx context.Context, cityID uuid.UUID, status string) (models.City, error) {
+func (s Service) UpdateStatusBySysAdmin(
+	ctx context.Context,
+	cityID uuid.UUID,
+	status string,
+) (models.City, error) {
 	return s.updateStatus(ctx, cityID, status)
 }
 
-func (s Service) updateStatus(ctx context.Context, cityID uuid.UUID, status string) (models.City, error) {
+func (s Service) updateStatus(
+	ctx context.Context,
+	cityID uuid.UUID,
+	status string,
+) (models.City, error) {
 	err := enum.CheckCityStatus(status)
 	if err != nil {
 		return models.City{}, errx.ErrorInvalidCityStatus.Raise(err)

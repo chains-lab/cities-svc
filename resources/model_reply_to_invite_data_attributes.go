@@ -16,37 +16,37 @@ import (
 	"fmt"
 )
 
-// checks if the AcceptInviteDataAttributes type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &AcceptInviteDataAttributes{}
+// checks if the ReplyToInviteDataAttributes type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &ReplyToInviteDataAttributes{}
 
-// AcceptInviteDataAttributes struct for AcceptInviteDataAttributes
-type AcceptInviteDataAttributes struct {
+// ReplyToInviteDataAttributes struct for ReplyToInviteDataAttributes
+type ReplyToInviteDataAttributes struct {
 	// The answer to the invite, either 'accept' or 'decline'
 	Answer string `json:"answer"`
 }
 
-type _AcceptInviteDataAttributes AcceptInviteDataAttributes
+type _ReplyToInviteDataAttributes ReplyToInviteDataAttributes
 
-// NewAcceptInviteDataAttributes instantiates a new AcceptInviteDataAttributes object
+// NewReplyToInviteDataAttributes instantiates a new ReplyToInviteDataAttributes object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewAcceptInviteDataAttributes(answer string) *AcceptInviteDataAttributes {
-	this := AcceptInviteDataAttributes{}
+func NewReplyToInviteDataAttributes(answer string) *ReplyToInviteDataAttributes {
+	this := ReplyToInviteDataAttributes{}
 	this.Answer = answer
 	return &this
 }
 
-// NewAcceptInviteDataAttributesWithDefaults instantiates a new AcceptInviteDataAttributes object
+// NewReplyToInviteDataAttributesWithDefaults instantiates a new ReplyToInviteDataAttributes object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewAcceptInviteDataAttributesWithDefaults() *AcceptInviteDataAttributes {
-	this := AcceptInviteDataAttributes{}
+func NewReplyToInviteDataAttributesWithDefaults() *ReplyToInviteDataAttributes {
+	this := ReplyToInviteDataAttributes{}
 	return &this
 }
 
 // GetAnswer returns the Answer field value
-func (o *AcceptInviteDataAttributes) GetAnswer() string {
+func (o *ReplyToInviteDataAttributes) GetAnswer() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -57,7 +57,7 @@ func (o *AcceptInviteDataAttributes) GetAnswer() string {
 
 // GetAnswerOk returns a tuple with the Answer field value
 // and a boolean to check if the value has been set.
-func (o *AcceptInviteDataAttributes) GetAnswerOk() (*string, bool) {
+func (o *ReplyToInviteDataAttributes) GetAnswerOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -65,11 +65,11 @@ func (o *AcceptInviteDataAttributes) GetAnswerOk() (*string, bool) {
 }
 
 // SetAnswer sets field value
-func (o *AcceptInviteDataAttributes) SetAnswer(v string) {
+func (o *ReplyToInviteDataAttributes) SetAnswer(v string) {
 	o.Answer = v
 }
 
-func (o AcceptInviteDataAttributes) MarshalJSON() ([]byte, error) {
+func (o ReplyToInviteDataAttributes) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -77,13 +77,13 @@ func (o AcceptInviteDataAttributes) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o AcceptInviteDataAttributes) ToMap() (map[string]interface{}, error) {
+func (o ReplyToInviteDataAttributes) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["answer"] = o.Answer
 	return toSerialize, nil
 }
 
-func (o *AcceptInviteDataAttributes) UnmarshalJSON(data []byte) (err error) {
+func (o *ReplyToInviteDataAttributes) UnmarshalJSON(data []byte) (err error) {
 	// This validates that all required properties are included in the JSON object
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
@@ -105,53 +105,53 @@ func (o *AcceptInviteDataAttributes) UnmarshalJSON(data []byte) (err error) {
 		}
 	}
 
-	varAcceptInviteDataAttributes := _AcceptInviteDataAttributes{}
+	varReplyToInviteDataAttributes := _ReplyToInviteDataAttributes{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varAcceptInviteDataAttributes)
+	err = decoder.Decode(&varReplyToInviteDataAttributes)
 
 	if err != nil {
 		return err
 	}
 
-	*o = AcceptInviteDataAttributes(varAcceptInviteDataAttributes)
+	*o = ReplyToInviteDataAttributes(varReplyToInviteDataAttributes)
 
 	return err
 }
 
-type NullableAcceptInviteDataAttributes struct {
-	value *AcceptInviteDataAttributes
+type NullableReplyToInviteDataAttributes struct {
+	value *ReplyToInviteDataAttributes
 	isSet bool
 }
 
-func (v NullableAcceptInviteDataAttributes) Get() *AcceptInviteDataAttributes {
+func (v NullableReplyToInviteDataAttributes) Get() *ReplyToInviteDataAttributes {
 	return v.value
 }
 
-func (v *NullableAcceptInviteDataAttributes) Set(val *AcceptInviteDataAttributes) {
+func (v *NullableReplyToInviteDataAttributes) Set(val *ReplyToInviteDataAttributes) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableAcceptInviteDataAttributes) IsSet() bool {
+func (v NullableReplyToInviteDataAttributes) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableAcceptInviteDataAttributes) Unset() {
+func (v *NullableReplyToInviteDataAttributes) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableAcceptInviteDataAttributes(val *AcceptInviteDataAttributes) *NullableAcceptInviteDataAttributes {
-	return &NullableAcceptInviteDataAttributes{value: val, isSet: true}
+func NewNullableReplyToInviteDataAttributes(val *ReplyToInviteDataAttributes) *NullableReplyToInviteDataAttributes {
+	return &NullableReplyToInviteDataAttributes{value: val, isSet: true}
 }
 
-func (v NullableAcceptInviteDataAttributes) MarshalJSON() ([]byte, error) {
+func (v NullableReplyToInviteDataAttributes) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableAcceptInviteDataAttributes) UnmarshalJSON(src []byte) error {
+func (v *NullableReplyToInviteDataAttributes) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

@@ -8,6 +8,9 @@ import (
 	"github.com/chains-lab/ape/problems"
 	"github.com/chains-lab/cities-svc/internal/domain/errx"
 	"github.com/chains-lab/cities-svc/internal/rest/meta"
+	"github.com/go-chi/chi/v5"
+	validation "github.com/go-ozzo/ozzo-validation/v4"
+	"github.com/google/uuid"
 )
 
 func (s Service) RefuseMyCityAdmin(w http.ResponseWriter, r *http.Request) {
@@ -19,12 +22,25 @@ func (s Service) RefuseMyCityAdmin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = s.domain.admin.DeleteOwn(r.Context(), initiator.ID)
+	cityID, err := uuid.Parse(chi.URLParam(r, "city_id"))
+	if err != nil {
+		s.log.WithError(err).Error("failed to parse city_id param")
+		ape.RenderErr(w, problems.BadRequest(validation.Errors{
+			"city_id": err,
+		})...)
+
+		return
+	}
+
+	err = s.domain.admin.DeleteOwn(r.Context(), initiator.ID, cityID)
 	if err != nil {
 		s.log.WithError(err).Error("failed to refuse own admin")
 		switch {
-		case errors.Is(err, errx.ErrorInitiatorIsNotCityAdmin):
-			ape.RenderErr(w, problems.Forbidden("no active city adminernment for the user"))
+		case errors.Is(err, errx.ErrorNotEnoughRight):
+			ape.RenderErr(w, problems.Forbidden("no active city admin for the user"))
+		case errors.Is(err, errx.ErrorCityAdminTechLeadCannotRefuseOwn):
+			ape.RenderErr(w, problems.Forbidden("tech lead cannot refuse own admin"))
+
 		default:
 			ape.RenderErr(w, problems.InternalError())
 		}

@@ -12,48 +12,47 @@ package resources
 
 import (
 	"encoding/json"
-	"github.com/google/uuid"
 	"bytes"
 	"fmt"
 )
 
-// checks if the AcceptInviteData type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &AcceptInviteData{}
+// checks if the UpdateOwnCityAdminData type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &UpdateOwnCityAdminData{}
 
-// AcceptInviteData struct for AcceptInviteData
-type AcceptInviteData struct {
-	// invite id
-	Id uuid.UUID `json:"id"`
+// UpdateOwnCityAdminData struct for UpdateOwnCityAdminData
+type UpdateOwnCityAdminData struct {
+	// user id + city id (UUID:UUID)
+	Id string `json:"id" validate:"regexp=^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"`
 	Type string `json:"type"`
-	Attributes AcceptInviteDataAttributes `json:"attributes"`
+	Attributes UpdateOwnCityAdminDataAttributes `json:"attributes"`
 }
 
-type _AcceptInviteData AcceptInviteData
+type _UpdateOwnCityAdminData UpdateOwnCityAdminData
 
-// NewAcceptInviteData instantiates a new AcceptInviteData object
+// NewUpdateOwnCityAdminData instantiates a new UpdateOwnCityAdminData object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewAcceptInviteData(id uuid.UUID, type_ string, attributes AcceptInviteDataAttributes) *AcceptInviteData {
-	this := AcceptInviteData{}
+func NewUpdateOwnCityAdminData(id string, type_ string, attributes UpdateOwnCityAdminDataAttributes) *UpdateOwnCityAdminData {
+	this := UpdateOwnCityAdminData{}
 	this.Id = id
 	this.Type = type_
 	this.Attributes = attributes
 	return &this
 }
 
-// NewAcceptInviteDataWithDefaults instantiates a new AcceptInviteData object
+// NewUpdateOwnCityAdminDataWithDefaults instantiates a new UpdateOwnCityAdminData object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewAcceptInviteDataWithDefaults() *AcceptInviteData {
-	this := AcceptInviteData{}
+func NewUpdateOwnCityAdminDataWithDefaults() *UpdateOwnCityAdminData {
+	this := UpdateOwnCityAdminData{}
 	return &this
 }
 
 // GetId returns the Id field value
-func (o *AcceptInviteData) GetId() uuid.UUID {
+func (o *UpdateOwnCityAdminData) GetId() string {
 	if o == nil {
-		var ret uuid.UUID
+		var ret string
 		return ret
 	}
 
@@ -62,7 +61,7 @@ func (o *AcceptInviteData) GetId() uuid.UUID {
 
 // GetIdOk returns a tuple with the Id field value
 // and a boolean to check if the value has been set.
-func (o *AcceptInviteData) GetIdOk() (*uuid.UUID, bool) {
+func (o *UpdateOwnCityAdminData) GetIdOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -70,12 +69,12 @@ func (o *AcceptInviteData) GetIdOk() (*uuid.UUID, bool) {
 }
 
 // SetId sets field value
-func (o *AcceptInviteData) SetId(v uuid.UUID) {
+func (o *UpdateOwnCityAdminData) SetId(v string) {
 	o.Id = v
 }
 
 // GetType returns the Type field value
-func (o *AcceptInviteData) GetType() string {
+func (o *UpdateOwnCityAdminData) GetType() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -86,7 +85,7 @@ func (o *AcceptInviteData) GetType() string {
 
 // GetTypeOk returns a tuple with the Type field value
 // and a boolean to check if the value has been set.
-func (o *AcceptInviteData) GetTypeOk() (*string, bool) {
+func (o *UpdateOwnCityAdminData) GetTypeOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -94,14 +93,14 @@ func (o *AcceptInviteData) GetTypeOk() (*string, bool) {
 }
 
 // SetType sets field value
-func (o *AcceptInviteData) SetType(v string) {
+func (o *UpdateOwnCityAdminData) SetType(v string) {
 	o.Type = v
 }
 
 // GetAttributes returns the Attributes field value
-func (o *AcceptInviteData) GetAttributes() AcceptInviteDataAttributes {
+func (o *UpdateOwnCityAdminData) GetAttributes() UpdateOwnCityAdminDataAttributes {
 	if o == nil {
-		var ret AcceptInviteDataAttributes
+		var ret UpdateOwnCityAdminDataAttributes
 		return ret
 	}
 
@@ -110,7 +109,7 @@ func (o *AcceptInviteData) GetAttributes() AcceptInviteDataAttributes {
 
 // GetAttributesOk returns a tuple with the Attributes field value
 // and a boolean to check if the value has been set.
-func (o *AcceptInviteData) GetAttributesOk() (*AcceptInviteDataAttributes, bool) {
+func (o *UpdateOwnCityAdminData) GetAttributesOk() (*UpdateOwnCityAdminDataAttributes, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -118,11 +117,11 @@ func (o *AcceptInviteData) GetAttributesOk() (*AcceptInviteDataAttributes, bool)
 }
 
 // SetAttributes sets field value
-func (o *AcceptInviteData) SetAttributes(v AcceptInviteDataAttributes) {
+func (o *UpdateOwnCityAdminData) SetAttributes(v UpdateOwnCityAdminDataAttributes) {
 	o.Attributes = v
 }
 
-func (o AcceptInviteData) MarshalJSON() ([]byte, error) {
+func (o UpdateOwnCityAdminData) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -130,7 +129,7 @@ func (o AcceptInviteData) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o AcceptInviteData) ToMap() (map[string]interface{}, error) {
+func (o UpdateOwnCityAdminData) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["id"] = o.Id
 	toSerialize["type"] = o.Type
@@ -138,7 +137,7 @@ func (o AcceptInviteData) ToMap() (map[string]interface{}, error) {
 	return toSerialize, nil
 }
 
-func (o *AcceptInviteData) UnmarshalJSON(data []byte) (err error) {
+func (o *UpdateOwnCityAdminData) UnmarshalJSON(data []byte) (err error) {
 	// This validates that all required properties are included in the JSON object
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
@@ -162,53 +161,53 @@ func (o *AcceptInviteData) UnmarshalJSON(data []byte) (err error) {
 		}
 	}
 
-	varAcceptInviteData := _AcceptInviteData{}
+	varUpdateOwnCityAdminData := _UpdateOwnCityAdminData{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varAcceptInviteData)
+	err = decoder.Decode(&varUpdateOwnCityAdminData)
 
 	if err != nil {
 		return err
 	}
 
-	*o = AcceptInviteData(varAcceptInviteData)
+	*o = UpdateOwnCityAdminData(varUpdateOwnCityAdminData)
 
 	return err
 }
 
-type NullableAcceptInviteData struct {
-	value *AcceptInviteData
+type NullableUpdateOwnCityAdminData struct {
+	value *UpdateOwnCityAdminData
 	isSet bool
 }
 
-func (v NullableAcceptInviteData) Get() *AcceptInviteData {
+func (v NullableUpdateOwnCityAdminData) Get() *UpdateOwnCityAdminData {
 	return v.value
 }
 
-func (v *NullableAcceptInviteData) Set(val *AcceptInviteData) {
+func (v *NullableUpdateOwnCityAdminData) Set(val *UpdateOwnCityAdminData) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableAcceptInviteData) IsSet() bool {
+func (v NullableUpdateOwnCityAdminData) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableAcceptInviteData) Unset() {
+func (v *NullableUpdateOwnCityAdminData) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableAcceptInviteData(val *AcceptInviteData) *NullableAcceptInviteData {
-	return &NullableAcceptInviteData{value: val, isSet: true}
+func NewNullableUpdateOwnCityAdminData(val *UpdateOwnCityAdminData) *NullableUpdateOwnCityAdminData {
+	return &NullableUpdateOwnCityAdminData{value: val, isSet: true}
 }
 
-func (v NullableAcceptInviteData) MarshalJSON() ([]byte, error) {
+func (v NullableUpdateOwnCityAdminData) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableAcceptInviteData) UnmarshalJSON(src []byte) error {
+func (v *NullableUpdateOwnCityAdminData) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

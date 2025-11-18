@@ -2,11 +2,11 @@ package controller
 
 import (
 	"context"
-	"time"
 
 	"github.com/chains-lab/cities-svc/internal/domain/models"
 	"github.com/chains-lab/cities-svc/internal/domain/services/admin"
 	"github.com/chains-lab/cities-svc/internal/domain/services/city"
+	"github.com/chains-lab/cities-svc/internal/domain/services/invite"
 
 	"github.com/chains-lab/logium"
 	"github.com/google/uuid"
@@ -20,30 +20,32 @@ type CityAdminSvc interface {
 		page, size uint64,
 	) (models.CityAdminsCollection, error)
 
-	Get(ctx context.Context, filters admin.GetFilters) (models.CityAdmin, error)
-	GetInitiator(ctx context.Context, initiatorID uuid.UUID) (models.CityAdmin, error)
+	Get(ctx context.Context, userID, cityID uuid.UUID) (models.CityAdmin, error)
 
-	DeleteOwn(ctx context.Context, userID uuid.UUID) error
+	DeleteOwn(ctx context.Context, userID, cityID uuid.UUID) error
 
-	DeleteByCityAdmin(ctx context.Context, userID, cityID, initiatorID uuid.UUID) error
+	DeleteByCityAdmin(ctx context.Context, initiatorID, userID, cityID uuid.UUID) error
 	DeleteBySysAdmin(ctx context.Context, userID, cityID uuid.UUID) error
 
 	UpdateByCityAdmin(
 		ctx context.Context,
-		userID uuid.UUID,
 		initiatorID uuid.UUID,
+		userID uuid.UUID,
+		cityID uuid.UUID,
 		params admin.UpdateParams,
 	) (models.CityAdmin, error)
 
 	UpdateBySysAdmin(
 		ctx context.Context,
 		userID uuid.UUID,
+		cityID uuid.UUID,
 		params admin.UpdateParams,
 	) (models.CityAdmin, error)
 
 	UpdateOwn(
 		ctx context.Context,
 		userID uuid.UUID,
+		cityID uuid.UUID,
 		params admin.UpdateOwnParams,
 	) (models.CityAdmin, error)
 }
@@ -61,31 +63,28 @@ type CitySvc interface {
 	GetByRadius(ctx context.Context, point orb.Point, radius uint64) (models.City, error)
 	GetBySlug(ctx context.Context, slug string) (models.City, error)
 
-	UpdateStatusByCityAdmin(ctx context.Context, cityID, initiatorID uuid.UUID, status string) (models.City, error)
+	UpdateStatusByCityAdmin(ctx context.Context, initiatorID, cityID uuid.UUID, status string) (models.City, error)
 	UpdateStatusBySysAdmin(ctx context.Context, cityID uuid.UUID, status string) (models.City, error)
 
-	UpdateByCityAdmin(ctx context.Context, cityID, initiatorID uuid.UUID, params city.UpdateParams) (models.City, error)
+	UpdateByCityAdmin(ctx context.Context, initiatorID, cityID uuid.UUID, params city.UpdateParams) (models.City, error)
 	UpdateByAdmin(ctx context.Context, cityID uuid.UUID, params city.UpdateParams) (models.City, error)
 }
 
 type inviteSvc interface {
-	CreateBySysAdmin(
-		ctx context.Context,
-		userID, cityID uuid.UUID,
-		role string,
-		duration time.Duration,
-	) (models.Invite, error)
-
 	CreateByCityAdmin(
 		ctx context.Context,
-		userID, cityID, initiatorID uuid.UUID,
-		role string,
-		duration time.Duration,
+		initiatorID uuid.UUID,
+		params invite.CreateParams,
+	) (models.Invite, error)
+	CreateBySysAdmin(
+		ctx context.Context,
+		initiatorID uuid.UUID,
+		params invite.CreateParams,
 	) (models.Invite, error)
 
-	Answer(
+	Reply(
 		ctx context.Context,
-		answerID, userID uuid.UUID,
+		userID, inviteID uuid.UUID,
 		answer string,
 	) (models.Invite, error)
 }

@@ -4,8 +4,8 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Position** | Pointer to **string** | optional position for the user in this city | [optional] 
 **Label** | Pointer to **string** | optional label for the user in this city | [optional] 
+**Position** | Pointer to **string** | optional position for the user in this city | [optional] 
 
 ## Methods
 
@@ -25,31 +25,6 @@ will change when the set of required properties is changed
 NewUpdateOwnCityAdminDataAttributesWithDefaults instantiates a new UpdateOwnCityAdminDataAttributes object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
-
-### GetPosition
-
-`func (o *UpdateOwnCityAdminDataAttributes) GetPosition() string`
-
-GetPosition returns the Position field if non-nil, zero value otherwise.
-
-### GetPositionOk
-
-`func (o *UpdateOwnCityAdminDataAttributes) GetPositionOk() (*string, bool)`
-
-GetPositionOk returns a tuple with the Position field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetPosition
-
-`func (o *UpdateOwnCityAdminDataAttributes) SetPosition(v string)`
-
-SetPosition sets Position field to given value.
-
-### HasPosition
-
-`func (o *UpdateOwnCityAdminDataAttributes) HasPosition() bool`
-
-HasPosition returns a boolean if a field has been set.
 
 ### GetLabel
 
@@ -75,6 +50,31 @@ SetLabel sets Label field to given value.
 `func (o *UpdateOwnCityAdminDataAttributes) HasLabel() bool`
 
 HasLabel returns a boolean if a field has been set.
+
+### GetPosition
+
+`func (o *UpdateOwnCityAdminDataAttributes) GetPosition() string`
+
+GetPosition returns the Position field if non-nil, zero value otherwise.
+
+### GetPositionOk
+
+`func (o *UpdateOwnCityAdminDataAttributes) GetPositionOk() (*string, bool)`
+
+GetPositionOk returns a tuple with the Position field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetPosition
+
+`func (o *UpdateOwnCityAdminDataAttributes) SetPosition(v string)`
+
+SetPosition sets Position field to given value.
+
+### HasPosition
+
+`func (o *UpdateOwnCityAdminDataAttributes) HasPosition() bool`
+
+HasPosition returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
