@@ -2,6 +2,7 @@ package publisher
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/chains-lab/cities-svc/internal/domain/models"
@@ -41,7 +42,7 @@ func (s Service) PublishCityAdminUpdated(
 	return s.publish(
 		ctx,
 		events.TopicCitiesAdminV1,
-		admin.UserID.String(),
+		fmt.Sprintf("%s:%s", admin.UserID.String(), city.ID.String()),
 		event,
 	)
 }
